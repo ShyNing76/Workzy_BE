@@ -1,6 +1,5 @@
 /node_modules
-./src/config/*.json
-./src/config/*.js
+/src/config/config.json
 .env
 .babelrc
 /.idea
