@@ -1,0 +1,7 @@
+/node_modules
+./src/config/*.json
+./src/config/*.js
+.env
+.babelrc
+/.idea
+.package-lock.json
