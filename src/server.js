@@ -6,6 +6,8 @@ import swaggerUi from 'swagger-ui-express';
 
 require('dotenv').config();
 
+// require('./config/connection')
+
 const app = express();
 app.use(cors());
 app.use(express.json());
