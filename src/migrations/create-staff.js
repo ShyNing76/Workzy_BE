@@ -7,10 +7,12 @@ module.exports = {
                 type: Sequelize.UUID,
                 defaultValue: Sequelize.UUIDV4,
                 primaryKey: true,
-                // references: {
-                //     model: 'Account',
-                //     key: 'account_id'
-                // }
+                references: {
+                    model: 'Account',
+                    key: 'account_id'
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE'
             },
             phone: {
                 type: Sequelize.STRING(15),
@@ -19,10 +21,12 @@ module.exports = {
             building_id: {
                 type: Sequelize.UUID,
                 defaultValue: Sequelize.UUIDV4,
-                // references: {
-                //     model: 'Building',
-                //     key: 'building_id'
-                // }
+                references: {
+                    model: 'Building',
+                    key: 'building_id'
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE'
             },
             status: {
                 type: Sequelize.ENUM('active', 'inactive'),

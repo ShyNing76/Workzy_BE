@@ -35,10 +35,12 @@ module.exports = {
             building_id: {
                 type: Sequelize.UUID,
                 defaultValue: Sequelize.UUIDV4,
-                // references: {
-                //     model: 'Building',
-                //     key: 'building_id'
-                // }
+                references: {
+                    model: 'Building',
+                    key: 'building_id'
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE'
             },
             price_per_hour: {
                 type: Sequelize.DECIMAL(10, 2),

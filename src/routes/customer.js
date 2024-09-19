@@ -11,7 +11,7 @@ const router = require('express').Router();
  *       required: true
  *       schema:
  *         type: string
- * /user:
+ * /profile:
  *   get:
  *     summary: Retrieve user information
  *     description: Returns user information based on the access token.
@@ -57,6 +57,7 @@ const router = require('express').Router();
  *                   type: string
  *                   description: Error message.
  */
-router.get('/', controller.getUser);
+router.get('/profile', controller.getUser);
+router.post('/profile', controller.updateUser);
 
 module.exports = router;

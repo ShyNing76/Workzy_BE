@@ -19,3 +19,20 @@ export const getUser = async (req, res) => {
         return res.status(500).json({error: error.message})
     }
 }
+
+export const updateUser = async (req, res) => {
+    try {
+        // Validate the request body
+        const error = Joi.object({
+            accessToken,
+        }).validate({accessToken: req.headers['authorization']}).error;
+        if (error) return badRequest(res, error.message);
+
+        const response = await services.updateProfile(req.headers['authorization'], req.body);
+
+        // Return the response
+        return res.status(200).json(response)
+    } catch (error) {
+        return res.status(500).json({error: error.message})
+    }
+}

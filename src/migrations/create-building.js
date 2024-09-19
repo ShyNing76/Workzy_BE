@@ -39,10 +39,12 @@ module.exports = {
             manager_id: {
                 type: Sequelize.UUID,
                 defaultValue: Sequelize.UUIDV4,
-                // references: {
-                //     model: 'Manager',
-                //     key: 'manager_id'
-                // }
+                references: {
+                    model: 'Manager',
+                    key: 'manager_id'
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE'
             },
             created_at: {
                 type: Sequelize.DATE,

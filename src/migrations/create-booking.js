@@ -35,26 +35,32 @@ module.exports = {
             customer_id: {
                 type: Sequelize.UUID,
                 defaultValue: Sequelize.UUIDV4,
-                // references: {
-                //     model: 'Customer',
-                //     key: 'customer_id'
-                // }
+                references: {
+                    model: 'Customer',
+                    key: 'customer_id'
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE'
             },
             workspace_id: {
                 type: Sequelize.UUID,
                 defaultValue: Sequelize.UUIDV4,
-                // references: {
-                //     model: 'Workspace',
-                //     key: 'workspace_id'
-                // }
+                references: {
+                    model: 'Workspace',
+                    key: 'workspace_id'
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE'
             },
             payment_id: {
                 type: Sequelize.UUID,
                 defaultValue: Sequelize.UUIDV4,
-                // references: {
-                //     model: 'Payment',
-                //     key: 'payment_id'
-                // }
+                references: {
+                    model: 'Payment',
+                    key: 'payment_id'
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE'
             },
             created_at: {
                 type: Sequelize.DATE,

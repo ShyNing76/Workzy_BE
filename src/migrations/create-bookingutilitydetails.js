@@ -11,18 +11,22 @@ module.exports = {
             booking_id: {
                 type: Sequelize.UUID,
                 defaultValue: Sequelize.UUIDV4,
-                // references: {
-                //     model: 'Booking',
-                //     key: 'booking_id'
-                // }
+                references: {
+                    model: 'Booking',
+                    key: 'booking_id'
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE'
             },
             utility_id: {
                 type: Sequelize.UUID,
                 defaultValue: Sequelize.UUIDV4,
-                // references: {
-                //     model: 'Utility',
-                //     key: 'utility_id'
-                // }
+                references: {
+                    model: 'Utility',
+                    key: 'utility_id'
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE'
             },
             created_at: {
                 type: Sequelize.DATE,

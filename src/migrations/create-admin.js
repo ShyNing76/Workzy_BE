@@ -6,11 +6,14 @@ module.exports = {
             admin_id: {
                 type: Sequelize.UUID,
                 defaultValue: Sequelize.UUIDV4,
+                allowNull: false,
                 primaryKey: true,
-                // references: {
-                //     model: 'Account',
-                //     key: 'accountId'
-                // }
+                references: {
+                    model: 'Account',
+                    key: 'account_id'
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE'
             }
         });
     },

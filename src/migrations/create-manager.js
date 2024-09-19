@@ -7,10 +7,12 @@ module.exports = {
                 type: Sequelize.UUID,
                 defaultValue: Sequelize.UUIDV4,
                 primaryKey: true,
-                // references: {
-                //     model: 'Account',
-                //     key: 'account_id'
-                // }
+                references: {
+                    model: 'Account',
+                    key: 'account_id'
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE'
             },
             name: {
                 type: Sequelize.STRING(255),
