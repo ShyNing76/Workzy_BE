@@ -3,7 +3,7 @@ import {notAuthorized} from "./handle_error";
 
 require('dotenv').config();
 
-const verify_token = (req, res, next) => {
+export const verify_token = (req, res, next) => {
     const accessToken = req.headers['authorization'];
     if (!accessToken) {
         return notAuthorized("No access token provided", res, false);
@@ -20,4 +20,3 @@ const verify_token = (req, res, next) => {
     });
 }
 
-export default verify_token;

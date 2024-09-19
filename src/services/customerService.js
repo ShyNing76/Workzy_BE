@@ -17,15 +17,26 @@ export const getProfile = (accessToken) => new Promise(async (resolve, reject) =
                     },
                     raw: true
                 });
+                const customerProfile = await db.Customer.findOne({
+                    where: {
+                        customer_id: decoded.account_id
+                    },
+                    attributes: {
+                        exclude: ['created_at', 'updated_at', 'customer_id', 'createdAt', 'updatedAt']
+                    },
+                    raw: true
+                });
 
                 resolve({
                     err: 1,
                     message: 'Get profile successful',
                     data: {
+                        account_id: customer.account_id,
                         email: customer.email,
                         name: customer.name,
                         role: customer.role,
-                        status: customer.status
+                        status: customer.status,
+                        profile: customerProfile
                     }
                 })
             }
