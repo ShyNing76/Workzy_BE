@@ -4,9 +4,9 @@ module.exports = {
     async up(queryInterface, Sequelize) {
         await queryInterface.createTable('Workspace', {
             workspace_id: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
                 primaryKey: true,
-                autoIncrement: true
             },
             workspace_name: {
                 type: Sequelize.STRING(200),
@@ -33,7 +33,8 @@ module.exports = {
                 defaultValue: 0.00
             },
             building_id: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
                 // references: {
                 //     model: 'Building',
                 //     key: 'building_id'

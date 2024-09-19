@@ -1,11 +1,27 @@
 'use strict';
-const {
-    Model
-} = require('sequelize');
+const {Model} = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-    const Booking = sequelize.define('Booking', {
+    class Booking extends Model {
+        /**
+         * Helper method for defining associations.
+         * This method is not a part of Sequelize lifecycle.
+         * The `models/index` file will call this method automatically.
+         */
+        static associate(models) {
+            Booking.belongsTo(models.Customer, {foreignKey: 'customer_id'});
+            Booking.belongsTo(models.Workspace, {foreignKey: 'workspace_id'});
+            Booking.belongsTo(models.Payment, {foreignKey: 'payment_id'});
+            Booking.hasMany(models.BookingTimeSlotDetails, {foreignKey: 'booking_id'});
+            Booking.hasMany(models.BookingUtilityDetails, {foreignKey: 'booking_id'});
+            Booking.hasMany(models.Review, {foreignKey: 'booking_id'});
+        }
+    }
+
+    Booking.init({
         booking_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
             autoIncrement: true
         },
@@ -34,40 +50,36 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         },
         customer_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
             references: {
                 model: 'Customer',
                 key: 'customer_id'
             }
         },
         workspace_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
             references: {
                 model: 'Workspace',
                 key: 'workspace_id'
             }
         },
         payment_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
             references: {
                 model: 'Payment',
                 key: 'payment_id'
             }
         }
     }, {
+        sequelize,
+        modelName: 'Booking',
         tableName: 'Booking',
         timestamps: true,
         underscored: true
     });
-
-    Booking.associate = (models) => {
-        Booking.belongsTo(models.Customer, {foreignKey: 'customer_id'});
-        Booking.belongsTo(models.Workspace, {foreignKey: 'workspace_id'});
-        Booking.belongsTo(models.Payment, {foreignKey: 'payment_id'});
-        Booking.hasMany(models.BookingTimeSlotDetails, {foreignKey: 'booking_id'});
-        Booking.hasMany(models.BookingUtilityDetails, {foreignKey: 'booking_id'});
-        Booking.hasMany(models.Review, {foreignKey: 'booking_id'});
-    };
 
     return Booking;
 };

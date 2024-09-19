@@ -4,9 +4,9 @@ module.exports = {
     async up(queryInterface, Sequelize) {
         await queryInterface.createTable('Review', {
             review_id: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
                 primaryKey: true,
-                autoIncrement: true
             },
             review_content: {
                 type: Sequelize.TEXT,
@@ -17,14 +17,16 @@ module.exports = {
                 allowNull: false
             },
             booking_id: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
                 // references: {
                 //     model: 'Booking',
                 //     key: 'booking_id'
                 // }
             },
             workspace_id: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
                 // references: {
                 //     model: 'Workspace',
                 //     key: 'workspace_id'

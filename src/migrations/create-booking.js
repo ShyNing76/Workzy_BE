@@ -4,9 +4,9 @@ module.exports = {
     async up(queryInterface, Sequelize) {
         await queryInterface.createTable('Booking', {
             booking_id: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
                 primaryKey: true,
-                autoIncrement: true
             },
             booking_date: {
                 type: Sequelize.DATE,
@@ -33,21 +33,24 @@ module.exports = {
                 allowNull: false
             },
             customer_id: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
                 // references: {
                 //     model: 'Customer',
                 //     key: 'customer_id'
                 // }
             },
             workspace_id: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
                 // references: {
                 //     model: 'Workspace',
                 //     key: 'workspace_id'
                 // }
             },
             payment_id: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
                 // references: {
                 //     model: 'Payment',
                 //     key: 'payment_id'

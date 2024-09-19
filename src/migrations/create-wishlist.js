@@ -4,19 +4,21 @@ module.exports = {
     async up(queryInterface, Sequelize) {
         await queryInterface.createTable('Wishlist', {
             wishlist_id: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
                 primaryKey: true,
-                autoIncrement: true
             },
             customer_id: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
                 // references: {
                 //     model: 'Customer',
                 //     key: 'customer_id'
                 // }
             },
             workspace_id: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
                 // references: {
                 //     model: 'Workspace',
                 //     key: 'workspace_id'

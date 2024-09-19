@@ -4,19 +4,21 @@ module.exports = {
     async up(queryInterface, Sequelize) {
         await queryInterface.createTable('BookingUtilityDetails', {
             booking_utility_id: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
                 primaryKey: true,
-                autoIncrement: true
             },
             booking_id: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
                 // references: {
                 //     model: 'Booking',
                 //     key: 'booking_id'
                 // }
             },
             utility_id: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
                 // references: {
                 //     model: 'Utility',
                 //     key: 'utility_id'

@@ -1,5 +1,6 @@
 import db from '../models'
 import jwt from 'jsonwebtoken';
+import {v4} from "uuid";
 import * as hashPassword from '../utils/hashPassword';
 
 export const loginService = ({email, password}) => new Promise(async (resolve, reject) => {
@@ -11,13 +12,14 @@ export const loginService = ({email, password}) => new Promise(async (resolve, r
             },
             raw: true
         });
+        
         console.log(user)
         // Check if the user exists and the password is valid
         const isPasswordValid = user && hashPassword.comparePassword(password, user.password);
         // If the password is valid, generate an access token
         const accessToken = isPasswordValid ? jwt.sign({
             email: user.email,
-            id: user.id
+            account_id: user.account_id
         }, process.env.JWT_SECRET, {
             expiresIn: '1h'
         }) : null;
@@ -40,6 +42,7 @@ export const registerService = ({email, password, name}) => new Promise(async (r
                 email
             },
             defaults: {
+                account_id: v4(),
                 email,
                 password: hashPassword.hashPassword(password),
                 name,
@@ -50,7 +53,7 @@ export const registerService = ({email, password, name}) => new Promise(async (r
 
         const accessToken = jwt.sign({
             email: user.email,
-            id: user.id
+            account_id: user.account_id
         }, process.env.JWT_SECRET, {
             expiresIn: '1h'
         });

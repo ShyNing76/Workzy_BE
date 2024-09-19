@@ -18,4 +18,6 @@ export const image = Joi.string().uri().required()
 
 export const bid = Joi.number().required()
 
+export const accessToken = Joi.string().required()
+
 export const refreshToken = Joi.string().required()

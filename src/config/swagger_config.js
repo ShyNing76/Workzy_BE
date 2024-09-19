@@ -5,8 +5,6 @@ const swaggerUi = require('swagger-ui-express');
 
 const serverUrl = process.env.SERVER_URL + '/api/v1';
 
-console.log(serverUrl);
-
 // Định nghĩa các cấu hình của Swagger
 const swaggerOptions = {
     swaggerDefinition: {

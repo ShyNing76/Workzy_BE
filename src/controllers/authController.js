@@ -19,6 +19,7 @@ export const loginController = async (req, res) => {
         // Return the response
         return res.status(200).json(response)
     } catch (error) {
+        console.log("Check Error log a hi hi ddoof ngoc" + error)
         return res.status(500).json({error: error.message})
     }
 }

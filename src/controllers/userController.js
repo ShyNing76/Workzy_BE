@@ -1,0 +1,21 @@
+import Joi from "joi";
+import {accessToken} from "../helper/joi_schema";
+import {badRequest} from "../middlewares/handle_error";
+import * as services from "../services";
+
+export const getUser = async (req, res) => {
+    try {
+        // Validate the request body
+        const error = Joi.object({
+            accessToken
+        }).validate({accessToken: req.headers['authorization']}).error;
+        if (error) return badRequest(res, error.message);
+
+        const response = await services.getProfile(req.headers['authorization']);
+
+        // Return the response
+        return res.status(200).json(response)
+    } catch (error) {
+        return res.status(500).json({error: error.message})
+    }
+}
