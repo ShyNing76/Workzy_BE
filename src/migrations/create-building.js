@@ -21,7 +21,7 @@ module.exports = {
                 allowNull: false
             },
             location: {
-                type: Sequelize.STRING(200),
+                type: Sequelize.ENUM('Hà Nội', 'Hồ Chí Minh'),
                 allowNull: false
             },
             amenities: {

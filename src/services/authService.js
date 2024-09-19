@@ -35,7 +35,7 @@ export const loginService = ({email, password}) => new Promise(async (resolve, r
 
 export const registerService = ({email, password, name}) => new Promise(async (resolve, reject) => {
     try {
-        const user = await db.Account.find({
+        const user = await db.Account.findOne({
             where: {
                 email
             },
