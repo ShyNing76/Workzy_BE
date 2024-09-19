@@ -19,7 +19,6 @@ export const loginController = async (req, res) => {
         // Return the response
         return res.status(200).json(response)
     } catch (error) {
-        console.log("Check Error log a hi hi ddoof ngoc" + error)
         return res.status(500).json({error: error.message})
     }
 }
@@ -35,7 +34,12 @@ export const registerController = async (req, res) => {
         if (error) return badRequest(res, error.message);
         const response = await services.registerService(req.body);
 
-        return res.status(200).json(response)
+        return res.status(200).json(response);
+        // {
+        //     err: "1",
+        //     message: "User registered successfully!"
+        //     accessToken: "Bearer " + accessToken
+        // }
     } catch (error) {
         return res.status(500).json({error: error.message})
     }

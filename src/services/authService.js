@@ -1,6 +1,5 @@
 import db from '../models'
 import jwt from 'jsonwebtoken';
-import {v4} from "uuid";
 import * as hashPassword from '../utils/hashPassword';
 
 export const loginService = ({email, password}) => new Promise(async (resolve, reject) => {
@@ -12,8 +11,7 @@ export const loginService = ({email, password}) => new Promise(async (resolve, r
             },
             raw: true
         });
-        
-        console.log(user)
+
         // Check if the user exists and the password is valid
         const isPasswordValid = user && hashPassword.comparePassword(password, user.password);
         // If the password is valid, generate an access token
@@ -37,32 +35,40 @@ export const loginService = ({email, password}) => new Promise(async (resolve, r
 
 export const registerService = ({email, password, name}) => new Promise(async (resolve, reject) => {
     try {
-        const user = await db.Account.findOrCreate({
+        const user = await db.Account.find({
             where: {
                 email
             },
-            defaults: {
-                account_id: v4(),
+            raw: true
+        });
+
+        if (user) {
+            resolve({
+                err: 0,
+                message: 'Email already exists'
+            })
+        } else {
+            const hash = hashPassword.hashPassword(password);
+            const user = await db.Account.create({
                 email,
-                password: hashPassword.hashPassword(password),
-                name,
-                role: 'user',
-                status: 'active'
-            }
-        });
+                password: hash,
+                name
+            });
+            const accessToken = jwt.sign({
+                email: user.email,
+                account_id: user.account_id
+            }, process.env.JWT_SECRET, {
+                expiresIn: '1h'
+            });
 
-        const accessToken = jwt.sign({
-            email: user.email,
-            account_id: user.account_id
-        }, process.env.JWT_SECRET, {
-            expiresIn: '1h'
-        });
+            resolve({
+                err: 1,
+                message: 'User registered successfully!',
+                accessToken: 'Bearer ' + accessToken,
+            })
+        }
 
-        resolve({
-            err: accessToken ? 1 : 0,
-            message: user[1] ? 'Register successful' : 'Email already exists',
-            accessToken: 'Bearer ' + accessToken
-        })
+
     } catch (error) {
         reject(error)
     }
