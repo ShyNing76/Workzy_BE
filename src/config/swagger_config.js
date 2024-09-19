@@ -3,7 +3,9 @@ require('dotenv').config();
 const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
-const serverUrl = process.env.HOST + ':' + process.env.PORT + '/api/v1';
+const serverUrl = process.env.SERVER_URL + '/api/v1';
+
+console.log(serverUrl);
 
 // Định nghĩa các cấu hình của Swagger
 const swaggerOptions = {

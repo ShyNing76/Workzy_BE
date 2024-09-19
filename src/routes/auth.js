@@ -39,7 +39,7 @@ router.post("/login", controllers.loginController
 
 /**
  * @swagger
- * /register:
+ * /auth/register:
  *   post:
  *     summary: Register a new user
  *     description: This endpoint allows you to register a new user by providing a username and password.
