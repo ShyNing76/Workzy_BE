@@ -4,3 +4,4 @@
 .babelrc
 /.idea
 .package-lock.json
+ngrok.exe

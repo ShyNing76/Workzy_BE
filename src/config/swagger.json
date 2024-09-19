@@ -18,21 +18,77 @@
     }
   ],
   "paths": {
-    "/users": {
-      "get": {
+    "/login": {
+      "post": {
+        "summary": "Login user",
+        "description": "Login user with email and password",
         "tags": [
-          "users"
+          "Authentication"
         ],
-        "summary": "Lấy danh sách người dùng",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password123"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Danh sách người dùng",
+            "description": "Login successful",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/User"
+                  "type": "object",
+                  "properties": {
+                    "err": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Login successful"
+                    },
+                    "accessToken": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "err": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid email or password"
+                    }
                   }
                 }
               }
@@ -40,21 +96,78 @@
           }
         }
       }
-    }
-  },
-  "components": {
-    "schemas": {
-      "User": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer"
+    },
+    "/register": {
+      "post": {
+        "summary": "Register user",
+        "description": "Register a new user",
+        "tags": [
+          "Authentication"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password123"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "err": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "User registered successfully"
+                    }
+                  }
+                }
+              }
+            }
           },
-          "name": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "err": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid email or password"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
