@@ -11,14 +11,14 @@ module.exports = {
                 //     key: 'account_id'
                 // }
             },
-            first_name: {
-                type: Sequelize.STRING(100),
-                allowNull: false
-            },
-            last_name: {
-                type: Sequelize.STRING(100),
-                allowNull: false
-            },
+            // first_name: {
+            //     type: Sequelize.STRING(100),
+            //     allowNull: false
+            // },
+            // last_name: {
+            //     type: Sequelize.STRING(100),
+            //     allowNull: false
+            // },
             phone: {
                 type: Sequelize.STRING(15),
                 allowNull: false

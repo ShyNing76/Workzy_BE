@@ -33,7 +33,7 @@ export const loginService = ({email, password}) => new Promise(async (resolve, r
     }
 });
 
-export const registerService = ({email, password}) => new Promise(async (resolve, reject) => {
+export const registerService = ({email, password, name}) => new Promise(async (resolve, reject) => {
     try {
         const user = await db.Account.findOrCreate({
             where: {
@@ -42,6 +42,9 @@ export const registerService = ({email, password}) => new Promise(async (resolve
             defaults: {
                 email,
                 password: hashPassword.hashPassword(password),
+                name,
+                role: 'user',
+                status: 'active'
             }
         });
 
@@ -53,7 +56,7 @@ export const registerService = ({email, password}) => new Promise(async (resolve
         });
 
         resolve({
-            err: 1,
+            err: accessToken ? 1 : 0,
             message: user[1] ? 'Register successful' : 'Email already exists',
             accessToken: 'Bearer ' + accessToken
         })

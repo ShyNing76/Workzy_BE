@@ -12,14 +12,14 @@ module.exports = (sequelize, DataTypes) => {
                 key: 'account_id'
             }
         },
-        first_name: {
-            type: DataTypes.STRING(100),
-            allowNull: false
-        },
-        last_name: {
-            type: DataTypes.STRING(100),
-            allowNull: false
-        },
+        // first_name: {
+        //     type: DataTypes.STRING(100),
+        //     allowNull: false
+        // },
+        // last_name: {
+        //     type: DataTypes.STRING(100),
+        //     allowNull: false
+        // },
         phone: {
             type: DataTypes.STRING(15),
             allowNull: false

@@ -12,10 +12,10 @@ module.exports = (sequelize, DataTypes) => {
                 key: 'account_id'
             }
         },
-        full_name: {
-            type: DataTypes.STRING(100),
-            allowNull: false
-        }
+        // full_name: {
+        //     type: DataTypes.STRING(100),
+        //     allowNull: false
+        // }
     }, {
         tableName: 'Admin',
         timestamps: true,
