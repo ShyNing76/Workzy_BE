@@ -3,14 +3,6 @@ import * as controllers from "../controllers"
 
 const router = express.Router();
 
-<<<<<<< Updated upstream
-router.post("/login", controllers.loginController
-);
-
-router.post("/register", controllers.registerController
-);
-=======
-
 router.post("/login",
     /*
      #swagger.requestBody = {
@@ -71,6 +63,5 @@ router.post("/register",
     #swagger.summary = 'Register a new customer'
     */
     controllers.registerController);
->>>>>>> Stashed changes
 
 module.exports = router;
