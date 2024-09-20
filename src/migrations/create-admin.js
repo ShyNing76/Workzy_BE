@@ -4,16 +4,16 @@ module.exports = {
     async up(queryInterface, Sequelize) {
         await queryInterface.createTable('Admin', {
             admin_id: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
+                allowNull: false,
                 primaryKey: true,
-                // references: {
-                //     model: 'Account',
-                //     key: 'accountId'
-                // }
-            },
-            full_name: {
-                type: Sequelize.STRING(100),
-                allowNull: false
+                references: {
+                    model: 'Account',
+                    key: 'account_id'
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE'
             }
         });
     },

@@ -4,10 +4,10 @@ module.exports = {
     async up(queryInterface, Sequelize) {
         await queryInterface.createTable('Account', {
             account_id: {
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
                 allowNull: false,
-                type: Sequelize.INTEGER,
-                primaryKey: true,
-                autoIncrement: true
+                primaryKey: true
             },
             email: {
                 type: Sequelize.STRING(255),
@@ -15,6 +15,10 @@ module.exports = {
             },
             password: {
                 type: Sequelize.STRING(255),
+            },
+            name: {
+                type: Sequelize.STRING(255),
+                allowNull: false
             },
             role: {
                 type: Sequelize.ENUM('admin', 'manager', 'staff', 'user'),

@@ -9,3 +9,8 @@ export const badRequest = (res, message) => {
     const error = createError.BadRequest(message);
     return res.status(error.status).json({err: error.status, message: error.message});
 }
+
+export const notAuthorized = (message, res, isExpired) => {
+    const error = isExpired ? createError.Unauthorized("Access token expired") : createError.Unauthorized(message);
+    return res.status(error.status).json({err: error.status, message: error.message});
+}

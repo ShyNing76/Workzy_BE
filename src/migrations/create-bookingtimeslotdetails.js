@@ -4,23 +4,29 @@ module.exports = {
     async up(queryInterface, Sequelize) {
         await queryInterface.createTable('BookingTimeSlotDetails', {
             booking_time_slot_id: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
                 primaryKey: true,
-                autoIncrement: true
             },
             booking_id: {
-                type: Sequelize.INTEGER,
-                // references: {
-                //     model: 'Booking',
-                //     key: 'booking_id'
-                // }
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
+                references: {
+                    model: 'Booking',
+                    key: 'booking_id'
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE'
             },
             time_slot_id: {
-                type: Sequelize.INTEGER,
-                // references: {
-                //     model: 'TimeSlot',
-                //     key: 'time_slot_id'
-                // }
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
+                references: {
+                    model: 'TimeSlot',
+                    key: 'time_slot_id'
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE'
             },
             created_at: {
                 type: Sequelize.DATE,

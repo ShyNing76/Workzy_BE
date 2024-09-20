@@ -1,30 +1,37 @@
 'use strict';
-const {
-    Model
-} = require('sequelize');
+const {Model} = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-    const Admin = sequelize.define('Admin', {
+    class Admin extends Model {
+        /**
+         * Helper method for defining associations.
+         * This method is not a part of Sequelize lifecycle.
+         * The `models/index` file will call this method automatically.
+         */
+        static associate(models) {
+            // Define association here
+            Admin.belongsTo(models.Account, {foreignKey: 'admin_id'});
+        }
+    }
+
+    Admin.init({
         admin_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
             references: {
                 model: 'Account',
                 key: 'account_id'
             }
         },
-        full_name: {
-            type: DataTypes.STRING(100),
-            allowNull: false
-        }
+
     }, {
+        sequelize,
+        modelName: 'Admin',
         tableName: 'Admin',
         timestamps: true,
         underscored: true
     });
-
-    Admin.associate = (models) => {
-        Admin.belongsTo(models.Account, {foreignKey: 'admin_id'});
-    };
 
     return Admin;
 };

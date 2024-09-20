@@ -1,11 +1,23 @@
 'use strict';
-const {
-    Model
-} = require('sequelize');
+const {Model} = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-    const Building = sequelize.define('Building', {
+    class Building extends Model {
+        /**
+         * Helper method for defining associations.
+         * This method is not a part of Sequelize lifecycle.
+         * The `models/index` file will call this method automatically.
+         */
+        static associate(models) {
+            Building.belongsTo(models.Manager, {foreignKey: 'manager_id'});
+            Building.hasMany(models.Workspace, {foreignKey: 'building_id'});
+        }
+    }
+
+    Building.init({
         building_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
             autoIncrement: true
         },
@@ -30,7 +42,8 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         },
         workspace_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
             allowNull: false
         },
         rating: {
@@ -42,22 +55,20 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         },
         manager_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
             references: {
                 model: 'Manager',
                 key: 'manager_id'
             }
         }
     }, {
+        sequelize,
+        modelName: 'Building',
         tableName: 'Building',
         timestamps: true,
         underscored: true
     });
-
-    Building.associate = (models) => {
-        Building.belongsTo(models.Manager, {foreignKey: 'manager_id'});
-        Building.hasMany(models.Workspace, {foreignKey: 'building_id'});
-    };
 
     return Building;
 };

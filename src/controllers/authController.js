@@ -1,5 +1,5 @@
 import * as services from "../services";
-import {email, password} from "../helper/joi_schema";
+import {email, name, password} from "../helper/joi_schema";
 import Joi from "joi";
 import {badRequest} from "../middlewares/handle_error";
 
@@ -28,12 +28,18 @@ export const registerController = async (req, res) => {
         // Validate the request body
         const error = Joi.object({
             email,
-            password
+            password,
+            name
         }).validate(req.body).error;
         if (error) return badRequest(res, error.message);
         const response = await services.registerService(req.body);
 
-        return res.status(200).json(response) // use handleSuccess function to return the response
+        return res.status(200).json(response);
+        // {
+        //     err: "1",
+        //     message: "User registered successfully!"
+        //     accessToken: "Bearer " + accessToken
+        // }
     } catch (error) {
         return res.status(500).json({error: error.message})
     }

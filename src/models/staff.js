@@ -1,46 +1,48 @@
 'use strict';
-const {
-    Model
-} = require('sequelize');
+const {Model} = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-    const Staff = sequelize.define('Staff', {
+    class Staff extends Model {
+        /**
+         * Helper method for defining associations.
+         * This method is not a part of Sequelize lifecycle.
+         * The `models/index` file will call this method automatically.
+         */
+        static associate(models) {
+            Staff.belongsTo(models.Account, {foreignKey: 'staff_id'});
+            Staff.belongsTo(models.Building, {foreignKey: 'building_id'});
+        }
+    }
+
+    Staff.init({
         staff_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
             references: {
                 model: 'Account',
                 key: 'account_id'
             }
         },
-        first_name: {
-            type: DataTypes.STRING(100),
-            allowNull: false
-        },
-        last_name: {
-            type: DataTypes.STRING(100),
-            allowNull: false
-        },
         phone: {
             type: DataTypes.STRING(15),
             allowNull: false
         },
         building_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
             references: {
                 model: 'Building',
                 key: 'building_id'
             }
         }
     }, {
+        sequelize,
+        modelName: 'Staff',
         tableName: 'Staff',
         timestamps: true,
         underscored: true
     });
-
-    Staff.associate = (models) => {
-        Staff.belongsTo(models.Account, {foreignKey: 'staff_id'});
-        Staff.belongsTo(models.Building, {foreignKey: 'building_id'});
-    };
 
     return Staff;
 };

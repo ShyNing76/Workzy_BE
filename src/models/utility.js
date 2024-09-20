@@ -1,11 +1,22 @@
 'use strict';
-const {
-    Model
-} = require('sequelize');
+const {Model} = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-    const Utility = sequelize.define('Utility', {
+    class Utility extends Model {
+        /**
+         * Helper method for defining associations.
+         * This method is not a part of Sequelize lifecycle.
+         * The `models/index` file will call this method automatically.
+         */
+        static associate(models) {
+            Utility.hasMany(models.BookingUtilityDetails, {foreignKey: 'utility_id'});
+        }
+    }
+
+    Utility.init({
         utility_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
             autoIncrement: true
         },
@@ -30,16 +41,12 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: false
         }
     }, {
+        sequelize,
+        modelName: 'Utility',
         tableName: 'Utility',
         timestamps: true,
         underscored: true
     });
 
-    Utility.associate = (models) => {
-        Utility.hasMany(models.BookingUtilityDetails, {foreignKey: 'utility_id'});
-    };
-
     return Utility;
 };
-
-

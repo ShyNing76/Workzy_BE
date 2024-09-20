@@ -1,38 +1,39 @@
 'use strict';
-const {
-    Model
-} = require('sequelize');
+const {Model} = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-    const Manager = sequelize.define('Manager', {
+    class Manager extends Model {
+        /**
+         * Helper method for defining associations.
+         * This method is not a part of Sequelize lifecycle.
+         * The `models/index` file will call this method automatically.
+         */
+        static associate(models) {
+            Manager.belongsTo(models.Account, {foreignKey: 'manager_id'});
+        }
+    }
+
+    Manager.init({
         manager_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
             references: {
                 model: 'Account',
                 key: 'account_id'
             }
         },
-        first_name: {
-            type: DataTypes.STRING(100),
-            allowNull: false
-        },
-        last_name: {
-            type: DataTypes.STRING(100),
-            allowNull: false
-        },
         phone: {
             type: DataTypes.STRING(15),
             allowNull: false
         }
     }, {
+        sequelize,
+        modelName: 'Manager',
         tableName: 'Manager',
         timestamps: true,
         underscored: true
     });
-
-    Manager.associate = (models) => {
-        Manager.belongsTo(models.Account, {foreignKey: 'manager_id'});
-    };
 
     return Manager;
 };

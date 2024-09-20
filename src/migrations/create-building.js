@@ -4,9 +4,9 @@ module.exports = {
     async up(queryInterface, Sequelize) {
         await queryInterface.createTable('Building', {
             building_id: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
                 primaryKey: true,
-                autoIncrement: true
             },
             building_name: {
                 type: Sequelize.STRING(200),
@@ -21,15 +21,11 @@ module.exports = {
                 allowNull: false
             },
             location: {
-                type: Sequelize.STRING(200),
+                type: Sequelize.ENUM('Hà Nội', 'Hồ Chí Minh'),
                 allowNull: false
             },
             amenities: {
                 type: Sequelize.STRING(250),
-                allowNull: false
-            },
-            workspace_id: {
-                type: Sequelize.INTEGER,
                 allowNull: false
             },
             rating: {
@@ -41,11 +37,14 @@ module.exports = {
                 allowNull: true
             },
             manager_id: {
-                type: Sequelize.INTEGER,
-                // references: {
-                //     model: 'Manager',
-                //     key: 'manager_id'
-                // }
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
+                references: {
+                    model: 'Manager',
+                    key: 'manager_id'
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE'
             },
             created_at: {
                 type: Sequelize.DATE,

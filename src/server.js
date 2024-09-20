@@ -5,7 +5,13 @@ import cors from 'cors';
 require('dotenv').config();
 
 const app = express();
-app.use(cors());
+app.use(cors(
+    {
+        origin: '*',
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+        allowedHeaders: ['Content-Type', 'Authorization']
+    }
+));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
@@ -13,6 +19,7 @@ const port = process.env.PORT || 3000;
 const host = process.env.HOST || 'localhost';
 
 initWebRoutes(app);
+
 
 app.listen(port, host, () => {
     console.log(`Server is running on ${port}`);

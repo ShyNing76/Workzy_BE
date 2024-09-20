@@ -1,11 +1,22 @@
 'use strict';
-const {
-    Model
-} = require('sequelize');
+const {Model} = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-    const Payment = sequelize.define('Payment', {
+    class Payment extends Model {
+        /**
+         * Helper method for defining associations.
+         * This method is not a part of Sequelize lifecycle.
+         * The `models/index` file will call this method automatically.
+         */
+        static associate(models) {
+            Payment.hasMany(models.Booking, {foreignKey: 'payment_id'});
+        }
+    }
+
+    Payment.init({
         payment_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
             autoIncrement: true
         },
@@ -26,18 +37,16 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         },
         transaction_id: {
-            type: DataTypes.STRING(50),
+            type: DataTypes.STRING,
             allowNull: false
         }
     }, {
+        sequelize,
+        modelName: 'Payment',
         tableName: 'Payment',
         timestamps: true,
         underscored: true
     });
-
-    Payment.associate = (models) => {
-        Payment.hasMany(models.Booking, {foreignKey: 'payment_id'});
-    };
 
     return Payment;
 };

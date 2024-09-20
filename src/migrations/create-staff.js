@@ -4,31 +4,33 @@ module.exports = {
     async up(queryInterface, Sequelize) {
         await queryInterface.createTable('Staff', {
             staff_id: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
                 primaryKey: true,
-                // references: {
-                //     model: 'Account',
-                //     key: 'account_id'
-                // }
-            },
-            first_name: {
-                type: Sequelize.STRING(100),
-                allowNull: false
-            },
-            last_name: {
-                type: Sequelize.STRING(100),
-                allowNull: false
+                references: {
+                    model: 'Account',
+                    key: 'account_id'
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE'
             },
             phone: {
                 type: Sequelize.STRING(15),
                 allowNull: false
             },
             building_id: {
-                type: Sequelize.INTEGER,
-                // references: {
-                //     model: 'Building',
-                //     key: 'building_id'
-                // }
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
+                references: {
+                    model: 'Building',
+                    key: 'building_id'
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE'
+            },
+            status: {
+                type: Sequelize.ENUM('active', 'inactive'),
+                defaultValue: 'active',
             },
             created_at: {
                 type: Sequelize.DATE,

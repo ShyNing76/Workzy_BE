@@ -4,9 +4,9 @@ module.exports = {
     async up(queryInterface, Sequelize) {
         await queryInterface.createTable('Utility', {
             utility_id: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
                 primaryKey: true,
-                autoIncrement: true
             },
             utility_name: {
                 type: Sequelize.STRING(200),
