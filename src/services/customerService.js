@@ -41,6 +41,7 @@ export const getProfile = (accessToken) => new Promise(async (resolve, reject) =
 });
 
 export const updateProfile = (accessToken, updateFields) => new Promise(async (resolve, reject) => {
+    const t = await db.sequelize.transaction();
     try {
         jwt.verify(accessToken.split(' ')[1], process.env.JWT_SECRET, async (err, decoded) => {
             if (err) {
@@ -49,13 +50,17 @@ export const updateProfile = (accessToken, updateFields) => new Promise(async (r
                     message: 'Invalid access token'
                 })
             } else {
+                const {date_of_birth, fieldToUpdated} = updateFields;
+
                 let isUpdated = await db.Customer.update({
-                    ...updateFields
+                    ...fieldToUpdated,
                 }, {
                     where: {
                         user_id: decoded.user_id
                     }
-                });
+                }, {transaction: t});
+
+                t.commit();
 
                 resolve({
                     err: isUpdated[0] ? 1 : 0,

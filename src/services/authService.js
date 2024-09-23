@@ -37,6 +37,8 @@ export const loginService = ({email, password}) => new Promise(async (resolve, r
 });
 
 export const registerService = ({email, password, name}) => new Promise(async (resolve, reject) => {
+    const t = await db.sequelize.transaction();
+
     try {
         const user = await db.User.findOne({
             where: {
@@ -52,16 +54,17 @@ export const registerService = ({email, password, name}) => new Promise(async (r
             })
         } else {
             const hash = hashPassword.hashPassword(password);
+
             const user = await db.User.create({
                 user_id: v4(),
                 email,
                 password: hash,
                 name,
                 role_id: 4
-            });
+            }, {transaction: t});
             const accessToken = jwt.sign({
                 email: user.email,
-                account_id: user.account_id
+                user_id: user.user_id
             }, process.env.JWT_SECRET, {
                 expiresIn: '1h'
             });
@@ -70,7 +73,9 @@ export const registerService = ({email, password, name}) => new Promise(async (r
                 customer_id: v4(),
                 user_id: user.user_id,
                 phone: "",
-            })
+            }, {transaction: t})
+
+            t.commit();
 
             resolve({
                 err: 1,
@@ -79,6 +84,7 @@ export const registerService = ({email, password, name}) => new Promise(async (r
             })
         }
     } catch (error) {
+        t.rollback();
         reject(error)
     }
 })

@@ -6,6 +6,14 @@ export const password = Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
 
 export const name = Joi.string().required()
 
+export const phone = Joi.string().required()
+
+export const gender = Joi.string().pattern(new RegExp('Male|Female|Other')).required()
+
+export const date_of_birth = Joi.date().required()
+
+export const point = Joi.number().min(0).required()
+
 export const title = Joi.string().required()
 
 export const price = Joi.number().min(0).required()

@@ -7,7 +7,7 @@ const sequelize = new Sequelize(process.env.DATABASE_NAME, process.env.DATABASE_
     host: process.env.DATABASE_HOST,
     dialect: 'postgres',
     port: process.env.DATABASE_PORT,
-    logging: false,
+    // logging: false,
 });
 
 export async function connection() {
