@@ -33,10 +33,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.UUID,
                 allowNull: false,
             },
-            price: {
-                type: DataTypes.DECIMAL(10, 2),
-                allowNull: false,
-            },
+            // price: {
+            //     type: DataTypes.DECIMAL(10, 2),
+            //     allowNull: false,
+            // },
         },
         {
             sequelize,

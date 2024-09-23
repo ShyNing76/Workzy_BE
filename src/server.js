@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 
 require('dotenv').config();
-require('./config/connection');
+// require('./config/connection');
 
 const app = express();
 app.use(cors(

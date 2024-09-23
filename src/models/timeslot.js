@@ -31,10 +31,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.TIME,
                 allowNull: false,
             },
-            status: {
-                type: DataTypes.ENUM("active", "inactive"),
-                defaultValue: "active",
-            },
+            // status: {
+            //     type: DataTypes.ENUM("active", "inactive"),
+            //     defaultValue: "active",
+            // },
         },
         {
             sequelize,

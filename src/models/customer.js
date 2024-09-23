@@ -35,15 +35,15 @@ module.exports = (sequelize, DataTypes) => {
             },
             phone: {
                 type: DataTypes.STRING(15),
-                allowNull: false,
+                defaultValue: "",
             },
             gender: {
-                type: DataTypes.STRING,
-                defaultValue: null,
+                type: DataTypes.ENUM("Male", "Female", "Other"),
+                defaultValue: "Male",
             },
             date_of_birth: {
                 type: DataTypes.DATE,
-                defaultValue: null,
+                allowNull: true,
             },
             point: {
                 type: DataTypes.INTEGER,

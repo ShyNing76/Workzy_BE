@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
                 primaryKey: true,
             },
             role_id: {
-                type: DataTypes.UUID,
+                type: DataTypes.INTEGER,
                 allowNull: false,
             },
             name: {

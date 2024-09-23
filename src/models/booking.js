@@ -19,7 +19,6 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: "booking_id",
             });
             Booking.hasOne(models.Review, {foreignKey: "booking_id"});
-            Booking.hasMany(models.BookingDetails, {foreignKey: "booking_id"});
             Booking.hasMany(models.BookingStatus, {foreignKey: "booking_id"});
             Booking.hasMany(models.Payment, {foreignKey: "booking_id"});
             Booking.belongsTo(models.Workspace, {foreignKey: "workspace_id"});

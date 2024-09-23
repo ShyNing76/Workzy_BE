@@ -12,7 +12,7 @@ router.get('/profile',
     }] */
     controller.getUser);
 
-router.post('/profile',
+router.post('/profile/',
     /*
     #swagger.description = 'Update the current customer profile.'
     #swagger.summary = 'Update the current profile of the customer'

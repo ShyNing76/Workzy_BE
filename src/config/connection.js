@@ -7,6 +7,7 @@ const sequelize = new Sequelize(process.env.DATABASE_NAME, process.env.DATABASE_
     host: process.env.DATABASE_HOST,
     dialect: 'postgres',
     port: process.env.DATABASE_PORT,
+    logging: false,
 });
 
 export async function connection() {
@@ -23,3 +24,5 @@ export async function connection() {
         console.error('Unable to connect to the database:', error);
     }
 }
+
+connection();
