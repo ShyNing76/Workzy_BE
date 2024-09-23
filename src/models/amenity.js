@@ -2,47 +2,56 @@
 const {Model} = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-    class TimeSlot extends Model {
+    class Amenity extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            TimeSlot.belongsToMany(models.Booking, {
-                through: "BookingTimeSlotDetails",
-                foreignKey: "time_slot_id",
+            Amenity.belongsToMany(models.Workspace, {
+                through: "AmenitiesWorkspace",
+                foreignKey: "amenity_id",
             });
         }
     }
 
-    TimeSlot.init(
+    Amenity.init(
         {
-            time_slot_id: {
+            amenity_id: {
                 type: DataTypes.UUID,
                 primaryKey: true,
             },
-            start_time: {
-                type: DataTypes.TIME,
+            amenity_name: {
+                type: DataTypes.STRING(200),
                 allowNull: false,
             },
-            end_time: {
-                type: DataTypes.TIME,
+            image: {
+                type: DataTypes.STRING(255),
+                allowNull: true,
+            },
+            original_price: {
+                type: DataTypes.DECIMAL(10, 2),
+                allowNull: false,
+            },
+            depreciation_price: {
+                type: DataTypes.DECIMAL(10, 2),
                 allowNull: false,
             },
             status: {
                 type: DataTypes.ENUM("active", "inactive"),
+                allowNull: false,
                 defaultValue: "active",
             },
         },
         {
             sequelize,
-            modelName: "TimeSlot",
-            tableName: "TimeSlot",
+            modelName: "Amenity",
+            tableName: "Amenity",
             timestamps: true,
             underscored: true,
         }
     );
 
-    return TimeSlot;
+    return Amenity;
 };

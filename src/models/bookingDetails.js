@@ -2,20 +2,20 @@
 const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-  class Review extends Model {
+  class BookingDetails extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Review.belongsTo(models.Booking, { foreignKey: "booking_id" });
+      BookingDetails.belongsTo(models.Booking, { foreignKey: "booking_id" });
     }
   }
 
-  Review.init(
+  BookingDetails.init(
     {
-      review_id: {
+      BookingDetails_id: {
         type: DataTypes.UUID,
         primaryKey: true,
       },
@@ -23,23 +23,27 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         allowNull: false,
       },
-      review_content: {
-        type: DataTypes.TEXT,
+      price: {
+        type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
       },
-      rating: {
-        type: DataTypes.DECIMAL(3, 2),
-        allowNull: false,
+      price_type: {
+        type: DataTypes.ENUM(
+          "workspace_price",
+          "service_price",
+          "broken_price"
+        ),
+        defaultValue: "workspace_price",
       },
     },
     {
       sequelize,
-      modelName: "Review",
-      tableName: "Review",
+      modelName: "BookingDetails",
+      tableName: "BookingDetails",
       timestamps: true,
       underscored: true,
     }
   );
 
-  return Review;
+  return BookingDetails;
 };

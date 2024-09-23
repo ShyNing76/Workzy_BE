@@ -2,44 +2,50 @@
 const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-  class Review extends Model {
+  class WorkspaceType extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Review.belongsTo(models.Booking, { foreignKey: "booking_id" });
+      WorkspaceType.hasMany(models.Workspace, {
+        foreignKey: "workspace_type_id",
+      });
     }
   }
 
-  Review.init(
+  WorkspaceType.init(
     {
-      review_id: {
+      workspace_type_id: {
         type: DataTypes.UUID,
         primaryKey: true,
       },
-      booking_id: {
-        type: DataTypes.UUID,
+      workspace_type_name: {
+        type: DataTypes.STRING(200),
         allowNull: false,
       },
-      review_content: {
+      image: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      description: {
         type: DataTypes.TEXT,
         allowNull: false,
       },
-      rating: {
-        type: DataTypes.DECIMAL(3, 2),
-        allowNull: false,
+      status: {
+        type: DataTypes.ENUM("active", "inactive"),
+        defaultValue: "active",
       },
     },
     {
       sequelize,
-      modelName: "Review",
-      tableName: "Review",
+      modelName: "WorkspaceType",
+      tableName: "WorkspaceType",
       timestamps: true,
       underscored: true,
     }
   );
 
-  return Review;
+  return WorkspaceType;
 };

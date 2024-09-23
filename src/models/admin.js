@@ -1,5 +1,5 @@
-'use strict';
-const {Model} = require('sequelize');
+"use strict";
+const {Model} = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
     class Admin extends Model {
@@ -10,28 +10,33 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             // Define association here
-            Admin.belongsTo(models.Account, {foreignKey: 'admin_id'});
+            Admin.belongsTo(models.User, {foreignKey: "user_id"});
         }
     }
 
-    Admin.init({
-        admin_id: {
-            type: DataTypes.UUID,
-            defaultValue: DataTypes.UUIDV4,
-            primaryKey: true,
-            references: {
-                model: 'Account',
-                key: 'account_id'
-            }
+    Admin.init(
+        {
+            admin_id: {
+                type: DataTypes.UUID,
+                primaryKey: true,
+            },
+            user_id: {
+                type: DataTypes.UUID,
+                allowNull: false,
+            },
+            phone: {
+                type: DataTypes.STRING(15),
+                allowNull: false,
+            },
         },
-
-    }, {
-        sequelize,
-        modelName: 'Admin',
-        tableName: 'Admin',
-        timestamps: true,
-        underscored: true
-    });
+        {
+            sequelize,
+            modelName: "Admin",
+            tableName: "Admin",
+            timestamps: true,
+            underscored: true,
+        }
+    );
 
     return Admin;
 };

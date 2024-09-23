@@ -2,45 +2,45 @@
 const {Model} = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-    class Wishlist extends Model {
+    class CustomerNotification extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            Wishlist.hasMany(models.Customer, {
-                foreignKey: "customer_id"
+            CustomerNotification.hasMany(models.Customer, {
+                foreignKey: "customer_id",
             });
-            Wishlist.hasMany(models.Workspace, {
-                foreignKey: "workspace_id"
+            CustomerNotification.hasMany(models.Notification, {
+                foreignKey: "notification_id",
             });
         }
     }
 
-    Wishlist.init(
+    CustomerNotification.init(
         {
-            wishlist_id: {
+            customer_notification_id: {
                 type: DataTypes.UUID,
                 primaryKey: true,
             },
-            customer_id: {
+            notification_id: {
                 type: DataTypes.UUID,
                 allowNull: false,
             },
-            workspace_id: {
+            customer_id: {
                 type: DataTypes.UUID,
                 allowNull: false,
             },
         },
         {
             sequelize,
-            modelName: "Wishlist",
-            tableName: "Wishlist",
+            modelName: "CustomerNotification",
+            tableName: "CustomerNotification",
             timestamps: true,
             underscored: true,
         }
     );
 
-    return Wishlist;
+    return CustomerNotification;
 };

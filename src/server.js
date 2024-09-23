@@ -21,7 +21,6 @@ const host = process.env.HOST || 'localhost';
 
 initWebRoutes(app);
 
-
 app.listen(port, host, () => {
     console.log(`Server is running on ${port}`);
     console.log(`Swagger is running on http://${host}:${port}/api-docs`);
