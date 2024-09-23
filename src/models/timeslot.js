@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
         {
             time_slot_id: {
                 type: DataTypes.UUID,
+                defaultValue: DataTypes.UUIDV4,
                 primaryKey: true,
             },
             start_time: {

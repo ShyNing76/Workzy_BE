@@ -2,25 +2,34 @@
 const {Model} = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-    class BookingDetails extends Model {
+    class BookingTimeSlotDetails extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            BookingDetails.belongsTo(models.Booking, {foreignKey: "booking_id"});
+            BookingTimeSlotDetails.hasMany(models.Booking, {
+                foreignKey: "booking_id",
+            });
+            BookingTimeSlotDetails.hasMany(models.TimeSlot, {
+                foreignKey: "time_slot_id",
+            });
         }
     }
 
-    BookingDetails.init(
+    BookingTimeSlotDetails.init(
         {
-            BookingDetails_id: {
+            booking_time_slot_id: {
                 type: DataTypes.UUID,
-                defaultValue: DataTypes.UUIDV4,
                 primaryKey: true,
+                allowNull: false,
             },
             booking_id: {
+                type: DataTypes.UUID,
+                allowNull: false
+            },
+            time_slot_id: {
                 type: DataTypes.UUID,
                 allowNull: false,
             },
@@ -28,23 +37,15 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.DECIMAL(10, 2),
                 allowNull: false,
             },
-            price_type: {
-                type: DataTypes.ENUM(
-                    "workspace_price",
-                    "service_price",
-                    "broken_price"
-                ),
-                defaultValue: "workspace_price",
-            },
         },
         {
             sequelize,
-            modelName: "BookingDetails",
-            tableName: "BookingDetails",
+            modelName: "BookingTimeSlotDetails",
+            tableName: "BookingTimeSlotDetails",
             timestamps: true,
             underscored: true,
         }
     );
 
-    return BookingDetails;
+    return BookingTimeSlotDetails;
 };

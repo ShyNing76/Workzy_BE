@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       payment_id: {
         type: DataTypes.UUID,
+          defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
       },
       booking_id: {

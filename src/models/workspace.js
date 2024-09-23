@@ -29,6 +29,7 @@ module.exports = (sequelize, DataTypes) => {
         {
             workspace_id: {
                 type: DataTypes.UUID,
+                defaultValue: DataTypes.UUIDV4,
                 primaryKey: true,
             },
             workspace_type_id: {

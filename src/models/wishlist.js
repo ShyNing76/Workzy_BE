@@ -22,6 +22,7 @@ module.exports = (sequelize, DataTypes) => {
         {
             wishlist_id: {
                 type: DataTypes.UUID,
+                defaultValue: DataTypes.UUIDV4,
                 primaryKey: true,
             },
             customer_id: {

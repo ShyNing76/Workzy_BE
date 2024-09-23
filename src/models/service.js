@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
         {
             service_id: {
                 type: DataTypes.UUID,
+                defaultValue: DataTypes.UUIDV4,
                 primaryKey: true,
             },
             service_name: {

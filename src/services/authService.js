@@ -5,7 +5,7 @@ import * as hashPassword from '../utils/hashPassword';
 export const loginService = ({email, password}) => new Promise(async (resolve, reject) => {
     try {
         // Find the user equal email address in the database
-        const user = await db.Account.findOne({
+        const user = await db.User.findOne({
             where: {
                 email
             },
@@ -35,7 +35,7 @@ export const loginService = ({email, password}) => new Promise(async (resolve, r
 
 export const registerService = ({email, password, name}) => new Promise(async (resolve, reject) => {
     try {
-        const user = await db.Account.findOne({
+        const user = await db.User.findOne({
             where: {
                 email
             },
@@ -49,10 +49,11 @@ export const registerService = ({email, password, name}) => new Promise(async (r
             })
         } else {
             const hash = hashPassword.hashPassword(password);
-            const user = await db.Account.create({
+            const user = await db.User.create({
                 email,
                 password: hash,
-                name
+                name,
+                role_id: 'user'
             });
             const accessToken = jwt.sign({
                 email: user.email,
