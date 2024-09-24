@@ -2,42 +2,48 @@
 const {Model} = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-    class Admin extends Model {
+    class BookingStatus extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            // Define association here
-            Admin.belongsTo(models.User, {foreignKey: "user_id"});
+            BookingStatus.belongsTo(models.Booking, {foreignKey: "booking_id"});
         }
     }
 
-    Admin.init(
+    BookingStatus.init(
         {
-            admin_id: {
+            booking_status_id: {
                 type: DataTypes.UUID,
                 defaultValue: DataTypes.UUIDV4,
                 primaryKey: true,
             },
-            user_id: {
+            booking_id: {
                 type: DataTypes.UUID,
                 allowNull: false,
             },
-            phone: {
-                type: DataTypes.STRING(15),
-                allowNull: false,
+            status: {
+                type: DataTypes.ENUM(
+                    "paid",
+                    "check-in",
+                    "in-process",
+                    "check-out",
+                    "completed",
+                    "cancelled"
+                ),
+                defaultValue: "paid",
             },
         },
         {
             sequelize,
-            modelName: "Admin",
-            tableName: "Admin",
+            modelName: "BookingStatus",
+            tableName: "BookingStatus",
             timestamps: true,
             underscored: true,
         }
     );
 
-    return Admin;
+    return BookingStatus;
 };

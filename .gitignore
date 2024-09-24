@@ -6,3 +6,4 @@
 /.idea
 .package-lock.json
 ngrok.exe
+/src/test.js

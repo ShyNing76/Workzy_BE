@@ -1,23 +1,26 @@
 import db from '../models'
 import jwt from 'jsonwebtoken';
 import * as hashPassword from '../utils/hashPassword';
+import {v4} from "uuid";
 
 export const loginService = ({email, password}) => new Promise(async (resolve, reject) => {
     try {
         // Find the user equal email address in the database
-        const user = await db.Account.findOne({
+        const user = await db.User.findOne({
             where: {
                 email
             },
             raw: true
         });
 
+        console.log(user)
+
         // Check if the user exists and the password is valid
         const isPasswordValid = user && hashPassword.comparePassword(password, user.password);
         // If the password is valid, generate an access token
         const accessToken = isPasswordValid ? jwt.sign({
-            email: user.email,
-            account_id: user.account_id
+            user_id: user.user_id,
+            email: user.email
         }, process.env.JWT_SECRET, {
             expiresIn: '1h'
         }) : null;
@@ -34,8 +37,10 @@ export const loginService = ({email, password}) => new Promise(async (resolve, r
 });
 
 export const registerService = ({email, password, name}) => new Promise(async (resolve, reject) => {
+    const t = await db.sequelize.transaction();
+
     try {
-        const user = await db.Account.findOne({
+        const user = await db.User.findOne({
             where: {
                 email
             },
@@ -49,17 +54,28 @@ export const registerService = ({email, password, name}) => new Promise(async (r
             })
         } else {
             const hash = hashPassword.hashPassword(password);
-            const user = await db.Account.create({
+
+            const user = await db.User.create({
+                user_id: v4(),
                 email,
                 password: hash,
-                name
-            });
+                name,
+                role_id: 4
+            }, {transaction: t});
             const accessToken = jwt.sign({
                 email: user.email,
-                account_id: user.account_id
+                user_id: user.user_id
             }, process.env.JWT_SECRET, {
                 expiresIn: '1h'
             });
+
+            await db.Customer.create({
+                customer_id: v4(),
+                user_id: user.user_id,
+                phone: "",
+            }, {transaction: t})
+
+            t.commit();
 
             resolve({
                 err: 1,
@@ -67,9 +83,8 @@ export const registerService = ({email, password, name}) => new Promise(async (r
                 accessToken: 'Bearer ' + accessToken,
             })
         }
-
-
     } catch (error) {
+        t.rollback();
         reject(error)
     }
 })

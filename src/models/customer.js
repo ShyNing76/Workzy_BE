@@ -1,5 +1,5 @@
-'use strict';
-const {Model} = require('sequelize');
+"use strict";
+const {Model} = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
     class Customer extends Model {
@@ -9,51 +9,58 @@ module.exports = (sequelize, DataTypes) => {
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            Customer.belongsTo(models.Account, {foreignKey: 'customer_id'});
+            Customer.belongsTo(models.User, {foreignKey: "user_id"});
+            Customer.belongsToMany(models.Workspace, {
+                through: "Wishlist",
+                foreignKey: "customer_id",
+            });
+            Customer.belongsToMany(models.Notification, {
+                through: "CustomerNotification",
+                foreignKey: "customer_id",
+            });
+            Customer.hasMany(models.Booking, {foreignKey: "customer_id"});
         }
     }
 
-    Customer.init({
-        customer_id: {
-            type: DataTypes.UUID,
-            defaultValue: DataTypes.UUIDV4,
-            primaryKey: true,
-            references: {
-                model: 'Account',
-                key: 'account_id'
-            }
+    Customer.init(
+        {
+            customer_id: {
+                type: DataTypes.UUID,
+                defaultValue: DataTypes.UUIDV4,
+                primaryKey: true,
+            },
+            user_id: {
+                type: DataTypes.UUID,
+                allowNull: false,
+            },
+            phone: {
+                type: DataTypes.STRING(15),
+                allowNull: true,
+                defaultValue: "",
+            },
+            gender: {
+                type: DataTypes.ENUM("Male", "Female", "Other"),
+                allowNull: true,
+                defaultValue: "Male",
+            },
+            date_of_birth: {
+                type: DataTypes.DATE,
+                allowNull: true,
+            },
+            point: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                defaultValue: 0,
+            },
         },
-        phone: {
-            type: DataTypes.STRING(15),
-            allowNull: false
-        },
-        gender: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false
-        },
-        date_of_birth: {
-            type: DataTypes.DATE,
-            defaultValue: null
-        },
-        point: {
-            type: DataTypes.INTEGER,
-            defaultValue: 0
-        },
-        created_at: {
-            type: DataTypes.DATE,
-            defaultValue: DataTypes.NOW
-        },
-        updated_at: {
-            type: DataTypes.DATE,
-            defaultValue: DataTypes.NOW
+        {
+            sequelize,
+            modelName: "Customer",
+            tableName: "Customer",
+            timestamps: true,
+            underscored: true,
         }
-    }, {
-        sequelize,
-        modelName: 'Customer',
-        tableName: 'Customer',
-        timestamps: true,
-        underscored: true
-    });
+    );
 
     return Customer;
 };

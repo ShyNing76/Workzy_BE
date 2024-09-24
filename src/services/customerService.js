@@ -1,97 +1,53 @@
 import db from '../models'
 import jwt from 'jsonwebtoken';
 
-export const getProfile = (accessToken) => new Promise(async (resolve, reject) => {
-    try {
-        jwt.verify(accessToken.split(' ')[1], process.env.JWT_SECRET, async (err, decoded) => {
-            console.log(decoded)
-            if (err) {
-                resolve({
-                    err: 0,
-                    message: 'Invalid access token'
-                })
-            } else {
-                const customer = await db.Account.findOne({
-                    where: {
-                        account_id: decoded.account_id
-                    },
-                    raw: true
-                });
-                const customerProfile = await db.Customer.findOne({
-                    where: {
-                        customer_id: decoded.account_id
-                    },
+export const getProfile = (user) => new Promise(async (resolve, reject) => {
+        try {
+            const customer = await db.User.findOne({
+                where: {
+                    user_id: user.user_id
+                },
+                include: {
+                    model: db.Customer,
                     attributes: {
                         exclude: ['created_at', 'updated_at', 'customer_id', 'createdAt', 'updatedAt']
-                    },
-                    raw: true
-                });
-
-                resolve({
-                    err: 1,
-                    message: 'Get profile successful',
-                    data: {
-                        account_id: customer.account_id,
-                        email: customer.email,
-                        name: customer.name,
-                        role: customer.role,
-                        status: customer.status,
-                        profile: customerProfile
                     }
-                })
-            }
-        })
-    } catch (error) {
-        reject(error)
-    }
-});
+                },
+                attributes: {
+                    exclude: ['password', 'created_at', 'updated_at', 'user_id', 'createdAt', 'updatedAt']
+                },
+                raw: true,
+                nest: true
+            });
 
-export const updateProfile = (accessToken, updateFields) => new Promise(async (resolve, reject) => {
+            let isCustomerExist = !!customer;
+
+            resolve({
+                err: isCustomerExist ? 1 : 0,
+                message: isCustomerExist ? 'Get profile successful' : 'Get profile failed',
+                data: isCustomerExist ? {
+                    ...customer
+                } : {}
+            })
+        } catch
+            (error) {
+            reject(error)
+        }
+    })
+;
+
+export const updateProfile = (updateFields) => new Promise(async (resolve, reject) => {
     try {
-        jwt.verify(accessToken.split(' ')[1], process.env.JWT_SECRET, async (err, decoded) => {
-            if (err) {
-                resolve({
-                    err: 0,
-                    message: 'Invalid access token'
-                })
-            } else {
-                let isUpdated = false;
-                const {password, ...fieldsToUpdate} = updateFields;
-
-                const affectedRows = await db.Account.update(fieldsToUpdate, {
-                    where: {
-                        account_id: decoded.account_id
-                    }
-                });
-
-                const [customer, created] = await db.Customer.findOrCreate({
-                    where: {
-                        customer_id: decoded.account_id
-                    },
-                    defaults: {
-                        account_id: decoded.account_id,
-                        ...fieldsToUpdate
-                    }
-                });
-                console.log(affectedRows)
-                isUpdated = affectedRows[0] > 0;
-
-                if (!created) {
-                    isUpdated = await db.Customer.update(fieldsToUpdate, {
-                        where: {
-                            customer_id: decoded.account_id
-                        }
-                    }) > 0 || isUpdated;
-                }
-
-                resolve({
-                    err: isUpdated ? 1 : 0,
-                    message: isUpdated ? 'Update profile successful' : 'Update profile failed',
-                    data: isUpdated ? {
-                        ...updateFields
-                    } : {}
-                })
+        const customer = await db.Customer.update(updateFields, {
+            where: {
+                user_id: updateFields.user_id
             }
+        });
+
+        let isCustomerExist = !!customer;
+        resolve({
+            err: isCustomerExist ? 1 : 0,
+            message: isCustomerExist ? 'Update profile successful' : 'Update profile failed',
         })
     } catch (error) {
         reject(error)

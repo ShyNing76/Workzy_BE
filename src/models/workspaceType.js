@@ -2,42 +2,51 @@
 const {Model} = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-    class Admin extends Model {
+    class WorkspaceType extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            // Define association here
-            Admin.belongsTo(models.User, {foreignKey: "user_id"});
+            WorkspaceType.hasMany(models.Workspace, {
+                foreignKey: "workspace_type_id",
+            });
         }
     }
 
-    Admin.init(
+    WorkspaceType.init(
         {
-            admin_id: {
+            workspace_type_id: {
                 type: DataTypes.UUID,
                 defaultValue: DataTypes.UUIDV4,
                 primaryKey: true,
             },
-            user_id: {
-                type: DataTypes.UUID,
+            workspace_type_name: {
+                type: DataTypes.STRING(200),
                 allowNull: false,
             },
-            phone: {
-                type: DataTypes.STRING(15),
+            image: {
+                type: DataTypes.STRING,
                 allowNull: false,
+            },
+            description: {
+                type: DataTypes.TEXT,
+                allowNull: false,
+            },
+            status: {
+                type: DataTypes.ENUM("active", "inactive"),
+                defaultValue: "active",
             },
         },
         {
             sequelize,
-            modelName: "Admin",
-            tableName: "Admin",
+            modelName: "WorkspaceType",
+            tableName: "WorkspaceType",
             timestamps: true,
             underscored: true,
         }
     );
 
-    return Admin;
+    return WorkspaceType;
 };

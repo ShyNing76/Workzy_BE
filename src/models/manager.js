@@ -1,5 +1,5 @@
-'use strict';
-const {Model} = require('sequelize');
+"use strict";
+const {Model} = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
     class Manager extends Model {
@@ -9,31 +9,43 @@ module.exports = (sequelize, DataTypes) => {
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            Manager.belongsTo(models.Account, {foreignKey: 'manager_id'});
+            Manager.belongsTo(models.User, {foreignKey: "user_id"});
+            Manager.hasMany(models.Building, {foreignKey: "manager_id"});
         }
     }
 
-    Manager.init({
-        manager_id: {
-            type: DataTypes.UUID,
-            defaultValue: DataTypes.UUIDV4,
-            primaryKey: true,
-            references: {
-                model: 'Account',
-                key: 'account_id'
-            }
+    Manager.init(
+        {
+            manager_id: {
+                type: DataTypes.UUID,
+                defaultValue: DataTypes.UUIDV4,
+                primaryKey: true,
+            },
+            user_id: {
+                type: DataTypes.UUID,
+                allowNull: false,
+            },
+            phone: {
+                type: DataTypes.STRING(15),
+                allowNull: false,
+            },
+            gender: {
+                type: DataTypes.STRING,
+                defaultValue: null,
+            },
+            date_of_birth: {
+                type: DataTypes.DATE,
+                defaultValue: null,
+            },
         },
-        phone: {
-            type: DataTypes.STRING(15),
-            allowNull: false
+        {
+            sequelize,
+            modelName: "Manager",
+            tableName: "Manager",
+            timestamps: true,
+            underscored: true,
         }
-    }, {
-        sequelize,
-        modelName: 'Manager',
-        tableName: 'Manager',
-        timestamps: true,
-        underscored: true
-    });
+    );
 
     return Manager;
 };

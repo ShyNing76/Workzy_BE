@@ -1,5 +1,5 @@
-'use strict';
-const {Model} = require('sequelize');
+"use strict";
+const {Model} = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
     class Payment extends Model {
@@ -9,44 +9,47 @@ module.exports = (sequelize, DataTypes) => {
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            Payment.hasMany(models.Booking, {foreignKey: 'payment_id'});
+            Payment.belongsTo(models.Booking, {foreignKey: "booking_id"});
+            Payment.hasMany(models.Transaction, {foreignKey: "payment_id"});
         }
     }
 
-    Payment.init({
-        payment_id: {
-            type: DataTypes.UUID,
-            defaultValue: DataTypes.UUIDV4,
-            primaryKey: true,
-            autoIncrement: true
+    Payment.init(
+        {
+            payment_id: {
+                type: DataTypes.UUID,
+                defaultValue: DataTypes.UUIDV4,
+                primaryKey: true,
+            },
+            booking_id: {
+                type: DataTypes.UUID,
+                allowNull: false,
+            },
+            payment_method: {
+                type: DataTypes.ENUM("paypal", "card"),
+                allowNull: false,
+            },
+            payment_date: {
+                type: DataTypes.DATE,
+                defaultValue: null,
+            },
+            payment_type: {
+                type: DataTypes.ENUM("workspace-price", "full", "refund"),
+                defaultValue: "workspace-price",
+            },
+            amount: {
+                type: DataTypes.DECIMAL(10, 2),
+                allowNull: false,
+            },
         },
-        payment_method: {
-            type: DataTypes.ENUM('paypal', 'card'),
-            allowNull: false
-        },
-        payment_date: {
-            type: DataTypes.DATE,
-            defaultValue: null
-        },
-        payment_type: {
-            type: DataTypes.ENUM('workspace-price', 'full', 'refund'),
-            allowNull: false
-        },
-        amount: {
-            type: DataTypes.DECIMAL(10, 2),
-            allowNull: false
-        },
-        transaction_id: {
-            type: DataTypes.STRING,
-            allowNull: false
+        {
+            sequelize,
+            modelName: "Payment",
+            tableName: "Payment",
+            timestamps: true,
+            underscored: true,
         }
-    }, {
-        sequelize,
-        modelName: 'Payment',
-        tableName: 'Payment',
-        timestamps: true,
-        underscored: true
-    });
+    );
 
     return Payment;
 };

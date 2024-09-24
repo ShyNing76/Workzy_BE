@@ -2,42 +2,46 @@
 const {Model} = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-    class Admin extends Model {
+    class CustomerNotification extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            // Define association here
-            Admin.belongsTo(models.User, {foreignKey: "user_id"});
+            CustomerNotification.hasMany(models.Customer, {
+                foreignKey: "customer_id",
+            });
+            CustomerNotification.hasMany(models.Notification, {
+                foreignKey: "notification_id",
+            });
         }
     }
 
-    Admin.init(
+    CustomerNotification.init(
         {
-            admin_id: {
+            customer_notification_id: {
                 type: DataTypes.UUID,
                 defaultValue: DataTypes.UUIDV4,
                 primaryKey: true,
             },
-            user_id: {
+            notification_id: {
                 type: DataTypes.UUID,
                 allowNull: false,
             },
-            phone: {
-                type: DataTypes.STRING(15),
+            customer_id: {
+                type: DataTypes.UUID,
                 allowNull: false,
             },
         },
         {
             sequelize,
-            modelName: "Admin",
-            tableName: "Admin",
+            modelName: "CustomerNotification",
+            tableName: "CustomerNotification",
             timestamps: true,
             underscored: true,
         }
     );
 
-    return Admin;
+    return CustomerNotification;
 };

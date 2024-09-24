@@ -2,31 +2,28 @@
 const {Model} = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-    class Building extends Model {
+    class Amenity extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            Building.hasOne(models.Staff, {foreignKey: "building_id"});
-            Building.hasMany(models.Workspace, {foreignKey: "building_id"});
-            Building.belongsTo(models.Manager, {foreignKey: "manager_id"});
+            Amenity.belongsToMany(models.Workspace, {
+                through: "AmenitiesWorkspace",
+                foreignKey: "amenity_id",
+            });
         }
     }
 
-    Building.init(
+    Amenity.init(
         {
-            building_id: {
+            amenity_id: {
                 type: DataTypes.UUID,
                 defaultValue: DataTypes.UUIDV4,
                 primaryKey: true,
             },
-            manager_id: {
-                type: DataTypes.UUID,
-                allowNull: false,
-            },
-            building_name: {
+            amenity_name: {
                 type: DataTypes.STRING(200),
                 allowNull: false,
             },
@@ -34,31 +31,28 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING(255),
                 allowNull: true,
             },
-            location: {
-                type: DataTypes.STRING(200),
+            original_price: {
+                type: DataTypes.DECIMAL(10, 2),
                 allowNull: false,
             },
-            description: {
-                type: DataTypes.TEXT,
+            depreciation_price: {
+                type: DataTypes.DECIMAL(10, 2),
                 allowNull: false,
-            },
-            rating: {
-                type: DataTypes.DECIMAL(3, 2),
-                defaultValue: null,
             },
             status: {
                 type: DataTypes.ENUM("active", "inactive"),
+                allowNull: false,
                 defaultValue: "active",
             },
         },
         {
             sequelize,
-            modelName: "Building",
-            tableName: "Building",
+            modelName: "Amenity",
+            tableName: "Amenity",
             timestamps: true,
             underscored: true,
         }
     );
 
-    return Building;
+    return Amenity;
 };

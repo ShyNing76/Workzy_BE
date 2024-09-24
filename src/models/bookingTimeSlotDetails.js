@@ -2,46 +2,50 @@
 const {Model} = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-    class Wishlist extends Model {
+    class BookingTimeSlotDetails extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            Wishlist.hasMany(models.Customer, {
-                foreignKey: "customer_id"
+            BookingTimeSlotDetails.hasMany(models.Booking, {
+                foreignKey: "booking_id",
             });
-            Wishlist.hasMany(models.Workspace, {
-                foreignKey: "workspace_id"
+            BookingTimeSlotDetails.hasMany(models.TimeSlot, {
+                foreignKey: "time_slot_id",
             });
         }
     }
 
-    Wishlist.init(
+    BookingTimeSlotDetails.init(
         {
-            wishlist_id: {
+            booking_time_slot_id: {
                 type: DataTypes.UUID,
-                defaultValue: DataTypes.UUIDV4,
                 primaryKey: true,
+                allowNull: false,
             },
-            customer_id: {
+            booking_id: {
+                type: DataTypes.UUID,
+                allowNull: false
+            },
+            time_slot_id: {
                 type: DataTypes.UUID,
                 allowNull: false,
             },
-            workspace_id: {
-                type: DataTypes.UUID,
-                allowNull: false,
-            },
+            // price: {
+            //     type: DataTypes.DECIMAL(10, 2),
+            //     allowNull: false,
+            // },
         },
         {
             sequelize,
-            modelName: "Wishlist",
-            tableName: "Wishlist",
+            modelName: "BookingTimeSlotDetails",
+            tableName: "BookingTimeSlotDetails",
             timestamps: true,
             underscored: true,
         }
     );
 
-    return Wishlist;
+    return BookingTimeSlotDetails;
 };
