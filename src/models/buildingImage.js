@@ -2,44 +2,45 @@
 const {Model} = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-    class Notification extends Model {
+    class BuildingImage extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            Notification.belongsToMany(models.Customer, {
-                through: "CustomerNotification",
-                foreignKey: "notification_id",
-            });
+            BuildingImage.belongsTo(models.Building, {foreignKey: "building_id"});
         }
     }
 
-    Notification.init(
+    BuildingImage.init(
         {
-            notification_id: {
+            building_image_id: {
                 type: DataTypes.UUID,
                 defaultValue: DataTypes.UUIDV4,
                 primaryKey: true,
             },
-            type: {
-                type: DataTypes.ENUM("booking", "payment", "system"),
+            building_id: {
+                type: DataTypes.UUID,
                 allowNull: false,
             },
-            description: {
-                type: DataTypes.TEXT,
-                defaultValue: false,
+            image: {
+                type: DataTypes.STRING(255),
+                allowNull: true,
+            },
+            status: {
+                type: DataTypes.ENUM("active", "inactive"),
+                defaultValue: "active",
             },
         },
         {
             sequelize,
-            modelName: "Notification",
-            tableName: "Notification",
+            modelName: "BuildingImage",
+            tableName: "BuildingImage",
             timestamps: true,
             underscored: true,
         }
     );
 
-    return Notification;
+    return BuildingImage;
 };
