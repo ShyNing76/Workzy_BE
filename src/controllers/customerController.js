@@ -5,13 +5,7 @@ import * as services from "../services";
 
 export const getUser = async (req, res) => {
     try {
-        // Validate the request body
-        const error = Joi.object({
-            accessToken,
-        }).validate({accessToken: req.headers['authorization']}).error;
-        if (error) return badRequest(res, error.message);
-
-        const response = await services.getProfile(req.headers['authorization']);
+        const response = await services.getProfile(req.user);
 
         // Return the response
         return res.status(200).json(response)
@@ -24,15 +18,12 @@ export const updateUser = async (req, res) => {
     try {
         // Validate the request body
         const error = Joi.object({
-            accessToken,
             phone,
             gender,
-            // date_of_birth,
-            point
-        }).validate({accessToken: req.headers['authorization'], ...req.body}).error;
+            date_of_birth,
+        }).validate(req.body).error;
         if (error) return badRequest(res, error.message);
-
-        const response = await services.updateProfile(req.headers['authorization'], req.body);
+        const response = await services.updateProfile({...req.body, ...req.user});
 
         // Return the response
         return res.status(200).json(response)

@@ -1,72 +1,53 @@
 import db from '../models'
 import jwt from 'jsonwebtoken';
 
-export const getProfile = (accessToken) => new Promise(async (resolve, reject) => {
-    try {
-        jwt.verify(accessToken.split(' ')[1], process.env.JWT_SECRET, async (err, decoded) => {
-            if (err) {
-                resolve({
-                    err: 0,
-                    message: 'Invalid access token'
-                })
-            } else {
-                const customer = await db.User.findOne({
-                    where: {
-                        user_id: decoded.user_id
-                    },
-                    include: {
-                        model: db.Customer,
-                        attributes: {
-                            exclude: ['created_at', 'updated_at', 'customer_id', 'createdAt', 'updatedAt']
-                        }
-                    },
-                    raw: true,
-                    nest: true
-                });
-
-                let isCustomerExist = !!customer;
-
-                resolve({
-                    err: isCustomerExist ? 1 : 0,
-                    message: isCustomerExist ? 'Get profile successful' : 'Get profile failed',
-                    data: isCustomerExist ? {
-                        ...customer
-                    } : {}
-                })
-            }
-        })
-    } catch (error) {
-        reject(error)
-    }
-});
-
-export const updateProfile = (accessToken, updateFields) => new Promise(async (resolve, reject) => {
-    const t = await db.sequelize.transaction();
-    try {
-        jwt.verify(accessToken.split(' ')[1], process.env.JWT_SECRET, async (err, decoded) => {
-            if (err) {
-                resolve({
-                    err: 0,
-                    message: 'Invalid access token'
-                })
-            } else {
-                const {date_of_birth, fieldToUpdated} = updateFields;
-
-                let isUpdated = await db.Customer.update({
-                    ...fieldToUpdated,
-                }, {
-                    where: {
-                        user_id: decoded.user_id
+export const getProfile = (user) => new Promise(async (resolve, reject) => {
+        try {
+            const customer = await db.User.findOne({
+                where: {
+                    user_id: user.user_id
+                },
+                include: {
+                    model: db.Customer,
+                    attributes: {
+                        exclude: ['created_at', 'updated_at', 'customer_id', 'createdAt', 'updatedAt']
                     }
-                }, {transaction: t});
+                },
+                attributes: {
+                    exclude: ['password', 'created_at', 'updated_at', 'user_id', 'createdAt', 'updatedAt']
+                },
+                raw: true,
+                nest: true
+            });
 
-                t.commit();
+            let isCustomerExist = !!customer;
 
-                resolve({
-                    err: isUpdated[0] ? 1 : 0,
-                    message: isUpdated[0] ? 'Update profile successful' : 'Update profile failed'
-                })
+            resolve({
+                err: isCustomerExist ? 1 : 0,
+                message: isCustomerExist ? 'Get profile successful' : 'Get profile failed',
+                data: isCustomerExist ? {
+                    ...customer
+                } : {}
+            })
+        } catch
+            (error) {
+            reject(error)
+        }
+    })
+;
+
+export const updateProfile = (updateFields) => new Promise(async (resolve, reject) => {
+    try {
+        const customer = await db.Customer.update(updateFields, {
+            where: {
+                user_id: updateFields.user_id
             }
+        });
+
+        let isCustomerExist = !!customer;
+        resolve({
+            err: isCustomerExist ? 1 : 0,
+            message: isCustomerExist ? 'Update profile successful' : 'Update profile failed',
         })
     } catch (error) {
         reject(error)

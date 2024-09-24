@@ -12,8 +12,6 @@ export const gender = Joi.string().pattern(new RegExp('Male|Female|Other')).requ
 
 export const date_of_birth = Joi.date().required()
 
-export const point = Joi.number().min(0).required()
-
 export const title = Joi.string().required()
 
 export const price = Joi.number().min(0).required()
