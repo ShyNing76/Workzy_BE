@@ -77,4 +77,9 @@ router.put('/password', verify_token, controller.updatePassword
     }] */
 );
 
+router.put('/phone', verify_token, controller.updatePhone);
+
+router.put('/email', verify_token, controller.updateEmail);
+
+
 module.exports = router;

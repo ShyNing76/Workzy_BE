@@ -104,3 +104,108 @@ export const updatePassword = (updateFields) => new Promise(async (resolve, reje
         reject(error)
     }
 })
+
+export const updatePhone = (updateFields) => new Promise(async (resolve, reject) => {
+    try {
+        const isPhoneDuplicated = db.Customer.findOne({
+            where: {
+                phone: updateFields.phone,
+            }
+        });
+        let check = !!isPhoneDuplicated;
+
+        if (check) resolve({
+            err: 0,
+            message: "Phone is already used"
+        });
+
+        const customer = await db.Customer.findOne({
+            where: {
+                user_id: updateFields.user_id
+            }
+        });
+
+        if (!customer) {
+            resolve({
+                err: 0,
+                message: 'User not found'
+            })
+        }
+
+        customer.phone = updateFields.phone;
+        await customer.save();
+
+        resolve({
+            err: 1,
+            message: 'Update phone successful'
+        })
+    } catch (error) {
+        reject(error)
+    }
+})
+
+export const updateEmail = (updateFields) => new Promise(async (resolve, reject) => {
+    try {
+        const isEmailDuplicated = db.User.findOne({
+            where: {
+                email: updateFields.email,
+            }
+        });
+        let check = !!isEmailDuplicated;
+
+        if (check) resolve({
+            err: 0,
+            message: "Email is already used"
+        });
+
+        const user = await db.User.findOne({
+            where: {
+                user_id: updateFields.user_id
+            }
+        });
+
+        if (!user) {
+            resolve({
+                err: 0,
+                message: 'User not found'
+            })
+        }
+
+        user.email = updateFields.email;
+        await user.save();
+
+        resolve({
+            err: 1,
+            message: 'Update email successful'
+        })
+    } catch (error) {
+        reject(error)
+    }
+})
+
+export const updateImage = (updateFields) => new Promise(async (resolve, reject) => {
+    try {
+        const user = await db.Customer.findOne({
+            where: {
+                user_id: updateFields.user_id
+            }
+        });
+
+        if (!user) {
+            resolve({
+                err: 0,
+                message: 'User not found'
+            })
+        }
+
+        user.image = updateFields.image;
+        await user.save();
+
+        resolve({
+            err: 1,
+            message: 'Update image successful'
+        })
+    } catch (error) {
+        reject(error)
+    }
+})
