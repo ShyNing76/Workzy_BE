@@ -22,9 +22,9 @@ router.put('/profile/', verify_token, controller.updateUser
                         schema: {
                             type: 'object',
                             properties: {
-                                phone: {
+                                name: {
                                     type: 'string',
-                                    example: '0987654321'
+                                    example: 'John doe'
                                 },
                                 gender: {
                                     type: 'string',

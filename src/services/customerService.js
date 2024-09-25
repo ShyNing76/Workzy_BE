@@ -42,13 +42,23 @@ export const getProfile = (user) => new Promise(async (resolve, reject) => {
 ;
 
 export const updateProfile = (updateFields) => new Promise(async (resolve, reject) => {
+    const t = await db.sequelize.transaction();
     try {
         const customer = await db.Customer.update(updateFields, {
             where: {
                 user_id: updateFields.user_id
             }
-        });
+        }, {transaction: t});
 
+        await db.User.update({
+            name: updateFields.name
+        }, {
+            where: {
+                user_id: updateFields.user_id
+            }
+        }, {transaction: t});
+
+        await t.commit();
         let isCustomerExist = !!customer;
         resolve({
             err: isCustomerExist ? 1 : 0,
