@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
             },
             image: {
                 type: DataTypes.STRING(255),
-                allowNull: true,
+                allowNull: false,
             },
             status: {
                 type: DataTypes.ENUM("active", "inactive"),

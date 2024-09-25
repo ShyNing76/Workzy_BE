@@ -10,14 +10,11 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             Booking.belongsTo(models.Customer, {foreignKey: "customer_id"});
-            Booking.belongsToMany(models.TimeSlot, {
-                through: "BookingTimeSlotDetails",
-                foreignKey: "booking_id",
-            });
             Booking.belongsToMany(models.Service, {
                 through: "BookingServiceDetails",
                 foreignKey: "booking_id",
             });
+            Booking.belongsTo(models.BookingType, {foreignKey: "booking_type_id"});
             Booking.hasOne(models.Review, {foreignKey: "booking_id"});
             Booking.hasMany(models.BookingStatus, {foreignKey: "booking_id"});
             Booking.hasMany(models.Payment, {foreignKey: "booking_id"});
@@ -40,9 +37,17 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.UUID,
                 allowNull: false,
             },
-            booking_date: {
+            booking_type_id: {
+                type: DataTypes.INTEGER,
+                allowNull: false,
+            },
+            start_time_date: {
                 type: DataTypes.DATE,
-                defaultValue: null,
+                allowNull: false,
+            },
+            end_time_date: {
+                type: DataTypes.DATE,
+                allowNull: false,
             },
             workspace_price: {
                 type: DataTypes.DECIMAL(10, 2),
@@ -50,11 +55,11 @@ module.exports = (sequelize, DataTypes) => {
             },
             service_price: {
                 type: DataTypes.DECIMAL(10, 2),
-                allowNull: false,
+                allowNull: true,
             },
             broken_price: {
                 type: DataTypes.DECIMAL(10, 2),
-                allowNull: false,
+                allowNull: true,
             },
             total_price: {
                 type: DataTypes.DECIMAL(10, 2),

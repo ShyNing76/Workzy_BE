@@ -15,7 +15,6 @@ passport.use(new GoogleStrategy({
                 if (profile?.id) {
                     profile.response = await controllers.loginGoogle(profile);
                 }
-
             } catch (err) {
                 console.log(err);
             }

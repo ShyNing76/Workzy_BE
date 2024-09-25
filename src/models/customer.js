@@ -36,7 +36,6 @@ module.exports = (sequelize, DataTypes) => {
             phone: {
                 type: DataTypes.STRING(15),
                 allowNull: true,
-                defaultValue: "",
             },
             gender: {
                 type: DataTypes.ENUM("Male", "Female", "Other"),

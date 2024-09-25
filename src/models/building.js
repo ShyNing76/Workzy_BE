@@ -33,19 +33,19 @@ module.exports = (sequelize, DataTypes) => {
             },
             location: {
                 type: DataTypes.STRING(200),
-                allowNull: false,
+                defaultValue: null,
             },
             description: {
                 type: DataTypes.TEXT,
-                allowNull: false,
+                defaultValue: null,
             },
             rating: {
-                type: DataTypes.DECIMAL(3, 2),
-                defaultValue: null,
+                type: DataTypes.INTEGER,
+                defaultValue: 0,
             },
             status: {
                 type: DataTypes.ENUM("active", "inactive"),
-                defaultValue: "active",
+                defaultValue: "inactive",
             },
         },
         {

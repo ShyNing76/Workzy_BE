@@ -33,16 +33,15 @@ module.exports = (sequelize, DataTypes) => {
             },
             original_price: {
                 type: DataTypes.DECIMAL(10, 2),
-                allowNull: false,
+                defaultValue: 0.0,
             },
             depreciation_price: {
                 type: DataTypes.DECIMAL(10, 2),
-                allowNull: false,
+                defaultValue: 0.0,
             },
             status: {
                 type: DataTypes.ENUM("active", "inactive"),
-                allowNull: false,
-                defaultValue: "active",
+                defaultValue: "inactive",
             },
         },
         {

@@ -28,15 +28,15 @@ module.exports = (sequelize, DataTypes) => {
             },
             image: {
                 type: DataTypes.STRING,
-                allowNull: false,
+                allowNull: true,
             },
             description: {
                 type: DataTypes.TEXT,
-                allowNull: false,
+                defaultValue: "",
             },
             status: {
                 type: DataTypes.ENUM("active", "inactive"),
-                defaultValue: "active",
+                defaultValue: "inactive",
             },
         },
         {
