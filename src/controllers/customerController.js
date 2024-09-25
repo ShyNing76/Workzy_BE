@@ -1,5 +1,5 @@
 import Joi from "joi";
-import {accessToken, date_of_birth, gender, phone, point} from "../helper/joi_schema";
+import {date_of_birth, gender, name} from "../helper/joi_schema";
 import {badRequest} from "../middlewares/handle_error";
 import * as services from "../services";
 
@@ -18,6 +18,7 @@ export const updateUser = async (req, res) => {
     try {
         // Validate the request body
         const error = Joi.object({
+            name,
             gender,
             date_of_birth,
         }).validate(req.body).error;

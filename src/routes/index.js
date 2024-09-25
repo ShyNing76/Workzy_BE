@@ -9,9 +9,10 @@ function initWebRoutes(app) {
     ); // Import auth routes
     app.use('/api/v1/customer', require('./customer')
         // #swagger.tags = ['Customer']
-    ); // Import customer routes
+    );
 
-    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(require('../config/swagger-output.json'))); // Import Swagger UI
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(require('../config/swagger-output.json')));
+    // Import Swagger UI
     app.use(notFound);
 }
 

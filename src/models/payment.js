@@ -27,19 +27,19 @@ module.exports = (sequelize, DataTypes) => {
             },
             payment_method: {
                 type: DataTypes.ENUM("paypal", "card"),
-                allowNull: false,
+                defaultValue: "card",
             },
             payment_date: {
                 type: DataTypes.DATE,
-                defaultValue: null,
+                defaultValue: DataTypes.NOW,
             },
             payment_type: {
-                type: DataTypes.ENUM("workspace-price", "full", "refund"),
-                defaultValue: "workspace-price",
+                type: DataTypes.ENUM("Workspace-Price", "Full", "Refund"),
+                defaultValue: "Workspace-Price",
             },
             amount: {
                 type: DataTypes.DECIMAL(10, 2),
-                allowNull: false,
+                defaultValue: 0,
             },
         },
         {

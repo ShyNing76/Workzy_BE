@@ -27,11 +27,11 @@ module.exports = (sequelize, DataTypes) => {
             },
             phone: {
                 type: DataTypes.STRING(15),
-                allowNull: false,
+                allowNull: true,
             },
             gender: {
-                type: DataTypes.STRING,
-                defaultValue: null,
+                type: DataTypes.ENUM("Male", "Female", "Others"),
+                defaultValue: "Male",
             },
             date_of_birth: {
                 type: DataTypes.DATE,

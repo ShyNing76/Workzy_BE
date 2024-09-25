@@ -25,11 +25,11 @@ module.exports = (sequelize, DataTypes) => {
             },
             type: {
                 type: DataTypes.ENUM("booking", "payment", "system"),
-                allowNull: false,
+                defaultValue: "system",
             },
             description: {
                 type: DataTypes.TEXT,
-                defaultValue: false,
+                defaultValue: "",
             },
         },
         {

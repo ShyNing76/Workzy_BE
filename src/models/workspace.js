@@ -61,15 +61,15 @@ module.exports = (sequelize, DataTypes) => {
             },
             capacity: {
                 type: DataTypes.INTEGER,
-                allowNull: false,
+                defaultValue: 1,
             },
             description: {
                 type: DataTypes.TEXT,
-                allowNull: false,
+                defaultValue: "",
             },
             status: {
                 type: DataTypes.ENUM("active", "inactive"),
-                defaultValue: "active",
+                defaultValue: "inactive",
             },
         },
         {
