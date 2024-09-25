@@ -13,7 +13,7 @@ router.get('/profile', verify_token, controller.getUser
     }] */
 );
 
-router.post('/profile/', verify_token, controller.updateUser
+router.put('/profile/', verify_token, controller.updateUser
     /*
          #swagger.requestBody = {
              required: true,
@@ -46,5 +46,35 @@ router.post('/profile/', verify_token, controller.updateUser
                 "apiKeyAuth": []
             }]
         } */);
+
+router.put('/password', verify_token, controller.updatePassword
+    /*
+    #swagger.requestBody = {
+        required: true,
+        content: {
+            "application/json": {
+                schema: {
+                    type: 'object',
+                    properties: {
+                        current_password: {
+                            type: 'string',
+                            example: 'password123'
+                        },
+                        new_password: {
+                            type: 'string',
+                            example: 'password1234'
+                        }
+                    },
+                    required: ['current_password', 'new_password']
+                }
+            }
+        }
+    }
+    #swagger.description = 'Update the current customer password.'
+    #swagger.summary = 'Update the current password of the customer'
+    #swagger.security = [{
+            "apiKeyAuth": []
+    }] */
+);
 
 module.exports = router;

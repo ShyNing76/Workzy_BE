@@ -18,12 +18,28 @@ export const updateUser = async (req, res) => {
     try {
         // Validate the request body
         const error = Joi.object({
-            phone,
             gender,
             date_of_birth,
         }).validate(req.body).error;
         if (error) return badRequest(res, error.message);
         const response = await services.updateProfile({...req.body, ...req.user});
+
+        // Return the response
+        return res.status(200).json(response)
+    } catch (error) {
+        return res.status(500).json({error: error.message})
+    }
+}
+
+export const updatePassword = async (req, res) => {
+    try {
+        // Validate the request body
+        const error = Joi.object({
+            current_password: Joi.string().required(),
+            new_password: Joi.string().required(),
+        }).validate(req.body).error;
+        if (error) return badRequest(res, error.message);
+        const response = await services.updatePassword({...req.body, ...req.user});
 
         // Return the response
         return res.status(200).json(response)

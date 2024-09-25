@@ -15,8 +15,6 @@ export const loginService = ({email, password}) => new Promise(async (resolve, r
             raw: true
         });
 
-        console.log(user)
-
         // Check if the user exists and the password is valid
         const isPasswordValid = user && hashPassword.comparePassword(password, user.password);
         // If the password is valid, generate an access token
