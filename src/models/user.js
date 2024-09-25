@@ -34,7 +34,11 @@ module.exports = (sequelize, DataTypes) => {
             },
             password: {
                 type: DataTypes.STRING,
-                allowNull: false,
+                allowNull: true,
+            },
+            google_token: {
+                type: DataTypes.STRING,
+                allowNull: true,
             },
             status: {
                 type: DataTypes.ENUM("active", "inactive"),

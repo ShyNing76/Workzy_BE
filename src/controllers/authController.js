@@ -2,6 +2,7 @@ import * as services from "../services";
 import {email, name, password} from "../helper/joi_schema";
 import Joi from "joi";
 import {badRequest} from "../middlewares/handle_error";
+import passport from "passport";
 
 
 export const loginController = async (req, res) => {
@@ -35,12 +36,15 @@ export const registerController = async (req, res) => {
         const response = await services.registerService(req.body);
 
         return res.status(200).json(response);
-        // {
-        //     err: "1",
-        //     message: "User registered successfully!"
-        //     accessToken: "Bearer " + accessToken
-        // }
     } catch (error) {
         return res.status(500).json({error: error.message})
+    }
+}
+
+export const loginGoogle = async (profile) => {
+    try {
+        return await services.loginGoogleService(profile);
+    } catch (error) {
+        return {err: 1, message: error.message}
     }
 }
