@@ -2,6 +2,8 @@ import db from '../models'
 import jwt from 'jsonwebtoken';
 import * as hashPassword from '../utils/hashPassword';
 import {v4} from "uuid";
+import {resolve} from "@babel/core/lib/vendor/import-meta-resolve";
+import {reject} from "bcrypt/promises";
 
 export const loginService = ({email, password}) => new Promise(async (resolve, reject) => {
     try {
@@ -87,4 +89,87 @@ export const registerService = ({email, password, name}) => new Promise(async (r
         t.rollback();
         reject(error)
     }
+});
+
+export const loginGoogleService = (profile) => new Promise(async (resolve, reject) => {
+    const t = await db.sequelize.transaction();
+    try {
+        const user = await db.User.findOrCreate({
+            where: {
+                email: profile.emails[0].value
+            },
+            defaults: {
+                user_id: v4(),
+                email: profile.emails[0].value,
+                password: hashPassword.hashPassword(profile.id),
+                name: profile.displayName,
+                role_id: 4,
+                google_token: profile.token
+            },
+            transaction: t
+        });
+
+        if (user[1]) {
+            await db.Customer.create({
+                customer_id: v4(),
+                user_id: user[0].user_id,
+                phone: "",
+            }, {transaction: t})
+        }else{
+            await db.User.update({
+                google_token: profile.token
+            },{
+                where: {
+                    email: profile.emails[0].value
+                },
+                transaction: t
+            })
+        }
+
+        t.commit();
+
+        const accessToken = jwt.sign({
+            email: user[0].email,
+            user_id: user[0].user_id
+        }, process.env.JWT_SECRET, {
+            expiresIn: '1h'
+        });
+
+
+        resolve({
+            err: 0,
+            message: 'Login successful',
+            accessToken: 'Bearer ' + accessToken
+        })
+    } catch (error) {
+        reject(error)
+    }
 })
+
+export const loginSuccessService = (email, token) => new Promise(async (resolve, reject) => {
+    try {
+        const user = await db.User.findOne({
+            where: {
+                email,
+                google_token: token
+            },
+            raw: true
+        });
+
+        const accessToken = jwt.sign({
+            user_id: user.user_id,
+            email: user.email
+        }, process.env.JWT_SECRET, {
+            expiresIn: '1h'
+        });
+
+        resolve({
+            err: 1,
+            message: 'Login successful',
+            accessToken: 'Bearer ' + accessToken
+        })
+    } catch (error) {
+        reject(error)
+    }
+})
+

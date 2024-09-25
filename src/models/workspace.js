@@ -22,6 +22,9 @@ module.exports = (sequelize, DataTypes) => {
             Workspace.belongsTo(models.WorkspaceType, {
                 foreignKey: "workspace_type_id",
             });
+            Workspace.hasMany(models.WorkspaceImage, {
+                foreignKey: "workspace_id",
+            });
         }
     }
 
@@ -44,11 +47,15 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING(200),
                 allowNull: false,
             },
-            workspace_image: {
-                type: DataTypes.STRING(255),
+            price_per_hour: {
+                type: DataTypes.DECIMAL(10, 2),
                 allowNull: false,
             },
-            price_per_hour: {
+            price_per_day: {
+                type: DataTypes.DECIMAL(10, 2),
+                allowNull: false,
+            },
+            price_per_month:{
                 type: DataTypes.DECIMAL(10, 2),
                 allowNull: false,
             },

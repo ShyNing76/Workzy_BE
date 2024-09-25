@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 
 require('dotenv').config();
+require('./config/passport');
 // require('./config/connection');
 
 const app = express();

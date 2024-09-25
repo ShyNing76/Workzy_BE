@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
             Building.hasOne(models.Staff, {foreignKey: "building_id"});
             Building.hasMany(models.Workspace, {foreignKey: "building_id"});
             Building.belongsTo(models.Manager, {foreignKey: "manager_id"});
+            Building.hasMany(models.BuildingImage, {foreignKey: "building_id"});
         }
     }
 
@@ -29,10 +30,6 @@ module.exports = (sequelize, DataTypes) => {
             building_name: {
                 type: DataTypes.STRING(200),
                 allowNull: false,
-            },
-            image: {
-                type: DataTypes.STRING(255),
-                allowNull: true,
             },
             location: {
                 type: DataTypes.STRING(200),
