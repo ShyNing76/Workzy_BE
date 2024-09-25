@@ -1,5 +1,6 @@
 import db from '../models'
 import jwt from 'jsonwebtoken';
+import moment from "moment";
 
 export const getProfile = (user) => new Promise(async (resolve, reject) => {
         try {
@@ -19,6 +20,8 @@ export const getProfile = (user) => new Promise(async (resolve, reject) => {
                 raw: true,
                 nest: true
             });
+
+            customer.Customer.date_of_birth = moment(customer.Customer.date_of_birth).format('MM/DD/YYYY');
 
             let isCustomerExist = !!customer;
 
