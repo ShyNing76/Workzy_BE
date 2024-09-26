@@ -2,7 +2,7 @@ import Joi from "joi";
 
 export const email = Joi.string().pattern(new RegExp('gmail.com$')).required();
 
-export const password = Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
+export const password = Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')).required()
 
 export const name = Joi.string().required()
 

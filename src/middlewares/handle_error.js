@@ -7,7 +7,7 @@ export const notFound = (req, res) => {
 
 export const badRequest = (res, message) => {
     const error = createError.BadRequest(message);
-    return res.status(error.status).json({err: error.status, message: error.message});
+    return res.status(error.status).json({err: error.status, message: error.message.toString().replaceAll("\"", "")});
 }
 
 export const notAuthorized = (message, res, isExpired) => {

@@ -1,7 +1,9 @@
 'use strict';
 
+/** @type {function(*, *): *} */
+const hashSync = require('bcrypt').hashSync;
 const {v4} = require("uuid");
-/** @type {import('sequelize-cli').Migration} */
+
 module.exports = {
     async up(queryInterface, Sequelize) {
         /**
@@ -39,7 +41,16 @@ module.exports = {
             updated_at: new Date()
         }], {});
 
-
+        await queryInterface.bulkInsert('User', [{
+            user_id: v4(),
+            role_id: 1,
+            name: 'Admin',
+            email: 'admin@gmail.com',
+            password: hashSync('admin', process.env.SALT_ROUNDS || 10),
+            status: 'active',
+            created_at: new Date(),
+            updated_at: new Date()
+        }]);
 
     },
 

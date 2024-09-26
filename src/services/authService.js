@@ -20,7 +20,8 @@ export const loginService = ({email, password}) => new Promise(async (resolve, r
         // If the password is valid, generate an access token
         const accessToken = isPasswordValid ? jwt.sign({
             user_id: user.user_id,
-            email: user.email
+            email: user.email,
+            role_id: user.role_id
         }, process.env.JWT_SECRET, {
             expiresIn: '1h'
         }) : null;
@@ -64,7 +65,8 @@ export const registerService = ({email, password, name}) => new Promise(async (r
             }, {transaction: t});
             const accessToken = jwt.sign({
                 email: user.email,
-                user_id: user.user_id
+                user_id: user.user_id,
+                role_id: user.role_id
             }, process.env.JWT_SECRET, {
                 expiresIn: '1h'
             });
@@ -135,7 +137,7 @@ export const loginGoogleService = (profile) => new Promise(async (resolve, rejec
 
 
         resolve({
-            err: 0,
+            err: 1,
             message: 'Login successful',
             accessToken: 'Bearer ' + accessToken
         })
