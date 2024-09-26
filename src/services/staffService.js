@@ -16,7 +16,7 @@ export const createStaff = (data) => new Promise(async (resolve, reject) => {
             message: "Email is already used"
         });
 
-        const isPhoneDuplicated = await db.Staff.findOne({
+        const isPhoneDuplicated = await db.User.findOne({
             where: {
                 phone: data.phone,
             }
@@ -28,21 +28,22 @@ export const createStaff = (data) => new Promise(async (resolve, reject) => {
         });
 
         const staff = await db.User.create({
-                user_id: v4(),
-                name: data.name,
-                email: data.email,
-                password: data.password,
-                role_id: 3,
-                Staff: {
-                    ...data,
-                }
-            },
-            {
-                include: db.Staff
-            }, 
-            {
-                raw: true, nest: true
-            } 
+            user_id: v4(),
+            name: data.name,
+            email: data.email,
+            password: data.password,
+            role_id: 3,
+            Staff: {
+                ...data
+            }
+        } ,
+        {
+            include: db.Staff,
+        },
+        {
+            raw: true,
+            nest: true
+        }
         );
 
         resolve({
@@ -53,14 +54,9 @@ export const createStaff = (data) => new Promise(async (resolve, reject) => {
                 email: staff.email,
                 name: staff.name,
                 role_id: staff.role_id,
-                status: staff.status,
-                Staff: {
-                    manager_id: staff.Staff.manager_id,
-                    user_id: staff.Staff.user_id,
-                    phone: staff.Staff.phone,
-                    gender: staff.Staff.gender,
-                    date_of_birth: moment(staff.Staff.date_of_birth).format("MM/DD/YYYY"),
-                }
+                phone: staff.Staff.phone,
+                gender: staff.Staff.gender,
+                date_of_birth: moment(staff.Staff.date_of_birth).format("MM/DD/YYYY"),
             }
         });
     } catch (error) {
