@@ -1,5 +1,5 @@
 "use strict";
-const { Model } = require("sequelize");
+const {Model} = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
     class User extends Model {
@@ -11,48 +11,47 @@ module.exports = (sequelize, DataTypes) => {
             User.belongsTo(models.Role, {foreignKey: "role_id"});
         }
     }
-  }
 
-  User.init(
-    {
-      user_id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        primaryKey: true,
-      },
-      role_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-      name: {
-        type: DataTypes.STRING(255),
-        allowNull: true,
-      },
-      email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      password: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      google_token: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      status: {
-        type: DataTypes.ENUM("active", "inactive"),
-        defaultValue: "active",
-      },
-    },
-    {
-      sequelize,
-      modelName: "User",
-      tableName: "User",
-      timestamps: true,
-      underscored: true,
-    }
-  );
+    User.init(
+        {
+            user_id: {
+                type: DataTypes.UUID,
+                defaultValue: DataTypes.UUIDV4,
+                primaryKey: true,
+            },
+            role_id: {
+                type: DataTypes.INTEGER,
+                allowNull: false,
+            },
+            name: {
+                type: DataTypes.STRING(255),
+                allowNull: true,
+            },
+            email: {
+                type: DataTypes.STRING,
+                allowNull: false,
+            },
+            password: {
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
+            google_token: {
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
+            status: {
+                type: DataTypes.ENUM("active", "inactive"),
+                defaultValue: "active",
+            },
+        },
+        {
+            sequelize,
+            modelName: "User",
+            tableName: "User",
+            timestamps: true,
+            underscored: true,
+        }
+    );
 
-  return User;
+    return User;
 };
