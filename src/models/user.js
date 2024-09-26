@@ -35,6 +35,18 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: true,
             },
+            phone: {
+                type: DataTypes.STRING(15),
+                allowNull: true,
+            },
+            gender: {
+                type: DataTypes.ENUM("Male", "Female", "Others"),
+                defaultValue: "Male",
+            },
+            date_of_birth: {
+                type: DataTypes.DATE,
+                defaultValue: null,
+            },
             google_token: {
                 type: DataTypes.STRING,
                 allowNull: true,

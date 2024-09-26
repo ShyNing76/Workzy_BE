@@ -33,19 +33,6 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.UUID,
                 allowNull: false,
             },
-            phone: {
-                type: DataTypes.STRING(15),
-                allowNull: true,
-            },
-            gender: {
-                type: DataTypes.ENUM("Male", "Female", "Other"),
-                allowNull: true,
-                defaultValue: "Male",
-            },
-            date_of_birth: {
-                type: DataTypes.DATE,
-                allowNull: true,
-            },
             point: {
                 type: DataTypes.INTEGER,
                 allowNull: true,
