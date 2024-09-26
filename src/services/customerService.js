@@ -107,13 +107,12 @@ export const updatePassword = (updateFields) => new Promise(async (resolve, reje
 
 export const updatePhone = (updateFields) => new Promise(async (resolve, reject) => {
     try {
-        const isPhoneDuplicated = db.Customer.findOne({
+        const isPhoneDuplicated = await db.Customer.findOne({
             where: {
                 phone: updateFields.phone,
             }
         });
         let check = !!isPhoneDuplicated;
-
         if (check) resolve({
             err: 0,
             message: "Phone is already used"
@@ -144,13 +143,14 @@ export const updatePhone = (updateFields) => new Promise(async (resolve, reject)
     }
 })
 
-export const updateEmail = (updateFields) => new Promise(async (resolve, reject) => {
+export const updateEmail = (newEmail, userId) => new Promise(async (resolve, reject) => {
     try {
-        const isEmailDuplicated = db.User.findOne({
+        const isEmailDuplicated = await db.User.findOne({
             where: {
-                email: updateFields.email,
+                email: newEmail,
             }
         });
+        console.log(!!isEmailDuplicated);
         let check = !!isEmailDuplicated;
 
         if (check) resolve({
@@ -160,7 +160,7 @@ export const updateEmail = (updateFields) => new Promise(async (resolve, reject)
 
         const user = await db.User.findOne({
             where: {
-                user_id: updateFields.user_id
+                user_id: userId
             }
         });
 
@@ -171,7 +171,7 @@ export const updateEmail = (updateFields) => new Promise(async (resolve, reject)
             })
         }
 
-        user.email = updateFields.email;
+        user.email = newEmail;
         await user.save();
 
         resolve({

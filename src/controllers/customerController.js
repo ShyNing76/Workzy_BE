@@ -56,7 +56,7 @@ export const updatePhone = async (req, res) => {
             phone,
         }).validate(req.body).error;
         if (error) return badRequest(res, error.message);
-        const response = await services.updatePassword({...req.body, ...req.user});
+        const response = await services.updatePhone({...req.body, ...req.user});
 
         // Return the response
         return res.status(200).json(response)
@@ -72,7 +72,7 @@ export const updateEmail = async (req, res) => {
             email,
         }).validate(req.body).error;
         if (error) return badRequest(res, error.message);
-        const response = await services.updateEmail({...req.body, ...req.user});
+        const response = await services.updateEmail(req.body.email, req.user.user_id);
 
         // Return the response
         return res.status(200).json(response)
