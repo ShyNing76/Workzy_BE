@@ -11,6 +11,14 @@ function initWebRoutes(app) {
         // #swagger.tags = ['Customer']
     );
 
+    app.use('/api/v1/workspace', require('./workspace')
+        // #swagger.tags = ['Workspace']
+    );
+
+    app.use('/api/v1/manager', require('./manager')
+        // #swagger.tags = ['Manager']
+    );
+
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(require('../config/swagger-output.json')));
     // Import Swagger UI
     app.use(notFound);
