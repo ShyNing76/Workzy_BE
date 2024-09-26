@@ -25,13 +25,17 @@ module.exports = (sequelize, DataTypes) => {
             },
             manager_id: {
                 type: DataTypes.UUID,
-                allowNull: false,
+                allowNull: true,
             },
             building_name: {
                 type: DataTypes.STRING(200),
                 allowNull: false,
             },
             location: {
+                type: DataTypes.ENUM("Hanoi", "HCM"),
+                defaultValue: "Hanoi",
+            },
+            address: {
                 type: DataTypes.STRING(200),
                 defaultValue: null,
             },

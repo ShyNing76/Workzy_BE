@@ -40,13 +40,12 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: true,
             },
             gender: {
-                type: DataTypes.ENUM("Male", "Female", "Other"),
-                allowNull: true,
+                type: DataTypes.ENUM("Male", "Female", "Others"),
                 defaultValue: "Male",
             },
             date_of_birth: {
                 type: DataTypes.DATE,
-                allowNull: true,
+                defaultValue: null,
             },
             google_token: {
                 type: DataTypes.STRING,

@@ -76,7 +76,7 @@ export const getAllStaff = ({page, limit, order, name, ...query}) => new Promise
                 name: {
                     [Op.like] : name,
                 },
-                role_id: 2
+                role_id: 3
             },
             attributes: {
                 exclude: ["building_id","createdAt", "updatedAt"]
@@ -106,7 +106,7 @@ export const getAllStaff = ({page, limit, order, name, ...query}) => new Promise
 
         let count = 0;
         staffs.forEach(staff => {
-            staff.Staff.date_of_birth = moment(staff.Staff.date_of_birth).format("MM/DD/YYYY");
+            staff.date_of_birth = moment(staff.date_of_birth).format("MM/DD/YYYY");
             count++;
         });
 
@@ -153,9 +153,36 @@ export const getStaffByIdService = (id) => new Promise(async (resolve, reject) =
     }
 })
 
-export const updateStaff = (id, data) => new Promise((resolve, reject) => {
+// export const updateStaff = (id, data) => new Promise((resolve, reject) => {
+//     try {
+//         const isExist
+//     } catch (error) {
+//         reject(error)
+//     }
+// })
+
+export const deleteStaff = ({ids}) => new Promise(async (resolve, reject) => {
     try {
-        // const isExist
+
+        const isExist = await db.User.findOne({
+            where: {user_id: ids}
+        })
+        let check = !!isExist;
+        if(!check) resolve({
+            err: 0,
+            message: "User not found"
+        })
+
+        const staff = await db.User.destroy({
+            where : {user_id : ids}
+        });
+
+        await staff.Staff.destroy();
+
+        resolve({
+            err: staff > 0 ? 1 : 0,
+            message: staff > 0 ? `${staff} deleted` : "Cannot delete staff"
+        })
     } catch (error) {
         reject(error)
     }
