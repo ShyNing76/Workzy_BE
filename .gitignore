@@ -7,3 +7,5 @@
 .package-lock.json
 ngrok.exe
 /src/test.js
+.dockerignore
+Dockerfile
