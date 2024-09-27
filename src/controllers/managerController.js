@@ -30,10 +30,6 @@ export const getManagerByIdController = async (req, res) => {
 
 export const getAllManagersController = async (req, res) => {
     try {
-        const error = Joi.object({
-            order: Joi.string().valid("email", "name", "role_id", "status"),
-        }).validate({order: req.query}).error;
-
         const response = await services.getAllManagersService(req.query);
         return res.status(200).json(response);
     } catch (error) {

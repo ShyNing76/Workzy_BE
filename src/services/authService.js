@@ -27,7 +27,7 @@ export const loginService = ({email, password}) => new Promise(async (resolve, r
         }) : null;
 
         resolve({
-            err: accessToken ? 1 : 0,
+            err: accessToken ? 0 : 1,
             message: accessToken ? 'Login successful' : 'Invalid email or password',
             accessToken: 'Bearer ' + accessToken
         })
@@ -80,7 +80,7 @@ export const registerService = ({email, password, name}) => new Promise(async (r
             t.commit();
 
             resolve({
-                err: 1,
+                err: 0,
                 message: 'User registered successfully!',
                 accessToken: 'Bearer ' + accessToken,
             })
@@ -137,7 +137,7 @@ export const loginGoogleService = (profile) => new Promise(async (resolve, rejec
 
 
         resolve({
-            err: 1,
+            err: 0,
             message: 'Login successful',
             accessToken: 'Bearer ' + accessToken
         })
@@ -145,31 +145,3 @@ export const loginGoogleService = (profile) => new Promise(async (resolve, rejec
         reject(error)
     }
 })
-
-export const loginSuccessService = (email, token) => new Promise(async (resolve, reject) => {
-    try {
-        const user = await db.User.findOne({
-            where: {
-                email,
-                google_token: token
-            },
-            raw: true
-        });
-
-        const accessToken = jwt.sign({
-            user_id: user.user_id,
-            email: user.email
-        }, process.env.JWT_SECRET, {
-            expiresIn: '1h'
-        });
-
-        resolve({
-            err: 1,
-            message: 'Login successful',
-            accessToken: 'Bearer ' + accessToken
-        })
-    } catch (error) {
-        reject(error)
-    }
-})
-

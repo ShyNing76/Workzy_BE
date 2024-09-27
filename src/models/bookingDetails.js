@@ -2,25 +2,25 @@
 const {Model} = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-    class BookingServiceDetails extends Model {
+    class BookingDetails extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            BookingServiceDetails.hasMany(models.Booking, {
+            BookingDetails.hasMany(models.Booking, {
                 foreignKey: "booking_id",
             });
-            BookingServiceDetails.hasMany(models.Service, {
-                foreignKey: "service_id",
+            BookingDetails.hasMany(models.Workspace, {
+                foreignKey: "workspace_id",
             });
         }
     }
 
-    BookingServiceDetails.init(
+    BookingDetails.init(
         {
-            booking_service_id: {
+            booking_details_id: {
                 type: DataTypes.UUID,
                 defaultValue: DataTypes.UUIDV4,
                 primaryKey: true,
@@ -29,23 +29,31 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.UUID,
                 allowNull: false,
             },
-            service_id: {
+            workspace_id: {
                 type: DataTypes.UUID,
                 allowNull: false,
             },
-            price: {
+            start_time_date: {
+                type: DataTypes.DATE,
+                allowNull: false,
+            },
+            end_time_date: {
+                type: DataTypes.DATE,
+                allowNull: false,
+            },
+            workspace_price: {
                 type: DataTypes.DECIMAL(10, 2),
                 allowNull: false,
             },
         },
         {
             sequelize,
-            modelName: "BookingServiceDetails",
-            tableName: "BookingServiceDetails",
+            modelName: "BookingDetails",
+            tableName: "BookingDetails",
             timestamps: true,
             underscored: true,
         }
     );
 
-    return BookingServiceDetails;
+    return BookingDetails;
 };

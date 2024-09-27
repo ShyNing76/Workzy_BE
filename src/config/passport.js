@@ -7,7 +7,10 @@ passport.use(new GoogleStrategy({
             clientID: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
             callbackURL: "/api/v1/auth/google/callback",
-            scope: ["profile", "email"],
+            scope: ["profile", "email",
+                'https://www.googleapis.com/auth/user.birthday.read',
+                'https://www.googleapis.com/auth/user.phonenumbers.read',
+            ],
         },
         async function (accessToken, refreshToken, profile, cb) {
             try {

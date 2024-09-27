@@ -2,64 +2,62 @@
 const {Model} = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-    class Amenity extends Model {
+    class BookingAmenities extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            Amenity.belongsToMany(models.Workspace, {
-                through: "AmenitiesWorkspace",
-                foreignKey: "amenity_id",
+            BookingAmenities.hasMany(models.Booking, {
+                foreignKey: "booking_id",
             });
-            Amenity.belongsToMany(models.Booking, {
-                through: "BookingAmenities",
+            BookingAmenities.hasMany(models.Amenity, {
                 foreignKey: "amenity_id",
             });
         }
     }
 
-    Amenity.init(
+    BookingAmenities.init(
         {
-            amenity_id: {
+            booking_amenities_id: {
                 type: DataTypes.UUID,
                 defaultValue: DataTypes.UUIDV4,
                 primaryKey: true,
             },
-            amenity_name: {
-                type: DataTypes.STRING(200),
+            booking_id: {
+                type: DataTypes.UUID,
                 allowNull: false,
             },
-            image: {
-                type: DataTypes.STRING(255),
-                allowNull: true,
+            amenity_id: {
+                type: DataTypes.UUID,
+                allowNull: false,
             },
-            original_price: {
+            quantity: {
+                type: DataTypes.INTEGER,
+                defaultValue: 1,
+            },
+            service_price: {
                 type: DataTypes.DECIMAL(10, 2),
                 defaultValue: 0.0,
             },
-            depreciation_price: {
+            broken_price: {
                 type: DataTypes.DECIMAL(10, 2),
                 defaultValue: 0.0,
             },
-            type: {
-                type: DataTypes.ENUM("amenity", "service"),
-                defaultValue: "amenity",
-            },
-            status: {
-                type: DataTypes.ENUM("active", "inactive"),
-                defaultValue: "inactive",
-            },
+            quantity_broken: {
+                type: DataTypes.INTEGER,
+                defaultValue: 0,
+            }
         },
         {
             sequelize,
-            modelName: "Amenity",
-            tableName: "Amenity",
+            modelName: "BookingAmenities",
+            tableName: "BookingAmenities",
             timestamps: true,
             underscored: true,
         }
     );
 
-    return Amenity;
+    return BookingAmenities;
 };

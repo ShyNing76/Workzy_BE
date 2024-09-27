@@ -47,6 +47,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.DATE,
                 defaultValue: null,
             },
+            image: {
+                type: DataTypes.STRING(255),
+                allowNull: true,
+            },
             google_token: {
                 type: DataTypes.STRING,
                 allowNull: true,

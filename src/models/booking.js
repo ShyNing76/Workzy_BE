@@ -10,15 +10,18 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             Booking.belongsTo(models.Customer, {foreignKey: "customer_id"});
-            Booking.belongsToMany(models.Service, {
-                through: "BookingServiceDetails",
+            Booking.belongsToMany(models.Amenity, {
+                through: "BookingAmenities",
+                foreignKey: "booking_id",
+            });
+            Booking.belongsToMany(models.Workspace, {
+                through: "BookingDetails",
                 foreignKey: "booking_id",
             });
             Booking.belongsTo(models.BookingType, {foreignKey: "booking_type_id"});
             Booking.hasOne(models.Review, {foreignKey: "booking_id"});
             Booking.hasMany(models.BookingStatus, {foreignKey: "booking_id"});
             Booking.hasMany(models.Payment, {foreignKey: "booking_id"});
-            Booking.belongsTo(models.Workspace, {foreignKey: "workspace_id"});
         }
     }
 
@@ -33,24 +36,8 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.UUID,
                 allowNull: false,
             },
-            workspace_id: {
-                type: DataTypes.UUID,
-                allowNull: false,
-            },
             booking_type_id: {
                 type: DataTypes.INTEGER,
-                allowNull: false,
-            },
-            start_time_date: {
-                type: DataTypes.DATE,
-                allowNull: false,
-            },
-            end_time_date: {
-                type: DataTypes.DATE,
-                allowNull: false,
-            },
-            workspace_price: {
-                type: DataTypes.DECIMAL(10, 2),
                 allowNull: false,
             },
             service_price: {
