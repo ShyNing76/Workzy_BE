@@ -9,10 +9,11 @@ export const createBuildingController = async (req, res) => {
             building_name: name,
             location: location,
             address: address,
-            description: Joi.string().required(),
-            rating: Joi.number().required(),
-            status: Joi.string().pattern(new RegExp('active|inactive')).required()
-        }).validate(req.body).error;
+        }).validate({
+            building_name: req.body.building_name,
+            location: req.body.location,
+            address: req.body.address
+        }).error;
         if (error) return badRequest(res, error);
 
         const response = await services.createBuildingService(req.body);

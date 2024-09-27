@@ -8,16 +8,15 @@ export const createBuildingService = (data) => new Promise(async (resolve, rejec
                 building_name: data.building_name
             },
             defaults: {
+                building_name: data.building_name,
                 location: data.location,
                 address: data.address,
-                description: data.description,
-                rating: data.rating,
-                status: data.status
+                ...data
             }
         }).then(([building, created]) => {
             if (!created) {
                 return reject({
-                    err: 0,
+                    err: 1,
                     message: "Building name already exists"
                 });
             }
@@ -25,7 +24,7 @@ export const createBuildingService = (data) => new Promise(async (resolve, rejec
         })
 
         resolve({
-            err: 1,
+            err: 0,
             message: "Building created successfully",
             data: {
                 building_id: building.building_id,
