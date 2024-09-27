@@ -166,47 +166,6 @@ router.put("/:id", controllers.updateBuildingController
      */
 );
 
-// Assign manager to building
-router.put("/:id/manager", controllers.assignManagerController
-    /*
-        #swagger.description = 'Endpoint to assign a manager to a building.'
-        #swagger.summary = 'Assign a manager to a building.'
-        #swagger.parameters['id'] = { description: 'Building ID.' }
-        #swagger.requestBody = {
-            required: true,
-            content: {
-                "application/json": {
-                    schema: {
-                        type: 'object',
-                        properties: {
-                            manager_id: {
-                                type: 'integer',
-                                example: 1
-                            }
-                        },
-                        required: ['manager_id']
-                    }
-                }
-            }
-        }
-        #swagger.responses[200] = {
-            description: 'Manager assigned successfully.'
-        }
-        #swagger.responses[400] = {
-            description: 'Invalid data.'
-        }
-        #swagger.responses[404] = {
-            description: 'Building not found.'
-        }
-        #swagger.responses[500] = {
-            description: 'Internal server error.'
-        }
-        #swagger.security = [{
-            "apiKeyAuth": []
-        }]
-     */
-);
-
 router.put("/:id/status", controllers.updateBuildingStatusController
     /*
         #swagger.description = 'Endpoint to update status of a building.'
@@ -246,6 +205,47 @@ router.put("/:id/status", controllers.updateBuildingStatusController
         }]
      */
 );
+
+router.put("/:id/manager", verify_admin, controllers.assignManagerController
+    /*
+        #swagger.description = 'Endpoint to assign a manager to a building.'
+        #swagger.summary = 'Assign a manager to a building.'
+        #swagger.parameters['id'] = { description: 'Building ID.' }
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            manager_id: {
+                                type: 'integer',
+                                example: 1
+                            }
+                        },
+                        required: ['manager_id']
+                    }
+                }
+            }
+        }
+        #swagger.responses[200] = {
+            description: 'Manager assigned successfully.'
+        }
+        #swagger.responses[400] = {
+            description: 'Invalid data.'
+        }
+        #swagger.responses[404] = {
+            description: 'Building not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
 
 router.delete("/:id", verify_admin, controllers.deleteBuildingController
     /*
