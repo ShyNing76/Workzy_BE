@@ -88,7 +88,7 @@ router.put('/phone', verify_token, controller.updatePhone
                     properties: {
                         phone: {
                             type: 'string',
-                            example: '1234567890'
+                            example: '0987654321'
                         }
                     },
                     required: ['phone']
@@ -103,7 +103,7 @@ router.put('/phone', verify_token, controller.updatePhone
     }] */
 );
 
-router.put('/email', verify_token, controller.updateEmail
+router.put('/email', verify_token, controller.updateEmail 
     /*
     #swagger.requestBody = {
         required: true,
@@ -126,7 +126,7 @@ router.put('/email', verify_token, controller.updateEmail
     #swagger.summary = 'Update the current email of the customer'
     #swagger.security = [{
             "apiKeyAuth": []
-     */
+    }] */
 );
 
 

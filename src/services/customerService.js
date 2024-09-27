@@ -121,7 +121,7 @@ export const updatePassword = (updateFields) => new Promise(async (resolve, reje
 
 export const updatePhone = (updateFields) => new Promise(async (resolve, reject) => {
     try {
-        const isPhoneDuplicated = await db.Customer.findOne({
+        const isPhoneDuplicated = await db.User.findOne({
             where: {
                 phone: updateFields.phone,
             }
@@ -132,7 +132,7 @@ export const updatePhone = (updateFields) => new Promise(async (resolve, reject)
             message: "Phone is already used"
         });
 
-        const customer = await db.Customer.findOne({
+        const customer = await db.User.findOne({
             where: {
                 user_id: updateFields.user_id
             }
@@ -199,7 +199,7 @@ export const updateEmail = (newEmail, userId) => new Promise(async (resolve, rej
 
 export const updateImage = (updateFields) => new Promise(async (resolve, reject) => {
     try {
-        const user = await db.Customer.findOne({
+        const user = await db.User.findOne({
             where: {
                 user_id: updateFields.user_id
             }
