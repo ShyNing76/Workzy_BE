@@ -77,9 +77,55 @@ router.put('/password', verify_token, controller.updatePassword
     }] */
 );
 
-router.put('/phone', verify_token, controller.updatePhone);
+router.put('/phone', verify_token, controller.updatePhone     /*
+    #swagger.requestBody = {
+        required: true,
+        content: {
+            "application/json": {
+                schema: {
+                    type: 'object',
+                    properties: {
+                        phone: {
+                            type: 'string',
+                            example: '0987654321'
+                        }
+                    },
+                    required: ['phone']
+                }
+            }
+        }
+    }
+    #swagger.description = 'Update the current customer phone.'
+    #swagger.summary = 'Update the current phone of the customer'
+    #swagger.security = [{
+            "apiKeyAuth": []
+    }] */
+);
 
-router.put('/email', verify_token, controller.updateEmail);
+router.put('/email', verify_token, controller.updateEmail /*
+    #swagger.requestBody = {
+        required: true,
+        content: {
+            "application/json": {
+                schema: {
+                    type: 'object',
+                    properties: {
+                        email: {
+                            type: 'string',
+                            example: 'admin@gmail'
+                        }
+                    },
+                    required: ['email']
+                }
+            }
+        }
+    }
+    #swagger.description = 'Update the current customer email.'
+    #swagger.summary = 'Update the current email of the customer'
+    #swagger.security = [{
+            "apiKeyAuth": []
+    }] */
+);
 
 
 module.exports = router;
