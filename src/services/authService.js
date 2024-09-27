@@ -74,7 +74,7 @@ export const registerService = ({email, password, name}) => new Promise(async (r
             await db.Customer.create({
                 customer_id: v4(),
                 user_id: user.user_id,
-                phone: "",
+                point: 0,
             }, {transaction: t})
 
             t.commit();

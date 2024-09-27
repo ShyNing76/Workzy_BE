@@ -16,6 +16,10 @@ export const title = Joi.string().required()
 
 export const price = Joi.number().min(0).required()
 
+export const location = Joi.string().pattern(new RegExp('Hanoi|HCM')).required()
+
+export const address = Joi.string().required()
+
 export const available = Joi.number().min(0).required()
 
 export const categoryId = Joi.string().alphanum().required()

@@ -5,26 +5,31 @@ import {hashPassword} from "../utils/hashPassword";
 
 export const createManagerService = (data) => new Promise(async (resolve, reject) => {
     try {
-        const checkDuplicateEmail = await db.User.findOne({
+        const isDuplicate = await db.User.findOne({
             where: {
-                email: data.email
+                [db.Sequelize.Op.or]: [
+                    {
+                        email: data.email || ""
+                    },
+                    {
+                        phone: data.phone || ""
+                    }
+                ]
             }
         });
 
-        if (checkDuplicateEmail) {
+        if (isDuplicate && isDuplicate.user_id) {
             return reject({
                 err: 0,
-                message: "Email already exists"
+                message: "Email or phone are already exists"
             });
         }
         const user = await db.User.create({
                 user_id: v4(),
-                email: data.email,
-                password: hashPassword(data.password),
-                name: data.name,
+                ...data,
                 role_id: 2, // 2 is the role_id for manager
                 Manager: {
-                    ...data
+                    manager_id: v4(),
                 }
             },
             {
@@ -40,18 +45,7 @@ export const createManagerService = (data) => new Promise(async (resolve, reject
             err: 0,
             message: "Manager created successfully",
             data: {
-                user_id: user.user_id,
-                email: user.email,
-                name: user.name,
-                role_id: user.role_id,
-                status: user.status,
-                Manager: {
-                    manager_id: user.Manager.manager_id,
-                    user_id: user.Manager.user_id,
-                    phone: user.Manager.phone,
-                    gender: user.Manager.gender,
-                    date_of_birth: moment(user.Manager.date_of_birth).format("MM/DD/YYYY"),
-                }
+                ...user
             }
         });
 
@@ -79,9 +73,11 @@ export const getManagerByIdService = (id) => new Promise(async (resolve, reject)
             nest: true
         });
 
-        manager.Manager.date_of_birth = moment(manager.Manager.date_of_birth).format("MM/DD/YYYY");
 
         let isManagerExist = !!manager;
+        if (isManagerExist) {
+            manager.date_of_birth = moment(manager.date_of_birth).format("MM/DD/YYYY");
+        }
 
         resolve({
             err: isManagerExist ? 1 : 0,
@@ -129,7 +125,7 @@ export const getAllManagersService = ({page, limit, order, name, ...query}) => n
 
         let count = 0;
         managers.forEach(manager => {
-            manager.Manager.date_of_birth = moment(manager.Manager.date_of_birth).format("MM/DD/YYYY");
+            manager.date_of_birth = moment(manager.date_of_birth).format("MM/DD/YYYY");
             count++;
         });
 
@@ -150,9 +146,6 @@ export const updateManagerService = (id, data) => new Promise(async (resolve, re
             where: {
                 user_id: id
             },
-            include: {
-                model: db.Manager
-            }
         });
 
         if (!manager) {
@@ -162,31 +155,40 @@ export const updateManagerService = (id, data) => new Promise(async (resolve, re
             });
         }
 
-        const updatedManager = await manager.update({
-            email: data.email,
-            name: data.name
+        const isDuplicateEmail = await db.User.findOne({
+            where: {
+                [db.Sequelize.Op.or]: [
+                    {
+                        email: data.email
+                    },
+                    {
+                        phone: data.phone
+                    }
+                ]
+            }
         });
 
-        await manager.Manager.update({
-            phone: data.phone,
-            date_of_birth: data.date_of_birth,
+        if (isDuplicateEmail && isDuplicateEmail.user_id !== id) {
+            return reject({
+                err: 0,
+                message: "Email or phone already exists"
+            });
+        }
+
+        await manager.update({
+            ...manager,
+            ...data,
         });
 
         resolve({
             err: 1,
             message: "Manager updated successfully",
             data: {
-                user_id: updatedManager.user_id,
-                email: updatedManager.email,
-                name: updatedManager.name,
-                role_id: updatedManager.role_id,
-                status: updatedManager.status,
-                Manager: {
-                    manager_id: updatedManager.Manager.manager_id,
-                    user_id: updatedManager.Manager.user_id,
-                    phone: updatedManager.Manager.phone,
-                    date_of_birth: moment(updatedManager.Manager.date_of_birth).format("MM/DD/YYYY"),
-                }
+                user_id: manager.user_id,
+                email: manager.email,
+                name: manager.name,
+                phone: manager.phone,
+                date_of_birth: moment(manager.date_of_birth).format("MM/DD/YYYY"),
             }
         });
     } catch (error) {
