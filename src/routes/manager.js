@@ -1,7 +1,7 @@
 import express from "express";
 import * as controllers from "../controllers";
 import {getAllManagersController} from "../controllers";
-import {verify_admin, verify_token} from "../middlewares/verifyToken";
+import {verify_admin, verify_admin_or_manager, verify_token} from "../middlewares/verifyToken";
 
 const router = express.Router();
 
@@ -25,7 +25,7 @@ router.get("/", verify_token, verify_admin, controllers.getAllManagersController
      */
 );
 
-router.get("/:id", verify_token, verify_admin, controllers.getManagerByIdController
+router.get("/:id", verify_token, verify_admin_or_manager, controllers.getManagerByIdController
     /*
         #swagger.description = 'Get a manager by ID.'
         #swagger.summary = 'Get a manager by ID.'
@@ -64,6 +64,10 @@ router.post("/", verify_token, verify_admin, controllers.createManagerController
                                 type: 'string',
                                 example: 'password'
                             },
+                            phone: {
+                                type: 'string',
+                                example: '0997658634'
+                            },
                             name: {
                                 type: 'string',
                                 example: 'Manager'
@@ -89,7 +93,7 @@ router.post("/", verify_token, verify_admin, controllers.createManagerController
      */
 );
 
-router.put("/:id", verify_token, verify_admin, controllers.updateManagerController
+router.put("/:id", verify_token, verify_admin_or_manager, controllers.updateManagerController
     /*
         #swagger.description = 'Endpoint to update a manager.'
         #swagger.summary = 'Update a manager.'
@@ -101,13 +105,9 @@ router.put("/:id", verify_token, verify_admin, controllers.updateManagerControll
                     schema: {
                         type: 'object',
                         properties: {
-                            password: {
+                            email: {
                                 type: 'string',
-                                example: 'password'
-                            },
-                            name: {
-                                type: 'string',
-                                example: 'Manager'
+                                example: 'manager@gmail.com'
                             },
                             phone: {
                                 type: 'string',
@@ -116,6 +116,10 @@ router.put("/:id", verify_token, verify_admin, controllers.updateManagerControll
                             date_of_birth: {
                                 type: 'string',
                                 example: 'MM/DD/YYYY'
+                            },
+                            name: {
+                                type: 'string',
+                                example: 'Manager'
                             },
                             gender: {
                                 type: 'string',

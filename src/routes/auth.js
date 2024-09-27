@@ -81,9 +81,9 @@ router.get("/google/callback",
         const token = req.user?.token;
         const email = req.user?.emails[0].value;
         if (token && email)
-            res.status(200).json(req.user?.response);
+            res.redirect(`http://localhost:5173/api/v1/auth/google/callback?token=${req.user?.response.accessToken}`)
         else
-            res.status(500).json(req.user?.response);
+            res.redirect(`http://localhost:5173/login`)
     }
     /*
     #swagger.description = 'Redirect to the client login success page.'

@@ -32,6 +32,13 @@ export const verify_admin = (req, res, next) => {
     next();
 }
 
+export const verify_admin_or_manager = (req, res, next) => {
+    if (req.user.role_id !== 1 && req.user.role_id !== 2) { // Admin role_id is 1, Manager role_id is 2
+        return notAuthorized("Unauthorized", res, false);
+    }
+    next();
+}
+
 export const verify_manager = (req, res, next) => {
     if (req.user.role_id !== 2) { // Manager role_id is 2
         return notAuthorized("Unauthorized", res, false);

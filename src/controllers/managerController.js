@@ -1,5 +1,5 @@
 import Joi from "joi";
-import {email, password, name} from "../helper/joi_schema";
+import {email, password, name, phone} from "../helper/joi_schema";
 import {badRequest} from "../middlewares/handle_error";
 import * as services from "../services";
 
@@ -8,7 +8,8 @@ export const createManagerController = async (req, res) => {
         const error = Joi.object({
             email,
             password,
-        }).validate({email: req.body.email, password: req.body.password}).error;
+            phone
+        }).validate({email: req.body.email, password: req.body.password, phone: req.body.phone}).error;
         if (error) return badRequest(res, error.details[0].message);
 
         const response = await services.createManagerService(req.body);
@@ -42,6 +43,12 @@ export const getAllManagersController = async (req, res) => {
 
 export const updateManagerController = async (req, res) => {
     try {
+        const error = Joi.object({
+            email,
+            phone,
+        }).validate({email: req.body.email, phone: req.body.phone}).error;
+        if (error) return badRequest(res, error.details[0].message);
+
         const response = await services.updateManagerService(req.params.id, req.body);
         return res.status(200).json(response);
     } catch (error) {
