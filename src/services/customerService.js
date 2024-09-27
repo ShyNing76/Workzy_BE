@@ -2,6 +2,7 @@ import db from '../models'
 import jwt from 'jsonwebtoken';
 import moment from "moment";
 import * as hashPassword from '../utils/hashPassword';
+import {isDuplicate} from '../utils/checkDuplicate';
 
 
 export const getProfile = (user) => new Promise(async (resolve, reject) => {
@@ -29,7 +30,7 @@ export const getProfile = (user) => new Promise(async (resolve, reject) => {
             }
 
             resolve({
-                err: isCustomerExist ? 1 : 0,
+                err: isCustomerExist ? 0 : 1,
                 message: isCustomerExist ? 'Get profile successful' : 'Get profile failed',
                 data: isCustomerExist ? {
                     ...customer
@@ -42,15 +43,6 @@ export const getProfile = (user) => new Promise(async (resolve, reject) => {
     })
 ;
 
-const isDuplicate = async (model, field, value) => {
-    const isDuplicated = await model.findOne({
-        where: {
-            [field]: value
-        }
-    });
-    return !!isDuplicated;
-}
-
 export const updateProfile = (updateFields) => new Promise(async (resolve, reject) => {
     const t = await db.sequelize.transaction();
     try {
@@ -62,7 +54,7 @@ export const updateProfile = (updateFields) => new Promise(async (resolve, rejec
         });
         if (!user) {
             resolve({
-                err: 0,
+                err: 1,
                 message: 'User not found'
             })
         }
@@ -76,7 +68,7 @@ export const updateProfile = (updateFields) => new Promise(async (resolve, rejec
         await user.save({transaction: t});
         await t.commit();
         resolve({
-            err: 1,
+            err: 0,
             message: 'Update profile successful'
         })
     } catch (error) {
@@ -94,7 +86,7 @@ export const updatePassword = (updateFields) => new Promise(async (resolve, reje
 
         if (!user) {
             resolve({
-                err: 0,
+                err: 1,
                 message: 'User not found'
             })
         }
@@ -103,7 +95,7 @@ export const updatePassword = (updateFields) => new Promise(async (resolve, reje
 
         if (!isPasswordCorrect) {
             resolve({
-                err: 0,
+                err: 1,
                 message: 'Current password is incorrect'
             })
         }
@@ -112,7 +104,7 @@ export const updatePassword = (updateFields) => new Promise(async (resolve, reje
         await user.save();
 
         resolve({
-            err: 1,
+            err: 0,
             message: 'Update password successful'
         })
     } catch (error) {
@@ -122,14 +114,10 @@ export const updatePassword = (updateFields) => new Promise(async (resolve, reje
 
 export const updatePhone = (updateFields) => new Promise(async (resolve, reject) => {
     try {
-        const isPhoneDuplicated = await db.User.findOne({
-            where: {
-                phone: updateFields.phone,
-            }
-        });
-        let check = !!isPhoneDuplicated;
+        const isPhoneDuplicated = isDuplicate(db.User, 'phone', updateFields.phone);
+        let check = await isPhoneDuplicated;
         if (check) resolve({
-            err: 0,
+            err: 1,
             message: "Phone is already used"
         });
 
@@ -141,7 +129,7 @@ export const updatePhone = (updateFields) => new Promise(async (resolve, reject)
 
         if (!customer) {
             resolve({
-                err: 0,
+                err: 1,
                 message: 'User not found'
             })
         }
@@ -150,7 +138,7 @@ export const updatePhone = (updateFields) => new Promise(async (resolve, reject)
         await customer.save();
 
         resolve({
-            err: 1,
+            err: 0,
             message: 'Update phone successful'
         })
     } catch (error) {
@@ -160,16 +148,11 @@ export const updatePhone = (updateFields) => new Promise(async (resolve, reject)
 
 export const updateEmail = (newEmail, userId) => new Promise(async (resolve, reject) => {
     try {
-        const isEmailDuplicated = await db.User.findOne({
-            where: {
-                email: newEmail,
-            }
-        });
-        console.log(!!isEmailDuplicated);
-        let check = !!isEmailDuplicated;
+        const isEmailDuplicated = isDuplicate(db.User, 'email', newEmail);
+        let check = await isEmailDuplicated;
 
         if (check) resolve({
-            err: 0,
+            err: 1,
             message: "Email is already used"
         });
 
@@ -181,7 +164,7 @@ export const updateEmail = (newEmail, userId) => new Promise(async (resolve, rej
 
         if (!user) {
             resolve({
-                err: 0,
+                err: 1,
                 message: 'User not found'
             })
         }
@@ -190,7 +173,7 @@ export const updateEmail = (newEmail, userId) => new Promise(async (resolve, rej
         await user.save();
 
         resolve({
-            err: 1,
+            err: 0,
             message: 'Update email successful'
         })
     } catch (error) {
@@ -208,7 +191,7 @@ export const updateImage = (updateFields) => new Promise(async (resolve, reject)
 
         if (!user) {
             resolve({
-                err: 0,
+                err: 1,
                 message: 'User not found'
             })
         }
@@ -217,7 +200,7 @@ export const updateImage = (updateFields) => new Promise(async (resolve, reject)
         await user.save();
 
         resolve({
-            err: 1,
+            err: 0,
             message: 'Update image successful'
         })
     } catch (error) {

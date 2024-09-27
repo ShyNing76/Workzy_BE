@@ -20,32 +20,37 @@ export const createManagerService = (data) => new Promise(async (resolve, reject
 
         if (isDuplicate && isDuplicate.user_id) {
             return reject({
-                err: 0,
+                err: 1,
                 message: "Email or phone are already exists"
             });
         }
-        const user = await db.User.create({
+        const user = await db.User.create(
+            {
                 user_id: v4(),
                 ...data,
-                role_id: 2, // 2 is the role_id for manager
+                role_id: 2, // Assuming 2 is the role_id for manager
                 Manager: {
                     manager_id: v4(),
-                }
+                },
             },
             {
-                include: db.Manager
-            },
-            {
+                include: [{ model: db.Manager }], // Correct placement of include option
                 raw: true,
-                nest: true
+                nest: true,
             }
-        );
+        )
 
         resolve({
             err: 0,
             message: "Manager created successfully",
             data: {
-                ...user
+                user_id: user.user_id,
+                email: user.email,
+                name: user.name,
+                phone: user.phone,
+                date_of_birth: moment(user.date_of_birth).format("MM/DD/YYYY"),
+                role_id: user.role_id,
+                manager_id: user.Manager.manager_id
             }
         });
 
@@ -73,14 +78,13 @@ export const getManagerByIdService = (id) => new Promise(async (resolve, reject)
             nest: true
         });
 
-
         let isManagerExist = !!manager;
         if (isManagerExist) {
             manager.date_of_birth = moment(manager.date_of_birth).format("MM/DD/YYYY");
         }
 
         resolve({
-            err: isManagerExist ? 1 : 0,
+            err: isManagerExist ? 0 : 1,
             message: isManagerExist ? "Manager found" : "Manager not found",
             data: isManagerExist ? {
                 ...manager
@@ -123,6 +127,12 @@ export const getAllManagersService = ({page, limit, order, name, ...query}) => n
             nest: true
         });
 
+        if (!managers) {
+            return reject({
+                err: 1,
+                message: "No manager found"
+            });
+        }
         let count = 0;
         managers.forEach(manager => {
             manager.date_of_birth = moment(manager.date_of_birth).format("MM/DD/YYYY");
@@ -130,7 +140,7 @@ export const getAllManagersService = ({page, limit, order, name, ...query}) => n
         });
 
         resolve({
-            err: 1,
+            err: managers.length ? 0 : 1,
             message: managers.length ? "List of managers" : "No manager found",
             total: count,
             data: managers
@@ -150,7 +160,7 @@ export const updateManagerService = (id, data) => new Promise(async (resolve, re
 
         if (!manager) {
             return reject({
-                err: 0,
+                err: 1,
                 message: "Manager not found"
             });
         }
@@ -170,7 +180,7 @@ export const updateManagerService = (id, data) => new Promise(async (resolve, re
 
         if (isDuplicateEmail && isDuplicateEmail.user_id !== id) {
             return reject({
-                err: 0,
+                err: 1,
                 message: "Email or phone already exists"
             });
         }
@@ -181,7 +191,7 @@ export const updateManagerService = (id, data) => new Promise(async (resolve, re
         });
 
         resolve({
-            err: 1,
+            err: 0,
             message: "Manager updated successfully",
             data: {
                 user_id: manager.user_id,
@@ -209,7 +219,7 @@ export const deleteManagerService = (id) => new Promise(async (resolve, reject) 
 
         if (!manager) {
             return reject({
-                err: 0,
+                err: 1,
                 message: "Manager not found"
             });
         }
@@ -218,7 +228,7 @@ export const deleteManagerService = (id) => new Promise(async (resolve, reject) 
         await manager.destroy();
 
         resolve({
-            err: 1,
+            err: 0,
             message: "Manager deleted successfully"
         });
     } catch (error) {
