@@ -77,7 +77,8 @@ router.put('/password', verify_token, controller.updatePassword
     }] */
 );
 
-router.put('/phone', verify_token, controller.updatePhone     /*
+router.put('/phone', verify_token, controller.updatePhone
+    /*
     #swagger.requestBody = {
         required: true,
         content: {
@@ -95,14 +96,15 @@ router.put('/phone', verify_token, controller.updatePhone     /*
             }
         }
     }
-    #swagger.description = 'Update the current customer phone.'
-    #swagger.summary = 'Update the current phone of the customer'
+    #swagger.description = 'Update the current customer phone number.'
+    #swagger.summary = 'Update the current phone number of the customer'
     #swagger.security = [{
             "apiKeyAuth": []
     }] */
 );
 
-router.put('/email', verify_token, controller.updateEmail /*
+router.put('/email', verify_token, controller.updateEmail 
+    /*
     #swagger.requestBody = {
         required: true,
         content: {
@@ -112,7 +114,7 @@ router.put('/email', verify_token, controller.updateEmail /*
                     properties: {
                         email: {
                             type: 'string',
-                            example: 'admin@gmail'
+                            example: 'example@gmail.com'
                         }
                     },
                     required: ['email']

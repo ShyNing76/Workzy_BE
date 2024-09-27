@@ -23,7 +23,7 @@ export const getProfile = (user) => new Promise(async (resolve, reject) => {
                 nest: true
             });
 
-            customer.Customer.date_of_birth = moment(customer.Customer.date_of_birth).format('MM/DD/YYYY');
+            customer.date_of_birth = moment(customer.date_of_birth).format('YYYY-MM-DD');
 
             let isCustomerExist = !!customer;
 
@@ -41,28 +41,42 @@ export const getProfile = (user) => new Promise(async (resolve, reject) => {
     })
 ;
 
+const isDuplicate = async (model, field, value) => {
+    const isDuplicated = await model.findOne({
+        where: {
+            [field]: value
+        }
+    });
+    return !!isDuplicated;
+}
+
 export const updateProfile = (updateFields) => new Promise(async (resolve, reject) => {
     const t = await db.sequelize.transaction();
     try {
-        const customer = await db.Customer.update(updateFields, {
+        const {phone, email, password, ...customerFields} = updateFields;
+        const user = await db.User.findOne({
             where: {
                 user_id: updateFields.user_id
             }
-        }, {transaction: t});
+        });
+        if (!user) {
+            resolve({
+                err: 0,
+                message: 'User not found'
+            })
+        }
 
-        await db.User.update({
-            name: updateFields.name
-        }, {
-            where: {
-                user_id: updateFields.user_id
+        user.set(
+            {
+                ...user,
+                ...customerFields
             }
-        }, {transaction: t});
-
+        );
+        await user.save({transaction: t});
         await t.commit();
-        let isCustomerExist = !!customer;
         resolve({
-            err: isCustomerExist ? 1 : 0,
-            message: isCustomerExist ? 'Update profile successful' : 'Update profile failed',
+            err: 1,
+            message: 'Update profile successful'
         })
     } catch (error) {
         reject(error)

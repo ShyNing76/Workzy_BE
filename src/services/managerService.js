@@ -134,7 +134,7 @@ export const getAllManagersService = ({page, limit, order, name, ...query}) => n
         });
 
         resolve({
-            err: 0,
+            err: 1,
             message: managers.length ? "List of managers" : "No manager found",
             total: count,
             data: managers

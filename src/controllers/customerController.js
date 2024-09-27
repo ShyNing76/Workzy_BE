@@ -16,13 +16,6 @@ export const getUser = async (req, res) => {
 
 export const updateUser = async (req, res) => {
     try {
-        // Validate the request body
-        const error = Joi.object({
-            name,
-            gender,
-            date_of_birth,
-        }).validate(req.body).error;
-        if (error) return badRequest(res, error.message);
         const response = await services.updateProfile({...req.body, ...req.user});
 
         // Return the response
