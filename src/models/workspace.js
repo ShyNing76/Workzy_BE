@@ -14,7 +14,10 @@ module.exports = (sequelize, DataTypes) => {
                 through: "Wishlist",
                 foreignKey: "workspace_id",
             });
-            Workspace.hasOne(models.Booking, {foreignKey: "workspace_id"});
+            Workspace.belongsToMany(models.Booking, {
+                through: "BookingDetails",
+                foreignKey: "workspace_id",
+            })
             Workspace.belongsToMany(models.Amenity, {
                 through: "AmenitiesWorkspace",
                 foreignKey: "workspace_id",
