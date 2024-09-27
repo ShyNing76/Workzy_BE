@@ -160,6 +160,30 @@ export const assignManagerService = (data) => new Promise(async (resolve, reject
     }
 })
 
+export const updateBuildingStatusService = (id, status) => new Promise(async (resolve, reject) => {
+    try {
+        const building = await db.Building.findOne({
+            where: {
+                building_id: id
+            }
+        });
+        if (!building) {
+            return resolve({
+                err: 1, message: "Building not found"
+            });
+        }
+
+        building.status = status;
+        await building.save();
+
+        resolve({
+            err: 0, message: "Building status updated successfully"
+        });
+    } catch (error) {
+        reject(error);
+    }
+});
+
 export const deleteBuildingService = (id) => new Promise(async (resolve, reject) => {
     try {
         const building = await db.Building.findOne({

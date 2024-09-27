@@ -72,14 +72,30 @@ export const updateBuildingController = async (req, res) => {
 export const assignManagerController = async (req, res) => {
     try {
         const error = Joi.object({
-            building_id: Joi.required(),
+            id: Joi.required(),
             manager_id: Joi.required()
         }).validate({
-            building_id: req.body.building_id,
+            id: req.params.id,
             manager_id: req.body.manager_id
         }).error;
         if (error) return badRequest(res, error);
-        const response = await services.assignManagerService(req.body);
+        const response = await services.assignManagerService(req.params.id, req.body.manager_id);
+        res.json(response);
+    } catch (error) {
+        internalServerError(res, error);
+    }
+}
+export const updateBuildingStatusController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            id: Joi.required(),
+            status: Joi.string().valid('active', 'inactive').required()
+        }).validate({
+            id: req.params.id,
+            status: req.body.status
+        }).error;
+        if (error) return badRequest(res, error);
+        const response = await services.updateBuildingStatusService(req.params.id, req.body.status);
         res.json(response);
     } catch (error) {
         internalServerError(res, error);
