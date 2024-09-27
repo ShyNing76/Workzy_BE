@@ -23,9 +23,10 @@ export const getProfile = (user) => new Promise(async (resolve, reject) => {
                 nest: true
             });
 
-            customer.date_of_birth = moment(customer.date_of_birth).format('YYYY-MM-DD');
-
             let isCustomerExist = !!customer;
+            if (isCustomerExist) {
+                customer.date_of_birth = moment(customer.date_of_birth).format('MM/DD/YYYY');
+            }
 
             resolve({
                 err: isCustomerExist ? 1 : 0,
