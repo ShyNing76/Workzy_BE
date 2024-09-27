@@ -99,12 +99,13 @@ export const getAllManagersService = ({page, limit, order, name, ...query}) => n
     try {
         const fLimit = limit ? parseInt(limit) : process.env.PAGE_LIMIT;
         const fPage = page ? parseInt(page) : 1;
-        const name = name ? name : "";
+        const fName = name ? name : "";
+        const fOrder = order ? order : "email";
 
         const managers = await db.User.findAll({
             where: {
                 name: {
-                    [db.Sequelize.Op.like]: `%${name}%`
+                    [db.Sequelize.Op.like]: `%${fName}%`
                 },
                 role_id: 2, // 2 is the role_id for manager
                 ...query
@@ -119,7 +120,7 @@ export const getAllManagersService = ({page, limit, order, name, ...query}) => n
                 exclude: ["password", "created_at", "updated_at", "user_id", "createdAt", "updatedAt"]
             },
             order: [
-                [order ? order : "email", "ASC"]
+                [fOrder, "ASC"]
             ],
             limit: fLimit,
             offset: (fPage - 1) * fLimit,

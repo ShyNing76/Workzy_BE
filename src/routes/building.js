@@ -1,14 +1,55 @@
 import express from "express";
 import * as controllers from "../controllers";
+import {verify_admin, verify_admin_or_manager, verify_token} from "../middlewares/verifyToken";
+
 const router = express.Router();
 
-router.get("/", (req, res) => {
-    res.send("Building route");
-})
+router.use(verify_token);
+router.use(verify_admin_or_manager);
 
-router.get("/:id", (req, res) => {
-    res.send("Building route");
-})
+router.get("/", controllers.getBuildingController
+    /*
+        #swagger.description = 'Endpoint to get all buildings.'
+        #swagger.summary = 'Get all buildings.'
+        #swagger.parameters['page'] = { description: 'Page number.' }
+        #swagger.parameters['limit'] = { description: 'Number of items in a page.' }
+        #swagger.parameters['order'] = { description: 'Order by column building_name|location|rating|status.' }
+        #swagger.parameters['building_name'] = { description: 'Search by building name.' }
+        #swagger.parameters['location'] = { description: 'Filter by location.' }
+        #swagger.responses[200] = {
+            description: 'Buildings found.'
+        }
+        #swagger.responses[404] = {
+            description: 'Buildings not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
+router.get("/:id", controllers.getBuildingByIdController
+    /*
+        #swagger.description = 'Endpoint to get a building by ID.'
+        #swagger.summary = 'Get a building by ID.'
+        #swagger.parameters['id'] = { description: 'Building ID.' }
+        #swagger.responses[200] = {
+            description: 'Building found.'
+        }
+        #swagger.responses[404] = {
+            description: 'Building not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
 
 router.post("/", controllers.createBuildingController
     /*
@@ -65,9 +106,7 @@ router.post("/", controllers.createBuildingController
      */
 );
 
-router.put("/:id", (req, res) => {
-    res.send("Building route");
-    }
+router.put("/:id", controllers.updateBuildingController
     /*
         #swagger.description = 'Endpoint to update a building.'
         #swagger.summary = 'Update a building.'
@@ -103,7 +142,8 @@ router.put("/:id", (req, res) => {
                                 type: 'string',
                                 example: 'active|inactive'
                             }
-                        }
+                        },
+                        required: ['building_name', 'location', 'address']
                     }
                 }
             }
@@ -126,8 +166,67 @@ router.put("/:id", (req, res) => {
      */
 );
 
-router.delete("/:id", (req, res) => {
-    res.send("Building route");
-})
+router.post('/assign-manager', controllers.assignManagerController
+    /*
+        #swagger.description = 'Endpoint to assign a manager to a building.'
+        #swagger.summary = 'Assign a manager to a building.'
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            building_id: {
+                                type: 'integer',
+                                example: 1
+                            },
+                            manager_id: {
+                                type: 'integer',
+                                example: 1
+                            }
+                        },
+                        required: ['building_id', 'manager_id']
+                    }
+                }
+            }
+        }
+        #swagger.responses[200] = {
+            description: 'Manager assigned successfully.'
+        }
+        #swagger.responses[400] = {
+            description: 'Invalid data.'
+        }
+        #swagger.responses[404] = {
+            description: 'Building or manager not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
+router.delete("/:id", verify_admin, controllers.deleteBuildingController
+    /*
+        #swagger.description = 'Endpoint to delete a building.'
+        #swagger.summary = 'Delete a building.'
+        #swagger.parameters['id'] = { description: 'Building ID.' }
+        #swagger.responses[200] = {
+            description: 'Building deleted successfully.'
+        }
+        #swagger.responses[404] = {
+            description: 'Building not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
 
 module.exports = router;

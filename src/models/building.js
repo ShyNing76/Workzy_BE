@@ -26,6 +26,12 @@ module.exports = (sequelize, DataTypes) => {
             manager_id: {
                 type: DataTypes.UUID,
                 allowNull: true,
+                setManager(value) {
+                    if (value === "") {
+                        value = null;
+                    }
+                    this.setDataValue("manager_id", value);
+                }
             },
             building_name: {
                 type: DataTypes.STRING(200),
