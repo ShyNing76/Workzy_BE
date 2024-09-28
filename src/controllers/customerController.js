@@ -89,3 +89,14 @@ export const updateImage = async (req, res) => {
         return res.status(500).json({error: error.message})
     }
 }
+
+export const removeUser = async (req, res) => {
+    try {
+        const response = await services.removeUser(req.params.id);
+
+        // Return the response
+        return res.status(200).json(response)
+    } catch (error) {
+        return res.status(500).json({error: error.message})
+    }
+}

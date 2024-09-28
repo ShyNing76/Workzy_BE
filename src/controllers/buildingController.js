@@ -85,6 +85,39 @@ export const assignManagerController = async (req, res) => {
         internalServerError(res, error);
     }
 }
+
+export const updateBuildingImageController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            id: Joi.required(),
+            image: Joi.required()
+        }).validate({
+            id: req.params.id,
+            image: req.body.image
+        }).error;
+        if (error) return badRequest(res, error);
+        const response = await services.updateBuildingImageService(req.params.id, req.body.image);
+        res.json(response);
+    } catch (error) {
+        internalServerError(res, error);
+    }
+}
+
+export const removeManagerController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            id: Joi.required()
+        }).validate({
+            id: req.params.id
+        }).error;
+        if (error) return badRequest(res, error);
+        const response = await services.removeManagerService(req.params.id);
+        res.json(response);
+    } catch (error) {
+        internalServerError(res, error);
+    }
+}
+
 export const updateBuildingStatusController = async (req, res) => {
     try {
         const error = Joi.object({

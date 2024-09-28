@@ -21,7 +21,7 @@ export const getBuildingService = ({
         });
 
         if (buildings.count === 0) {
-            return reject({
+            return resolve({
                 err: 1, message: "No building found"
             });
         }
@@ -125,11 +125,11 @@ export const updateBuildingService = (id, data) => new Promise(async (resolve, r
     }
 })
 
-export const assignManagerService = (data) => new Promise(async (resolve, reject) => {
+export const assignManagerService = (building_id, manager_id) => new Promise(async (resolve, reject) => {
     try {
         const building = await db.Building.findOne({
             where: {
-                building_id: data.building_id
+                building_id
             }
         });
         if (!building) {
@@ -140,7 +140,7 @@ export const assignManagerService = (data) => new Promise(async (resolve, reject
 
         const manager = await db.Manager.findOne({
             where: {
-                manager_id: data.manager_id
+                manager_id
             }
         });
         if (!manager) {
@@ -159,6 +159,63 @@ export const assignManagerService = (data) => new Promise(async (resolve, reject
         reject(error);
     }
 })
+
+export const updateBuildingImageService = (id, images) => new Promise(async (resolve, reject) => {
+    try {
+        const building = await db.Building.findOne({
+            where: {
+                building_id: id
+            },
+            include: {
+                model: db.BuildingImage,
+                as: "images"
+            }
+        });
+        if (!building) {
+            return resolve({
+                err: 1, message: "Building not found"
+            });
+        }
+        // image is a list like ["image1", "image2"]
+        images.forEach(image => {
+        //     add image to models buildingImage
+            db.BuildingImage.create({
+                building_id: building.building_id,
+                image
+            })
+        })
+
+        resolve({
+            err: 0, message: "Building image updated successfully"
+        });
+    } catch (error) {
+        reject(error);
+    }
+});
+
+export const removeManagerService = (id) => new Promise(async (resolve, reject) => {
+    try {
+        const building = await db.Building.findOne({
+            where: {
+                building_id: id
+            }
+        });
+        if (!building) {
+            return resolve({
+                err: 1, message: "Building not found"
+            });
+        }
+
+        building.setManager(null);
+        await building.save();
+
+        resolve({
+            err: 0, message: "Manager removed successfully"
+        });
+    } catch (error) {
+        reject(error);
+    }
+});
 
 export const updateBuildingStatusService = (id, status) => new Promise(async (resolve, reject) => {
     try {

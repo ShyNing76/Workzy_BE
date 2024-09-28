@@ -1,7 +1,7 @@
 import db from "../models";
 import {v4} from "uuid";
 import moment from "moment";
-import {hashPassword} from "../utils/hashPassword";
+import {comparePassword, hashPassword} from "../utils/hashPassword";
 
 export const createManagerService = (data) => new Promise(async (resolve, reject) => {
     try {
@@ -153,6 +153,7 @@ export const getAllManagersService = ({page, limit, order, name, ...query}) => n
 
 export const updateManagerService = (id, data) => new Promise(async (resolve, reject) => {
     try {
+        const {password, ...rest} = data;
         const manager = await db.User.findOne({
             where: {
                 user_id: id
@@ -186,9 +187,20 @@ export const updateManagerService = (id, data) => new Promise(async (resolve, re
             });
         }
 
+        if (password){
+            let checkPassword = comparePassword(password, manager.password);
+            if (checkPassword) {
+                return reject({
+                    err: 1,
+                    message: "Invalid password"
+                });
+            }
+            rest.password = hashPassword(password);
+        }
+
         await manager.update({
             ...manager,
-            ...data,
+            ...rest,
         });
 
         resolve({
@@ -225,8 +237,16 @@ export const deleteManagerService = (id) => new Promise(async (resolve, reject) 
             });
         }
 
-        await manager.Manager.destroy();
-        await manager.destroy();
+        manager.setStatus("inactive");
+        const building = await db.Building.update({
+            manager_id: null
+        }, {
+            where: {
+                manager_id: manager.Manager.manager_id
+            }
+        });
+
+        await manager.save();
 
         resolve({
             err: 0,

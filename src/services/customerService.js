@@ -207,3 +207,30 @@ export const updateImage = (updateFields) => new Promise(async (resolve, reject)
         reject(error)
     }
 })
+
+export const removeUser = (userId) => new Promise(async (resolve, reject) => {
+    try {
+        const user = await db.User.findOne({
+            where: {
+                user_id: userId
+            }
+        });
+
+        if (!user) {
+            resolve({
+                err: 1,
+                message: 'User not found'
+            })
+        }
+
+        user.setStatus('inactive');
+        await user.save();
+        
+        resolve({
+            err: 0,
+            message: 'Remove user successful'
+        })
+    } catch (error) {
+        reject(error)
+    }
+})

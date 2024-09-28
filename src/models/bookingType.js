@@ -23,8 +23,8 @@ module.exports = (sequelize, DataTypes) => {
                 primaryKey: true,
             },
             type:{
-                type: DataTypes.ENUM("timeslot", "daily", "monthly"),
-                defaultValue: "timeslot",
+                type: DataTypes.ENUM("Hourly", "Daily", "Monthly"),
+                defaultValue: "Hourly",
             }
         },
         {

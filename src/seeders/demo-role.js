@@ -43,14 +43,29 @@ module.exports = {
 
         await queryInterface.bulkInsert('User', [{
             user_id: v4(),
-            role_id: 1,
             name: 'Admin',
             email: 'admin@gmail.com',
             password: hashSync('admin', process.env.SALT_ROUNDS || 10),
+            role_id: 1,
             status: 'active',
             created_at: new Date(),
             updated_at: new Date()
         }]);
+
+        await queryInterface.bulkInsert('BookingType', [{
+            type: 'Hourly',
+            created_at: new Date(),
+            updated_at: new Date()
+        }, {
+            type: 'Daily',
+            created_at: new Date(),
+            updated_at: new Date()
+        }, {
+            type: 'Monthly',
+            created_at: new Date(),
+            updated_at: new Date()
+        }], {});
+
 
     },
 
