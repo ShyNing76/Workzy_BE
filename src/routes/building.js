@@ -206,6 +206,46 @@ router.put("/:id/status", controllers.updateBuildingStatusController
      */
 );
 
+router.put("/:id/image", controllers.updateBuildingImageController
+    /*
+        #swagger.description = 'Endpoint to update image of a building.'
+        #swagger.summary = 'Update image of a building.'
+        #swagger.parameters['id'] = { description: 'Building ID.' }
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "multipart/form-data": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            image: {
+                                type: 'string',
+                                format: 'binary'
+                            }
+                        },
+                        required: ['image']
+                    }
+                }
+            }
+        }
+        #swagger.responses[200] = {
+            description: 'Building image updated successfully.'
+        }
+        #swagger.responses[400] = {
+            description: 'Invalid data.'
+        }
+        #swagger.responses[404] = {
+            description: 'Building not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
 router.put("/:id/manager", verify_admin, controllers.assignManagerController
     /*
         #swagger.description = 'Endpoint to assign a manager to a building.'

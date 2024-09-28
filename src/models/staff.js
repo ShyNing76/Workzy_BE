@@ -29,6 +29,15 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.UUID,
                 allowNull: true,
             },
+            status: {
+                type: DataTypes.ENUM("active", "inactive"),
+                defaultValue: "active",
+                setStatus(value) {
+                    if (value === "active" || value === "inactive") {
+                        this.setDataValue("status", value);
+                    }
+                }
+            }
         },
         {
             sequelize,

@@ -1,5 +1,5 @@
 import * as controller from "../controllers";
-import {verify_token} from "../middlewares/verifyToken";
+import {verify_admin, verify_token} from "../middlewares/verifyToken";
 
 const router = require('express').Router();
 
@@ -127,6 +127,21 @@ router.put('/email', verify_token, controller.updateEmail
     #swagger.security = [{
             "apiKeyAuth": []
     }] */
+);
+
+router.put('/remove/:id', verify_token, verify_admin, controller.removeUser
+    /*
+    #swagger.description = 'Remove a customer.'
+    #swagger.summary = 'Remove a customer'
+    #swagger.security = [{
+            "apiKeyAuth": []
+    }]
+    #swagger.parameters['id'] = {
+        in: 'path',
+        description: 'ID of the customer to remove',
+        required: true,
+        type: 'integer'
+    } */
 );
 
 

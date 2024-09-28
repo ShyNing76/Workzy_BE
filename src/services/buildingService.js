@@ -160,6 +160,39 @@ export const assignManagerService = (building_id, manager_id) => new Promise(asy
     }
 })
 
+export const updateBuildingImageService = (id, images) => new Promise(async (resolve, reject) => {
+    try {
+        const building = await db.Building.findOne({
+            where: {
+                building_id: id
+            },
+            include: {
+                model: db.BuildingImage,
+                as: "images"
+            }
+        });
+        if (!building) {
+            return resolve({
+                err: 1, message: "Building not found"
+            });
+        }
+        // image is a list like ["image1", "image2"]
+        images.forEach(image => {
+        //     add image to models buildingImage
+            db.BuildingImage.create({
+                building_id: building.building_id,
+                image
+            })
+        })
+
+        resolve({
+            err: 0, message: "Building image updated successfully"
+        });
+    } catch (error) {
+        reject(error);
+    }
+});
+
 export const removeManagerService = (id) => new Promise(async (resolve, reject) => {
     try {
         const building = await db.Building.findOne({

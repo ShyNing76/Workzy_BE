@@ -237,8 +237,16 @@ export const deleteManagerService = (id) => new Promise(async (resolve, reject) 
             });
         }
 
-        await manager.Manager.destroy();
-        await manager.destroy();
+        manager.setStatus("inactive");
+        const building = await db.Building.update({
+            manager_id: null
+        }, {
+            where: {
+                manager_id: manager.Manager.manager_id
+            }
+        });
+
+        await manager.save();
 
         resolve({
             err: 0,
