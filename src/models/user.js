@@ -58,6 +58,11 @@ module.exports = (sequelize, DataTypes) => {
             status: {
                 type: DataTypes.ENUM("active", "inactive"),
                 defaultValue: "active",
+                setStatus(value) {
+                    if (value === "active" || value === "inactive") {
+                        this.setDataValue("status", value);
+                    }
+                }
             },
         },
         {

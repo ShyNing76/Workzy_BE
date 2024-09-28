@@ -225,7 +225,7 @@ export const removeUser = (userId) => new Promise(async (resolve, reject) => {
 
         user.setStatus('inactive');
         await user.save();
-        
+
         resolve({
             err: 0,
             message: 'Remove user successful'
