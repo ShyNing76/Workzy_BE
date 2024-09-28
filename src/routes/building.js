@@ -246,6 +246,25 @@ router.put("/:id/manager", verify_admin, controllers.assignManagerController
      */
 );
 
+router.put("/:id/manager/remove", verify_admin, controllers.removeManagerController
+    /*
+        #swagger.description = 'Endpoint to remove a manager from a building.'
+        #swagger.summary = 'Remove a manager from a building.'
+        #swagger.parameters['id'] = { description: 'Building ID.' }
+        #swagger.responses[200] = {
+            description: 'Manager removed successfully.'
+        }
+        #swagger.responses[404] = {
+            description: 'Building not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
 
 router.delete("/:id", verify_admin, controllers.deleteBuildingController
     /*
