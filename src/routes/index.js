@@ -23,6 +23,10 @@ function initWebRoutes(app) {
         // #swagger.tags = ['Workspace']
     );
 
+    app.use('/api/v1/staff', require('./staff')
+        // #swagger.tags = ['staff']
+    );
+
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(require('../config/swagger-output.json')));
     // Import Swagger UI
     app.use(notFound);
