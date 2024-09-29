@@ -31,3 +31,7 @@ export const bid = Joi.number().required()
 export const accessToken = Joi.string().required()
 
 export const refreshToken = Joi.string().required()
+
+export const workspaceName = Joi.string().pattern(new RegExp('^[A-Za-z0-9]+_[A-Za-z0-9]+_[0-9]+$')).required()
+
+export const workspacePricePerHour = Joi.number().positive().required()

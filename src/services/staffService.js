@@ -78,18 +78,18 @@ export const getAllStaffService = ({page, limit, order, name, ...query}) => new 
             attributes: {
                 exclude: ["building_id","createdAt", "updatedAt"]
             },
-            // include: [
-            //     {
-            //         model: db.Staff,
-            //         attributes: {exclude: ["building_id","createdAt", "updatedAt"]},
-            //         include: [
-            //             {
-            //                 model: db.Building,
-            //                 attributes: {exclude : ["createdAt", "updatedAt"]},
-            //             },
-            //         ]
-            //     }, 
-            // ],
+            include: [
+                {
+                    model: db.Staff,
+                    attributes: {exclude: ["building_id","createdAt", "updatedAt"]},
+                    include: [
+                        {
+                            model: db.Building,
+                            attributes: {exclude : ["createdAt", "updatedAt"]},
+                        },
+                    ]
+                }, 
+            ],
         });
 
         resolve({

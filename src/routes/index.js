@@ -24,7 +24,7 @@ function initWebRoutes(app) {
     );
 
     app.use('/api/v1/staff', require('./staff')
-        // #swagger.tags = ['staff']
+        // #swagger.tags = ['Staff']
     );
 
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(require('../config/swagger-output.json')));
