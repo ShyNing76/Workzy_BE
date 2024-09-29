@@ -19,7 +19,7 @@ export const createStaffService = ({password, ...data}) => new Promise(async (re
         });
         
         if(isDuplicated){
-            const field = isDuplicated.email == data.email ? "Email" : "Phone";
+            const field = isDuplicated.email === data.email ? "Email" : "Phone";
             return resolve({
                 err: 1,
                 message: `${field} is already used`
@@ -76,7 +76,7 @@ export const getAllStaffService = ({page, limit, order, name, ...query}) => new 
             },
             ...queries,
             attributes: {
-                exclude: ["building_id","createdAt", "updatedAt"]
+                exclude: ["password","google_token","building_id","createdAt", "updatedAt"]
             },
             include: [
                 {
@@ -85,17 +85,22 @@ export const getAllStaffService = ({page, limit, order, name, ...query}) => new 
                     include: [
                         {
                             model: db.Building,
-                            attributes: {exclude : ["createdAt", "updatedAt"]},
+                            attributes: {exclude : ["manager_id","status","createdAt", "updatedAt"]},
                         },
                     ]
                 }, 
             ],
         });
-
+        staffs.rows.forEach(staff => {
+            if (staff.date_of_birth) {
+                staff.date_of_birth = moment(staff.date_of_birth).format('MM/DD/YYYY');
+            }
+        });
         resolve({
             err: staffs ? 0 : 1,
             message: staffs ? "Got" : "No Staff Exist",
             data: staffs
+            
         });
     } catch (error) {
         reject(error)
@@ -110,21 +115,23 @@ export const getStaffByIdService = (id) => new Promise(async (resolve, reject) =
                 role_id: 3
             },
             attributes: {
-                exclude: ["createdAt", "updatedAt"]
+                exclude: ["password","google_token","createdAt", "updatedAt"]
             },
             include: {
                 model: db.Staff,
                 attributes: {
-                   exclude: ["buildingId","staff_id","createdAt","updatedAt"]
+                   exclude: ["user_id","createdAt","updatedAt"]
                 },
                 include: {
                     model: db.Building,
                     attributes: {
-                        exclude: ["buildingId","manager_id","status","createdAt","updatedAt"]
+                        exclude: ["building_id","manager_id","status","createdAt","updatedAt"]
                     },
                 }
             }
         });
+        staff.date_of_birth = moment(staff.date_of_birth).format("MM/DD/YYYY")
+        console.log(moment(staff.date_of_birth).format("MM/DD/YYYY"))
         resolve({
             err: staff ? 0 : 1,
             message: staff ? "Got" : "No Staff Exist",
@@ -153,7 +160,7 @@ export const updateStaffService = (id, data) => new Promise(async (resolve, reje
         });
 
         if(isDuplicated){
-            const field = isDuplicated.email == data.email ? "Email" : "Phone";
+            const field = isDuplicated.email === data.email ? "Email" : "Phone";
             return resolve({
                 err: 1,
                 message: `${field} is already used`

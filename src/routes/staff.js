@@ -158,7 +158,7 @@ router.put("/:id", verify_token, verify_admin, controllers.updateStaffController
 );
 
 
-router.put("/profile/:id", verify_token, verify_staff, controllers.updateStaffProfileController
+router.put("/profile/:id", verify_token, verify_admin, controllers.updateStaffProfileController
     /*
         #swagger.description = 'Endpoint to update a staff.'
         #swagger.summary = 'Update a staff.'
@@ -254,12 +254,12 @@ router.put("/assign/:id", verify_token, verify_admin_or_manager, controllers.ass
                     schema: {
                         type: 'object',
                         properties: {
-                            staff_id: {
+                            building_id: {
                                 type: 'integer',
                                 example: 1
                             }
                         },
-                        required: ['staff_id']
+                        required: ['building_id']
                     }
                 }
             }
