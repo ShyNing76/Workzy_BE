@@ -130,12 +130,25 @@ export const getStaffByIdService = (id) => new Promise(async (resolve, reject) =
                 }
             }
         });
-        staff.date_of_birth = moment(staff.date_of_birth).format("MM/DD/YYYY")
+        staff.date_of_birth = moment(staff.date_of_birth).format("MM/DD/YYYY");
+        console.log(staff.date_of_birth)
         console.log(moment(staff.date_of_birth).format("MM/DD/YYYY"))
         resolve({
             err: staff ? 0 : 1,
             message: staff ? "Got" : "No Staff Exist",
-            data: staff
+            data: {
+                user_id: staff.user_id,
+                role_id: staff.role_id,
+                name: staff.name,
+                email: staff.email,
+                phone: staff.phone,
+                gender: staff.gender,
+                date_of_birth: moment(staff.date_of_birth).format("MM/DD/YYYY"),
+                image: staff.image,
+                status: staff.status,
+                staff_id: staff.Staff.staff_id,
+                building_id: staff.Staff.building_id
+            }
         });
     } catch (error) {
         reject(error)
