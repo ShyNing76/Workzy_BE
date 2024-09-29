@@ -1,14 +1,14 @@
 import Joi from "joi";
-import {workspaceName, workspacePricePerHour} from "../helper/joi_schema";
+import {workspace_name, workspace_price} from "../helper/joi_schema";
 import {badRequest} from "../middlewares/handle_error";
 import * as services from "../services";
 
 export const createWorkspaceController = async (req, res) => {
     try {
         const error = Joi.object({
-            workspaceName,
-            workspacePricePerHour,
-        }).validate({workspaceName: req.body.workspaceName, workspacePricePerHour: req.body.workspacePricePerHour}).error;
+            workspace_name,
+            workspace_price,
+        }).validate({workspace_name: req.body.workspace_name, workspace_price: req.body.workspace_price}).error;
         if(error) return badRequest(res, error);
         const workspace = await services.createWorkspaceService(req.body);
         return res.status(201).json({workspace});

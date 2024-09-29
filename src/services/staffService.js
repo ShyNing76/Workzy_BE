@@ -191,6 +191,9 @@ export const updateStaffService = (id, data) => new Promise(async (resolve, reje
             err: 1,
             message: "Staff not found"
         });
+
+        if(data.password) data.password = hashPassword(data.password);
+
         await staff.update({
             ...data
         })
@@ -258,28 +261,23 @@ export const updateStaffPasswordService = (id, password) => new Promise(async (r
     }
 })
 
-export const deleteStaffService = ({ids}) => new Promise(async (resolve, reject) => {
+export const deleteStaffService = (id) => new Promise(async (resolve, reject) => {
     try {
 
         const user = await db.User.findOne({
-            where: {user_id: ids, role_id: 3}
+            where: {user_id: id, role_id: 3}
         })
         if(!user) return resolve({
             err: 0,
             message: "User not found"
         })
 
-        const staff = await db.Staff.destroy({
-            where : {user_id : ids}
-        });
-
-        await user.destroy({
-            where : {user_id : ids}
-        });
+        user.status = "inactive";
+        await user.save();
 
         resolve({
-            err: staff > 0  && user > 0 ? 0 : 1,
-            message: staff > 0  && user > 0 ? `${staff} deleted` : "Cannot delete staff"
+            err: 0,
+            message: "Staff deleted"
         })
     } catch (error) {
         reject(error)

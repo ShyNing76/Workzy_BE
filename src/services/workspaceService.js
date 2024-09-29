@@ -2,10 +2,10 @@ import db from '../models/';
 import {v4} from "uuid";
 import {Op} from "sequelize";
 
-export const createWorkspaceService = async ({workspace_name, workspacePricePerHour, ...data}) => new Promise(async (resolve, reject) => {
+export const createWorkspaceService = async ({workspace_name, workspace_price, ...data}) => new Promise(async (resolve, reject) => {
     try {
-        const price_per_day = workspacePricePerHour * 8 * 0.8;
-        const price_per_month = workspacePricePerHour * 22 * 0.8;
+        const price_per_day = workspace_price * 8 * 0.8;
+        const price_per_month = workspace_price * 22 * 0.8;
 
         const workspace = await db.Workspace.findOrCreate({
             where: {
@@ -13,9 +13,10 @@ export const createWorkspaceService = async ({workspace_name, workspacePricePerH
             },
             defaults: {
                 workspace_id: v4(),
-                building_id: "",
+                building_id: v4(),
+                workspace_type_id: v4(),
                 workspace_name: workspace_name,
-                price_per_hour: workspacePricePerHour,
+                price_per_hour: workspace_price,
                 price_per_day,
                 price_per_month,
                 ...data,
@@ -163,8 +164,8 @@ export const getAllWorkspaceService = ({page, limit, order, workspaceName, ...qu
         });
 
         resolve({
-            err: workspaces ? 0 : 1,
-            message: workspaces ? "Got" : "No Workspace Exist",
+            err: workspaces.count > 0 ? 0 : 1,
+            message: workspaces.count > 0 ? "Got" : "No Workspace Exist",
             data: workspaces
         });
     } catch (error) {
