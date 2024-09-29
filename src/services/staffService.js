@@ -191,3 +191,40 @@ export const deleteStaffService = ({ids}) => new Promise(async (resolve, reject)
         reject(error)
     }
 })
+
+export const assignStaffToBuildingService = async (id, building_id) => new Promise(async (resolve, reject) => {
+    try {
+
+        const [staff, isBuildingExist] = await Promise.all([
+            db.Staff.findOne({
+                where: {
+                    staff_id: id
+                }
+            }), 
+            db.Building.findOne({
+                where: {
+                    building_id: building_id
+                }
+            })
+        ])
+        if(!staff) return resolve({
+            err: 1,
+            message: "Staff is not exist"
+        })
+        if(!isBuildingExist) return resolve({
+            err: 1,
+            message: "Building is not exist"
+        })
+
+        staff.building_id = building_id;
+        await staff.save();
+        
+        resolve({
+            err: 0,
+            message: 'Staff updated successfully!',
+        })
+
+    } catch (error) {
+        reject(error)
+    }
+})

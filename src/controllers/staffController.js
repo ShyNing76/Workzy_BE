@@ -72,3 +72,20 @@ export const deleteStaffController = async (req, res) => {
         return res.status(500).json({error: error.message});
     }
 }
+
+export const assignStaffToBuildingController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            id: Joi.required(),
+            building_id: Joi.required()
+        }).validate({
+            id: req.params.id,
+            building_id: req.body.building_id
+        }).error;
+        if (error) return badRequest(res, error);
+        const response = await services.assignStaffToBuildingService(req.params.id, req.body.building_id);
+        return res.status(200).json(response);
+    } catch (error) {
+        return res.status(500).json({error: error.message});
+    }
+}

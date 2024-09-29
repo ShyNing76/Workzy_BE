@@ -153,4 +153,44 @@ router.delete("/:id", verify_token, verify_admin, controllers.deleteStaffControl
      */
 );
 
+router.put("/assign/:id", verify_token, verify_admin_or_manager, controllers.assignStaffToBuildingController
+    /*
+        #swagger.description = 'Endpoint to assign a staff to a building.'
+        #swagger.summary = 'Assign a staff to a building.'
+        #swagger.parameters['id'] = { description: 'Staff ID.' }
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            staff_id: {
+                                type: 'integer',
+                                example: 1
+                            }
+                        },
+                        required: ['staff_id']
+                    }
+                }
+            }
+        }
+        #swagger.responses[200] = {
+            description: 'Staff assigned successfully.'
+        }
+        #swagger.responses[400] = {
+            description: 'Invalid data.'
+        }
+        #swagger.responses[404] = {
+            description: 'Staff not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
 module.exports = router;
