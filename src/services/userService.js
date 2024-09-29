@@ -3,38 +3,31 @@ import moment from "moment";
 import * as hashPassword from '../utils/hashPassword';
 import {isDuplicate} from '../utils/checkDuplicate';
 
-export const updateProfile = (updateFields) => new Promise(async (resolve, reject) => {
-    const t = await db.sequelize.transaction();
+export const updateProfileService = (updateFields) => new Promise(async (resolve, reject) => {
     try {
-        const {phone, email, password, ...customerFields} = updateFields;
         const user = await db.User.findOne({
             where: {
                 user_id: updateFields.user_id
             }
         });
-        if (!user) {
-            resolve({
-                err: 1,
-                message: 'User not found'
-            })
-        }
 
-        user.set(
-            {
-                ...user,
-                ...customerFields
-            }
-        );
-        await user.save({transaction: t});
-        await t.commit();
+        if(!user) return resolve({
+            err: 1,
+            message: "User not found"
+        });
+
+        await staff.update({
+            ...data
+        })
         resolve({
             err: 0,
-            message: 'Update profile successful'
+            message: "Update Successfully"
         })
+
     } catch (error) {
         reject(error)
     }
-});
+})
 
 export const updatePassword = (updateFields) => new Promise(async (resolve, reject) => {
     try {

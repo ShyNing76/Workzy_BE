@@ -70,7 +70,7 @@ export const updateStaffProfileController = async (req, res) => {
             date_of_birth
         }).validate(req.body).error;
         if (error) return badRequest(res, error.details[0].message);
-        const response = await services.updateStaffProfileService( req.params.id, req.body);
+        const response = await services.updateProfileService( {...req.user, ...req.body});
         return res.status(200).json(response);
     } catch (error) {
         return res.status(500).json({error: error.message});
@@ -83,7 +83,7 @@ export const updateStaffPasswordController = async (req, res) => {
             password
         }).validate(req.body).error;
         if (error) return badRequest(res, error.details[0].message);
-        const response = await services.updateStaffPasswordService( req.params.id, req.body.password);
+        const response = await services.updatePassword({...req.user, ...req.body});
         return res.status(200).json(response);
     } catch (error) {
         return res.status(500).json({error: error.message});

@@ -158,7 +158,7 @@ router.put("/:id", verify_token, verify_admin, controllers.updateStaffController
 );
 
 
-router.put("/profile/:id", verify_token, verify_admin, controllers.updateStaffProfileController
+router.put("/profile", verify_token, verify_staff, controllers.updateStaffProfileController
     /*
         #swagger.description = 'Endpoint to update a staff.'
         #swagger.summary = 'Update a staff.'
@@ -198,7 +198,7 @@ router.put("/profile/:id", verify_token, verify_admin, controllers.updateStaffPr
      */
 );
 
-router.put("/profile/password/:id", verify_token, verify_staff, controllers.updateStaffPasswordController
+router.put("/profile/password", verify_token, verify_staff, controllers.updateStaffPasswordController
     /*
         #swagger.description = 'Endpoint to update a staff.'
         #swagger.summary = 'Update a staff.'
