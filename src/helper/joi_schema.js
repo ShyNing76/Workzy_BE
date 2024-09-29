@@ -31,3 +31,8 @@ export const bid = Joi.number().required()
 export const accessToken = Joi.string().required()
 
 export const refreshToken = Joi.string().required()
+
+
+export const type = Joi.string().valid("booking", "payment", "system").required()
+
+export const description = Joi.string().required()

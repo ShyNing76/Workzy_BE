@@ -1,4 +1,4 @@
-import {badRequest, internalServerError} from "../middlewares/handle_error";
+import {badRequest, created, internalServerError, ok} from "../middlewares/handle_error";
 import {address, name, location} from "../helper/joi_schema";
 import * as services from "../services";
 import Joi from "joi";
@@ -6,7 +6,7 @@ import Joi from "joi";
 export const getBuildingController = async (req, res) => {
     try {
         const response = await services.getBuildingService(req.query);
-        res.json(response);
+        return ok(res, response);
     } catch (error) {
         internalServerError(res, error);
     }
@@ -21,7 +21,7 @@ export const getBuildingByIdController = async (req, res) => {
         }).error;
         if (error) return badRequest(res, error);
         const response = await services.getBuildingByIdService(req.params.id);
-        res.json(response);
+        return ok(res, response);
     } catch (error) {
         internalServerError(res, error);
     }
@@ -41,7 +41,7 @@ export const createBuildingController = async (req, res) => {
         if (error) return badRequest(res, error);
 
         const response = await services.createBuildingService(req.body);
-        res.status(201).json(response);
+        return created(res, response);
     } catch (error) {
         internalServerError(res, error);
     }
@@ -62,9 +62,8 @@ export const updateBuildingController = async (req, res) => {
         }).error;
         if (error) return badRequest(res, error);
         const response = await services.updateBuildingService(req.params.id, req.body);
-        res.json(response);
+        return ok(res, response);
     } catch (error) {
-        console.log(error);
         internalServerError(res, error);
     }
 }
@@ -80,7 +79,7 @@ export const assignManagerController = async (req, res) => {
         }).error;
         if (error) return badRequest(res, error);
         const response = await services.assignManagerService(req.params.id, req.body.manager_id);
-        res.json(response);
+        return ok(res, response);
     } catch (error) {
         internalServerError(res, error);
     }
@@ -97,7 +96,7 @@ export const updateBuildingImageController = async (req, res) => {
         }).error;
         if (error) return badRequest(res, error);
         const response = await services.updateBuildingImageService(req.params.id, req.body.image);
-        res.json(response);
+        return ok(res, response);
     } catch (error) {
         internalServerError(res, error);
     }

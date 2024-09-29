@@ -1,6 +1,5 @@
 import express from "express";
 import * as controllers from "../controllers";
-import {getAllManagersController} from "../controllers";
 import {verify_admin, verify_admin_or_manager, verify_token} from "../middlewares/verifyToken";
 
 const router = express.Router();

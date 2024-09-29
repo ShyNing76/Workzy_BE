@@ -1,4 +1,4 @@
-import {notFound} from "../middlewares/handle_error";
+import {errorHandlingMiddleware, notFound} from "../middlewares/handle_error";
 import swaggerUi from 'swagger-ui-express';
 
 
@@ -21,6 +21,10 @@ function initWebRoutes(app) {
 
     app.use('/api/v1/workspace', require('./workspace')
         // #swagger.tags = ['Workspace']
+    );
+
+    app.use('/api/v1/notification', require('./notification')
+        // #swagger.tags = ['Notification']
     );
 
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(require('../config/swagger-output.json')));

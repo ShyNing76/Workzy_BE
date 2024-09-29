@@ -19,22 +19,19 @@ export const createManagerService = (data) => new Promise(async (resolve, reject
         });
 
         if (isDuplicate && isDuplicate.user_id) {
-            return reject({
-                err: 1,
-                message: "Email or phone are already exists"
-            });
+            return reject(isDuplicate.email === data.email ? "Email already exists" : "Phone already exists");
         }
         const user = await db.User.create(
             {
                 user_id: v4(),
                 ...data,
-                role_id: 2, // Assuming 2 is the role_id for manager
+                role_id: 2,
                 Manager: {
                     manager_id: v4(),
                 },
             },
             {
-                include: [{ model: db.Manager }], // Correct placement of include option
+                include: [{model: db.Manager}],
                 raw: true,
                 nest: true,
             }
@@ -63,7 +60,8 @@ export const getManagerByIdService = (id) => new Promise(async (resolve, reject)
     try {
         const manager = await db.User.findOne({
             where: {
-                user_id: id
+                user_id: id,
+                role_id: 2
             },
             include: {
                 model: db.Manager,
@@ -129,10 +127,7 @@ export const getAllManagersService = ({page, limit, order, name, ...query}) => n
         });
 
         if (!managers) {
-            return reject({
-                err: 1,
-                message: "No manager found"
-            });
+            return reject("No manager found");
         }
         let count = 0;
         managers.forEach(manager => {
@@ -156,15 +151,13 @@ export const updateManagerService = (id, data) => new Promise(async (resolve, re
         const {password, ...rest} = data;
         const manager = await db.User.findOne({
             where: {
-                user_id: id
+                user_id: id,
+                role_id: 2
             },
         });
 
         if (!manager) {
-            return reject({
-                err: 1,
-                message: "Manager not found"
-            });
+            return reject("Manager not found");
         }
 
         const isDuplicateEmail = await db.User.findOne({
@@ -181,19 +174,13 @@ export const updateManagerService = (id, data) => new Promise(async (resolve, re
         });
 
         if (isDuplicateEmail && isDuplicateEmail.user_id !== id) {
-            return reject({
-                err: 1,
-                message: "Email or phone already exists"
-            });
+            return reject(isDuplicateEmail.email === data.email ? "Email already exists" : "Phone already exists");
         }
 
-        if (password){
+        if (password) {
             let checkPassword = comparePassword(password, manager.password);
             if (checkPassword) {
-                return reject({
-                    err: 1,
-                    message: "Invalid password"
-                });
+                return reject("Invalid password");
             }
             rest.password = hashPassword(password);
         }
@@ -231,10 +218,7 @@ export const deleteManagerService = (id) => new Promise(async (resolve, reject) 
         });
 
         if (!manager) {
-            return reject({
-                err: 1,
-                message: "Manager not found"
-            });
+            return reject("Manager not found");
         }
 
         manager.setStatus("inactive");

@@ -1,6 +1,6 @@
 import Joi from "joi";
-import {date_of_birth, gender, name, phone, email} from "../helper/joi_schema";
-import {badRequest} from "../middlewares/handle_error";
+import {date_of_birth, gender, name, phone, email, image} from "../helper/joi_schema";
+import {badRequest, internalServerError, ok} from "../middlewares/handle_error";
 import * as services from "../services";
 
 export const getUser = async (req, res) => {
@@ -8,9 +8,9 @@ export const getUser = async (req, res) => {
         const response = await services.getProfile(req.user);
 
         // Return the response
-        return res.status(200).json(response)
+        return ok(res, response)
     } catch (error) {
-        return res.status(500).json({error: error.message})
+        internalServerError(res, error)
     }
 }
 
@@ -19,9 +19,9 @@ export const updateUser = async (req, res) => {
         const response = await services.updateProfile({...req.body, ...req.user});
 
         // Return the response
-        return res.status(200).json(response)
+        return ok(res, response)
     } catch (error) {
-        return res.status(500).json({error: error.message})
+        internalServerError(res, error)
     }
 }
 
@@ -36,9 +36,9 @@ export const updatePassword = async (req, res) => {
         const response = await services.updatePassword({...req.body, ...req.user});
 
         // Return the response
-        return res.status(200).json(response)
+        return ok(res, response)
     } catch (error) {
-        return res.status(500).json({error: error.message})
+        internalServerError(res, error)
     }
 }
 
@@ -52,9 +52,9 @@ export const updatePhone = async (req, res) => {
         const response = await services.updatePhone({...req.body, ...req.user});
 
         // Return the response
-        return res.status(200).json(response)
+        return ok(res, response)
     } catch (error) {
-        return res.status(500).json({error: error.message})
+        internalServerError(res, error)
     }
 }
 
@@ -68,9 +68,9 @@ export const updateEmail = async (req, res) => {
         const response = await services.updateEmail(req.body.email, req.user.user_id);
 
         // Return the response
-        return res.status(200).json(response)
+        return ok(res, response)
     } catch (error) {
-        return res.status(500).json({error: error.message})
+        internalServerError(res, error)
     }
 }
 
@@ -84,9 +84,9 @@ export const updateImage = async (req, res) => {
         const response = await services.updateImage({...req.body, ...req.user});
 
         // Return the response
-        return res.status(200).json(response)
+        return ok(res, response)
     } catch (error) {
-        return res.status(500).json({error: error.message})
+        internalServerError(res, error)
     }
 }
 
@@ -95,8 +95,8 @@ export const removeUser = async (req, res) => {
         const response = await services.removeUser(req.params.id);
 
         // Return the response
-        return res.status(200).json(response)
+        return ok(res, response)
     } catch (error) {
-        return res.status(500).json({error: error.message})
+        internalServerError(res, error)
     }
 }

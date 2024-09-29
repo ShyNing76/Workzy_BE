@@ -28,7 +28,7 @@ export const loginService = ({email, password}) => new Promise(async (resolve, r
 
         resolve({
             err: accessToken ? 0 : 1,
-            message: accessToken ? 'Login successful' : 'Invalid email or password',
+            message: accessToken ? 'Login successful' : user ? 'Invalid password' : 'User not found',
             accessToken: 'Bearer ' + accessToken
         })
 
@@ -48,11 +48,9 @@ export const registerService = ({email, password, name}) => new Promise(async (r
             raw: true
         });
 
+
         if (user) {
-            resolve({
-                err: 0,
-                message: 'Email already exists'
-            })
+            return reject('Email is already taken')
         } else {
             const hash = hashPassword.hashPassword(password);
 
@@ -115,10 +113,10 @@ export const loginGoogleService = (profile) => new Promise(async (resolve, rejec
                 user_id: user[0].user_id,
                 phone: "",
             }, {transaction: t})
-        }else{
+        } else {
             await db.User.update({
                 google_token: profile.token
-            },{
+            }, {
                 where: {
                     email: profile.emails[0].value
                 },
