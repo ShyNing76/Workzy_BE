@@ -9,10 +9,10 @@ export const createStaffService = ({password, ...data}) => new Promise(async (re
         const isDuplicated = await db.User.findOne({
             where: {
                 [Op.or]: [{
-                    email: data.email || ""
+                    email: data.email
                 },
                 {
-                    phone: data.phone || ""
+                    phone: data.phone
                 }]
             },
             raw: true
@@ -135,6 +135,56 @@ export const getStaffByIdService = (id) => new Promise(async (resolve, reject) =
     }
 })
 
+export const updateStaffService = (id, data) => new Promise(async (resolve, reject) => {
+    try {
+
+        const isDuplicated = await db.User.findOne({
+            where: {
+                [Op.or]: [
+                    {
+                        email: data.email
+                    },
+                    {
+                        phone: data.phone
+                    }   
+                ],
+                user_id: { [Op.ne]: id }
+            }
+        });
+
+        if(isDuplicated){
+            const field = isDuplicated.email == data.email ? "Email" : "Phone";
+            return resolve({
+                err: 1,
+                message: `${field} is already used`
+            })
+        }
+
+        const staff = await db.User.findOne({
+            where: {
+                user_id: id,
+                role_id: 3
+            }
+        });
+
+        if(!staff) return resolve({
+            err: 1,
+            message: "Staff not found"
+        });
+        await staff.update({
+            ...data
+        })
+        resolve({
+            err: 0,
+            message: "Update Successfully"
+        })
+
+    } catch (error) {
+        console.log(error.message)
+        reject(error)
+    }
+})
+
 export const updateStaffProfileService = (id, data) => new Promise(async (resolve, reject) => {
     try {
         const staff = await db.User.findOne({
@@ -144,18 +194,42 @@ export const updateStaffProfileService = (id, data) => new Promise(async (resolv
             }
         });
 
-        if(!staff) resolve({
+        if(!staff) return resolve({
             err: 1,
             message: "Staff not found"
         });
 
         await staff.update({
-            name: data.name,
-            gender: data.gender,
-            date_of_birth: data.date_of_birth,
+            ...data
         })
         resolve({
+            err: 0,
+            message: "Update Successfully"
+        })
+
+    } catch (error) {
+        reject(error)
+    }
+})
+
+export const updateStaffPasswordService = (id, password) => new Promise(async (resolve, reject) => {
+    try {
+        const staff = await db.User.findOne({
+            where: {
+                user_id: id,
+                role_id: 3
+            }
+        });
+
+        if(!staff) return resolve({
             err: 1,
+            message: "Staff not found"
+        });
+
+        staff.password = password;
+        await staff.save();
+        resolve({
+            err: 0,
             message: "Update Successfully"
         })
 

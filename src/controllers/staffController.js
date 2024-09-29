@@ -48,6 +48,20 @@ export const getAllStaffController = async (req, res) => {
     }
 }
 
+export const updateStaffController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            email,
+            phone,
+        }).validate({email: req.body.email, phone: req.body.phone}).error;
+        if (error) return badRequest(res, error.details[0].message);
+        const response = await services.updateStaffService( req.params.id, req.body);
+        return res.status(200).json(response);
+    } catch (error) {
+        return res.status(500).json({error: error.message});
+    }
+}
+
 export const updateStaffProfileController = async (req, res) => {
     try {
         const error = Joi.object({
@@ -57,6 +71,19 @@ export const updateStaffProfileController = async (req, res) => {
         }).validate(req.body).error;
         if (error) return badRequest(res, error.details[0].message);
         const response = await services.updateStaffProfileService( req.params.id, req.body);
+        return res.status(200).json(response);
+    } catch (error) {
+        return res.status(500).json({error: error.message});
+    }
+}
+
+export const updateStaffPasswordController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            password
+        }).validate(req.body).error;
+        if (error) return badRequest(res, error.details[0].message);
+        const response = await services.updateStaffPasswordService( req.params.id, req.body.password);
         return res.status(200).json(response);
     } catch (error) {
         return res.status(500).json({error: error.message});
