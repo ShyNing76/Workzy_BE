@@ -1,4 +1,5 @@
 export * from './auth.controller';
+export * from './user.controller';
 export * from './customer.controller';
 export * from './workspaceController';
 export * from './manager.controller';
