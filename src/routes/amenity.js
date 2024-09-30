@@ -6,8 +6,9 @@ const router = express.Router();
 
 router.post("/", verify_token, verify_admin, controllers.createAmenityController
     /*
-        #swagger.description = 'Endpoint to create a new workspace.'
-        #swagger.summary = 'Create a new workspace.'
+        #swagger.description = 'Endpoint to create a new amenity.'
+        #swagger.summary = 'Create a new amenity.'
+        #swagger.tags = ['Amenities']
         #swagger.requestBody = {
             required: true,
             content: {
@@ -15,32 +16,46 @@ router.post("/", verify_token, verify_admin, controllers.createAmenityController
                     schema: {
                         type: 'object',
                         properties: {
-                            workspace_name: {
+                            amenity_name: {
                                 type: 'string',
-                                example: 'Landmark81_POD_1'
+                                example: 'Fax Machine'
                             },
-                            workspace_price: {
-                                type: 'int',
-                                example: '1000000'
-                            },
-                            capacity: {
-                                type: 'int',
-                                example: '20'
-                            },
-                            description: {
+                            image: {
                                 type: 'string',
-                                example: 'Workspace description.'
+                                example: 'fax-machine.png'
                             },
-                        }
+                            original_price: {
+                                type: 'integer',
+                                example: 100000
+                            },
+                            type: {
+                                type: 'string',
+                                example: 'device'
+                            },
+                        },
+                        required: ['amenity_name', 'original_price', 'type']
                     }
                 }
             }
         }
         #swagger.responses[201] = {
-            description: 'Workspace created successfully.'
+            description: 'Amenity created successfully.',
+            content: {
+                "application/json": {
+                    schema: {
+                        $ref: "#/components/schemas/Amenity"
+                    }
+                }
+            }
         }
         #swagger.responses[400] = {
             description: 'Invalid data.'
+        }
+        #swagger.responses[401] = {
+            description: 'Unauthorized - Invalid or missing token.'
+        }
+        #swagger.responses[403] = {
+            description: 'Forbidden - User is not an admin.'
         }
         #swagger.responses[500] = {
             description: 'Internal server error.'
@@ -52,9 +67,15 @@ router.post("/", verify_token, verify_admin, controllers.createAmenityController
 );
 router.put("/:id", verify_token, verify_admin, controllers.updateAmenityController
     /*
-        #swagger.description = 'Endpoint to update a workspace.'
-        #swagger.summary = 'Update a workspace.'
-        #swagger.parameters['id'] = { description: 'Workspace ID.' }
+        #swagger.description = 'Endpoint to update an amenity.'
+        #swagger.summary = 'Update an amenity.'
+        #swagger.tags = ['Amenities']
+        #swagger.parameters['id'] = { 
+            in: 'path',
+            description: 'Amenity ID.',
+            required: true,
+            type: 'string'
+        }
         #swagger.requestBody = {
             required: true,
             content: {
@@ -62,36 +83,48 @@ router.put("/:id", verify_token, verify_admin, controllers.updateAmenityControll
                     schema: {
                         type: 'object',
                         properties: {
-                            workspace_name: {
+                            amenity_name: {
                                 type: 'string',
-                                example: 'Landmark81_POD_1'
+                                example: 'Updated Fax Machine'
                             },
-                            workspace_price: {
-                                type: 'int',
-                                example: '1000000'
-                            },
-                            capacity: {
-                                type: 'int',
-                                example: '20'
-                            },
-                            description: {
+                            image: {
                                 type: 'string',
-                                example: 'Workspace description.'
+                                example: 'updated-fax-machine.png'
                             },
-                        },
-                        required: ['workspace_name','workspace_price']
+                            original_price: {
+                                type: 'integer',
+                                example: 120000
+                            },
+                            type: {
+                                type: 'string',
+                                example: 'device'
+                            },
+                        }
                     }
                 }
             }
         }
         #swagger.responses[200] = {
-            description: 'Workspace updated successfully.'
+            description: 'Amenity updated successfully.',
+            content: {
+                "application/json": {
+                    schema: {
+                        $ref: "#/components/schemas/Amenity"
+                    }
+                }
+            }
         }
         #swagger.responses[400] = {
             description: 'Invalid data.'
         }
+        #swagger.responses[401] = {
+            description: 'Unauthorized - Invalid or missing token.'
+        }
+        #swagger.responses[403] = {
+            description: 'Forbidden - User is not an admin.'
+        }
         #swagger.responses[404] = {
-            description: 'Workspace not found.'
+            description: 'Amenity not found.'
         }
         #swagger.responses[500] = {
             description: 'Internal server error.'
@@ -103,14 +136,28 @@ router.put("/:id", verify_token, verify_admin, controllers.updateAmenityControll
 );
 router.delete("/", verify_token, verify_admin, controllers.deleteAmenityController
     /*
-        #swagger.description = 'Endpoint to remove a manager from a workspace.'
-        #swagger.summary = 'Remove a manager from a workspace.'
-        #swagger.parameters['id'] = { description: 'Workspace ID.' }
+        #swagger.description = 'Endpoint to delete an amenity.'
+        #swagger.summary = 'Delete an amenity.'
+        #swagger.parameters['id'] = { 
+            in: 'query',
+            description: 'Amenity ID.',
+            required: true,
+            type: 'string'
+        }
         #swagger.responses[200] = {
-            description: 'Workspace removed successfully.'
+            description: 'Amenity deleted successfully.'
+        }
+        #swagger.responses[400] = {
+            description: 'Invalid amenity ID.'
+        }
+        #swagger.responses[401] = {
+            description: 'Unauthorized - Invalid or missing token.'
+        }
+        #swagger.responses[403] = {
+            description: 'Forbidden - User is not an admin.'
         }
         #swagger.responses[404] = {
-            description: 'Workspace not found.'
+            description: 'Amenity not found.'
         }
         #swagger.responses[500] = {
             description: 'Internal server error.'
@@ -123,14 +170,58 @@ router.delete("/", verify_token, verify_admin, controllers.deleteAmenityControll
 
 router.get("/", verify_token, verify_admin, controllers.getAllAmenityController
     /*
-        #swagger.description = 'Endpoint to get all workspaces.'
-        #swagger.summary = 'Get all workspaces.'
-        #swagger.parameters['order'] = { description: 'Order by name, status.' }
-        #swagger.parameters['page'] = { description: 'Page number.' }
-        #swagger.parameters['limit'] = { description: 'Number of items per page.' }
-        #swagger.parameters['name'] = { description: 'Workspace name.' }
+        #swagger.description = 'Endpoint to get all amenities.'
+        #swagger.summary = 'Get all amenities.'
+        #swagger.tags = ['Amenities']
+        #swagger.parameters['order'] = { 
+            in: 'query',
+            description: 'Order by name, type, or price.',
+            type: 'string'
+        }
+        #swagger.parameters['page'] = { 
+            in: 'query',
+            description: 'Page number.',
+            type: 'integer'
+        }
+        #swagger.parameters['limit'] = { 
+            in: 'query',
+            description: 'Number of items per page.',
+            type: 'integer'
+        }
+        #swagger.parameters['name'] = { 
+            in: 'query',
+            description: 'Amenity name for filtering.',
+            type: 'string'
+        }
         #swagger.responses[200] = {
-            description: 'Workspace found.'
+            description: 'Amenities found.',
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            amenities: {
+                                type: 'array',
+                                items: {
+                                    $ref: "#/components/schemas/Amenity"
+                                }
+                            },
+                            totalPages: {
+                                type: 'integer'
+                            },
+                            currentPage: {
+                                type: 'integer'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        #swagger.responses[401] = {
+            description: 'Unauthorized - Invalid or missing token.'
+        }
+        #swagger.responses[403] = {
+            description: 'Forbidden - User is not an admin.'
         }
         #swagger.responses[500] = {
             description: 'Internal server error.'
@@ -142,14 +233,33 @@ router.get("/", verify_token, verify_admin, controllers.getAllAmenityController
 );
 router.get("/:id", verify_token, verify_admin, controllers.getAmenityByIdController
     /*
-        #swagger.description = 'Get a workspace by ID.'
-        #swagger.summary = 'Get a workspace by ID.'
-        #swagger.parameters['id'] = { description: 'Workspace ID.' }
+        #swagger.description = 'Endpoint to get an amenity by ID.'
+        #swagger.summary = 'Get an amenity by ID.'
+        #swagger.tags = ['Amenities']
+        #swagger.parameters['id'] = { 
+            in: 'path',
+            description: 'Amenity ID.',
+            required: true,
+            type: 'string'
+        }
         #swagger.responses[200] = {
-            description: 'Workspace found.'
+            description: 'Amenity found.',
+            content: {
+                "application/json": {
+                    schema: {
+                        $ref: "#/components/schemas/Amenity"
+                    }
+                }
+            }
+        }
+        #swagger.responses[401] = {
+            description: 'Unauthorized - Invalid or missing token.'
+        }
+        #swagger.responses[403] = {
+            description: 'Forbidden - User is not an admin.'
         }
         #swagger.responses[404] = {
-            description: 'Workspace not found.'
+            description: 'Amenity not found.'
         }
         #swagger.responses[500] = {
             description: 'Internal server error.'
