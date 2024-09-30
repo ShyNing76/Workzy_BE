@@ -1,4 +1,4 @@
-import db from '../models/';
+import db from '../models';
 import {v4} from "uuid";
 
 export const createAmenityService = async (data) => new Promise(async (resolve, reject) => {

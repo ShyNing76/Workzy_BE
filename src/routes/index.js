@@ -31,6 +31,22 @@ function initWebRoutes(app) {
         // #swagger.tags = ['Staff']
     );
 
+    app.use('/api/v1/amenity', require('./amenity')
+        // #swagger.tags = ['Amenity']
+    );
+
+    app.use('/api/v1/amenityWorkspace', require('./amenityWorkspace')
+        // #swagger.tags = ['Amenities Workspace']
+    );
+
+    app.use('/api/v1/wishList', require('./wishList')
+        // #swagger.tags = ['WishList']
+    );
+
+    app.use('/api/v1/review', require('./review')
+        // #swagger.tags = ['Review']
+    );
+
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(require('../config/swagger-output.json')));
     // Import Swagger UI
     app.use(notFound);

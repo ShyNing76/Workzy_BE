@@ -8,4 +8,8 @@ export * from './user.service';
 export * from './workspaceImage.service';
 export * from './amenity.service';
 export * from './amenitiesWorkspace.service';
+export * from './wishList.service';
+export * from './review.service';
+
+
 

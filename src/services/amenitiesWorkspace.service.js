@@ -53,7 +53,7 @@ export const deleteAmenitiesWorkspaceService = async ({amenities_workspace_ids})
           });
           resolve({
             err: amenitiesWorkspace > 0 ? 0 : 1,
-            mes: amenitiesWorkspace > 0 ? `${deletedCount} amenities-workspace record(s) deleted successfully!`
+            mes: amenitiesWorkspace > 0 ? `amenities-workspace record(s) deleted successfully!`
             : "No amenities-workspace records found to delete"
           })
     } catch (error) {

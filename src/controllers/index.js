@@ -7,5 +7,9 @@ export * from './staff.controller';
 export * from './workspaceImage.controller';
 export * from './amenity.controller';
 export * from './amenitiesWorkspace.controller';
+export * from './wishList.controller';
+export * from './review.controller';
+
+
 
 
