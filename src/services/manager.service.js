@@ -2,6 +2,7 @@ import db from "../models";
 import {v4} from "uuid";
 import moment from "moment";
 import {comparePassword, hashPassword} from "../utils/hashPassword";
+import {handleLimit, handleOffset, handleSortOrder} from "../utils/handleFilter";
 
 export const createManagerService = (data) => new Promise(async (resolve, reject) => {
     try {
@@ -19,22 +20,21 @@ export const createManagerService = (data) => new Promise(async (resolve, reject
         });
 
         if (isDuplicate && isDuplicate.user_id) {
-            return reject({
-                err: 1,
-                message: "Email or phone are already exists"
-            });
+            return reject(isDuplicate.email === data.email ? "Email already exists" : "Phone already exists");
         }
+        const {password, ...rest} = data;
+        rest.password = hashPassword(password);
         const user = await db.User.create(
             {
                 user_id: v4(),
-                ...data,
-                role_id: 2, // Assuming 2 is the role_id for manager
+                ...rest,
+                role_id: 2,
                 Manager: {
                     manager_id: v4(),
                 },
             },
             {
-                include: [{ model: db.Manager }], // Correct placement of include option
+                include: [{model: db.Manager}],
                 raw: true,
                 nest: true,
             }
@@ -63,7 +63,8 @@ export const getManagerByIdService = (id) => new Promise(async (resolve, reject)
     try {
         const manager = await db.User.findOne({
             where: {
-                user_id: id
+                user_id: id,
+                role_id: 2
             },
             include: {
                 model: db.Manager,
@@ -97,15 +98,12 @@ export const getManagerByIdService = (id) => new Promise(async (resolve, reject)
 
 export const getAllManagersService = ({page, limit, order, name, ...query}) => new Promise(async (resolve, reject) => {
     try {
-        const fLimit = limit ? parseInt(limit) : process.env.PAGE_LIMIT;
-        const fPage = page ? parseInt(page) : 1;
         const fName = name ? name : "";
-        const fOrder = order ? order : "email";
 
         const managers = await db.User.findAll({
             where: {
                 name: {
-                    [db.Sequelize.Op.like]: `%${fName}%`
+                    [db.Sequelize.Op.substring]: fName
                 },
                 role_id: 2, // 2 is the role_id for manager
                 ...query
@@ -119,20 +117,15 @@ export const getAllManagersService = ({page, limit, order, name, ...query}) => n
             attributes: {
                 exclude: ["password", "created_at", "updated_at", "user_id", "createdAt", "updatedAt"]
             },
-            order: [
-                [fOrder, "ASC"]
-            ],
-            limit: fLimit,
-            offset: (fPage - 1) * fLimit,
+            order: [handleSortOrder(order, "name")],
+            limit: handleLimit(limit),
+            offset: handleOffset(page, limit),
             raw: true,
             nest: true
         });
 
         if (!managers) {
-            return reject({
-                err: 1,
-                message: "No manager found"
-            });
+            return reject("No manager found");
         }
         let count = 0;
         managers.forEach(manager => {
@@ -156,18 +149,16 @@ export const updateManagerService = (id, data) => new Promise(async (resolve, re
         const {password, ...rest} = data;
         const manager = await db.User.findOne({
             where: {
-                user_id: id
+                user_id: id,
+                role_id: 2
             },
         });
 
         if (!manager) {
-            return reject({
-                err: 1,
-                message: "Manager not found"
-            });
+            return reject("Manager not found");
         }
 
-        const isDuplicateEmail = await db.User.findOne({
+        const isDuplicated = await db.User.findOne({
             where: {
                 [db.Sequelize.Op.or]: [
                     {
@@ -180,22 +171,8 @@ export const updateManagerService = (id, data) => new Promise(async (resolve, re
             }
         });
 
-        if (isDuplicateEmail && isDuplicateEmail.user_id !== id) {
-            return reject({
-                err: 1,
-                message: "Email or phone already exists"
-            });
-        }
-
-        if (password){
-            let checkPassword = comparePassword(password, manager.password);
-            if (checkPassword) {
-                return reject({
-                    err: 1,
-                    message: "Invalid password"
-                });
-            }
-            rest.password = hashPassword(password);
+        if (isDuplicated && isDuplicated.user_id !== id) {
+            return reject(isDuplicated.email === data.email ? "Email already exists" : "Phone already exists");
         }
 
         await manager.update({
@@ -231,10 +208,7 @@ export const deleteManagerService = (id) => new Promise(async (resolve, reject) 
         });
 
         if (!manager) {
-            return reject({
-                err: 1,
-                message: "Manager not found"
-            });
+            return reject("Manager not found");
         }
 
         manager.setStatus("inactive");

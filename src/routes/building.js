@@ -4,8 +4,6 @@ import {verify_admin, verify_admin_or_manager, verify_token} from "../middleware
 
 const router = express.Router();
 
-router.use(verify_token);
-router.use(verify_admin_or_manager);
 
 router.get("/", controllers.getBuildingController
     /*
@@ -13,7 +11,20 @@ router.get("/", controllers.getBuildingController
         #swagger.summary = 'Get all buildings.'
         #swagger.parameters['page'] = { description: 'Page number.' }
         #swagger.parameters['limit'] = { description: 'Number of items in a page.' }
-        #swagger.parameters['order'] = { description: 'Order by column building_name|location|rating|status.' }
+        #swagger.parameters['order'] = {
+            in: 'query',
+            description: 'Order by column building_name|location|rating|status.',
+            '@schema': {
+                type: 'array',
+                items: {
+                    type: 'string',
+                    pattern: '^(building_name|location|rating|status|asc|desc)$',
+                    example: 'building_name'
+                }
+            },
+            explode: true,
+            required: false
+        }
         #swagger.parameters['building_name'] = { description: 'Search by building name.' }
         #swagger.parameters['location'] = { description: 'Filter by location.' }
         #swagger.responses[200] = {
@@ -51,7 +62,9 @@ router.get("/:id", controllers.getBuildingByIdController
      */
 );
 
-router.post("/", controllers.createBuildingController
+router.use(verify_token);
+
+router.post("/", verify_admin, controllers.createBuildingController
     /*
         #swagger.description = 'Endpoint to create a new building.'
         #swagger.summary = 'Create a new building.'
@@ -106,7 +119,7 @@ router.post("/", controllers.createBuildingController
      */
 );
 
-router.put("/:id", controllers.updateBuildingController
+router.put("/:id", verify_admin_or_manager, controllers.updateBuildingController
     /*
         #swagger.description = 'Endpoint to update a building.'
         #swagger.summary = 'Update a building.'
@@ -166,7 +179,7 @@ router.put("/:id", controllers.updateBuildingController
      */
 );
 
-router.put("/:id/status", controllers.updateBuildingStatusController
+router.put("/:id/status", verify_admin_or_manager, controllers.updateBuildingStatusController
     /*
         #swagger.description = 'Endpoint to update status of a building.'
         #swagger.summary = 'Update status of a building.'
@@ -206,7 +219,7 @@ router.put("/:id/status", controllers.updateBuildingStatusController
      */
 );
 
-router.put("/:id/image", controllers.updateBuildingImageController
+router.put("/:id/image", verify_admin_or_manager, controllers.updateBuildingImageController
     /*
         #swagger.description = 'Endpoint to update image of a building.'
         #swagger.summary = 'Update image of a building.'

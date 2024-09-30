@@ -1,12 +1,12 @@
-import {notFound} from "../middlewares/handle_error";
+import {errorHandlingMiddleware, notFound} from "../middlewares/handle_error";
 import swaggerUi from 'swagger-ui-express';
 
 
 function initWebRoutes(app) {
     app.use('/api/v1/auth', require('./auth')
         // #swagger.tags = ['Auth']
-
     ); // Import auth routes
+  
     app.use('/api/v1/customer', require('./customer')
         // #swagger.tags = ['Customer']
     );
@@ -23,6 +23,13 @@ function initWebRoutes(app) {
         // #swagger.tags = ['Workspace']
     );
 
+    app.use('/api/v1/workspace-type', require('./workspaceType')
+        // #swagger.tags = ['Workspace Type']
+    );
+
+    app.use('/api/v1/notification', require('./notification')
+        // #swagger.tags = ['Notification']
+    );
     app.use('/api/v1/staff', require('./staff')
         // #swagger.tags = ['staff']
     );

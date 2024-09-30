@@ -14,8 +14,7 @@ router.get('/profile', verify_token, controller.getUser
 );
 
 router.put('/profile/', verify_token, controller.updateUser
-    /*
-         #swagger.requestBody = {
+    /* #swagger.requestBody = {
              required: true,
                 content: {
                     "application/json": {
@@ -31,7 +30,8 @@ router.put('/profile/', verify_token, controller.updateUser
                                     example: 'Male|Female|Others'
                                 },
                                 date_of_birth: {
-                                    type: 'date',
+                                    type: 'string',
+                                    format: 'date-time',
                                     example: 'MM/DD/YYYY'
                                 }
                             },

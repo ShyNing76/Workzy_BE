@@ -1,6 +1,5 @@
 import express from "express";
 import * as controllers from "../controllers";
-import {getAllManagersController} from "../controllers";
 import {verify_admin, verify_admin_or_manager, verify_token} from "../middlewares/verifyToken";
 
 const router = express.Router();
@@ -9,10 +8,26 @@ router.get("/", verify_token, verify_admin, controllers.getAllManagersController
     /*
         #swagger.description = 'Endpoint to get all managers.'
         #swagger.summary = 'Get all managers.'
-        #swagger.parameters['order'] = { description: 'Order by email, name, role_id, status.' }
         #swagger.parameters['page'] = { description: 'Page number.' }
         #swagger.parameters['limit'] = { description: 'Number of items per page.' }
+        #swagger.parameters['order'] = {
+            in: 'query',
+            description: 'Order by field.',
+            '@schema': {
+                type: 'array',
+                items: {
+                    type: 'string',
+                    pattern: '^(name|email|phone|date_of_birth|gender)$',
+                    example: 'name'
+                }
+            },
+            explode: true,
+            required: false
+        }
         #swagger.parameters['name'] = { description: 'Manager name.' }
+        #swagger.parameters['email'] = { description: 'Manager email.' }
+        #swagger.parameters['phone'] = { description: 'Manager phone.' }
+        #swagger.parameters['date_of_birth'] = { description: 'Manager date of birth.' }
         #swagger.responses[200] = {
             description: 'Managers found.'
         }

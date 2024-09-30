@@ -1,47 +1,44 @@
 import db from '../models'
-import jwt from 'jsonwebtoken';
 import moment from "moment";
 import * as hashPassword from '../utils/hashPassword';
 import {isDuplicate} from '../utils/checkDuplicate';
 
 
 export const getProfile = (user) => new Promise(async (resolve, reject) => {
-        try {
-            const customer = await db.User.findOne({
-                where: {
-                    user_id: user.user_id
-                },
-                include: {
-                    model: db.Customer,
-                    attributes: {
-                        exclude: ['created_at', 'updated_at', 'customer_id', 'createdAt', 'updatedAt']
-                    }
-                },
+    try {
+        const customer = await db.User.findOne({
+            where: {
+                user_id: user.user_id
+            },
+            include: {
+                model: db.Customer,
                 attributes: {
-                    exclude: ['password', 'created_at', 'updated_at', 'user_id', 'createdAt', 'updatedAt']
-                },
-                raw: true,
-                nest: true
-            });
+                    exclude: ['created_at', 'updated_at', 'customer_id', 'createdAt', 'updatedAt']
+                }
+            },
+            attributes: {
+                exclude: ['password', 'created_at', 'updated_at', 'user_id', 'createdAt', 'updatedAt']
+            },
+            raw: true,
+            nest: true
+        });
 
-            let isCustomerExist = !!customer;
-            if (isCustomerExist) {
-                customer.date_of_birth = moment(customer.date_of_birth).format('MM/DD/YYYY');
-            }
-
-            resolve({
-                err: isCustomerExist ? 0 : 1,
-                message: isCustomerExist ? 'Get profile successful' : 'Get profile failed',
-                data: isCustomerExist ? {
-                    ...customer
-                } : {}
-            })
-        } catch
-            (error) {
-            reject(error)
+        let isCustomerExist = !!customer;
+        if (isCustomerExist) {
+            customer.date_of_birth = moment(customer.date_of_birth).format('MM/DD/YYYY');
         }
-    })
-;
+
+        resolve({
+            err: isCustomerExist ? 0 : 1,
+            message: isCustomerExist ? 'Get profile successful' : 'Get profile failed',
+            data: isCustomerExist ? {
+                ...customer
+            } : {}
+        })
+    } catch(error) {
+        reject(error)
+    }
+});
 
 export const updateProfile = (updateFields) => new Promise(async (resolve, reject) => {
     const t = await db.sequelize.transaction();
@@ -53,18 +50,11 @@ export const updateProfile = (updateFields) => new Promise(async (resolve, rejec
             }
         });
         if (!user) {
-            resolve({
-                err: 1,
-                message: 'User not found'
-            })
+            return reject('User not found')
         }
 
-        user.set(
-            {
-                ...user,
-                ...customerFields
-            }
-        );
+        Object.assign(user, customerFields);
+
         await user.save({transaction: t});
         await t.commit();
         resolve({
@@ -85,19 +75,13 @@ export const updatePassword = (updateFields) => new Promise(async (resolve, reje
         });
 
         if (!user) {
-            resolve({
-                err: 1,
-                message: 'User not found'
-            })
+            return reject('User not found')
         }
 
         const isPasswordCorrect = hashPassword.comparePassword(updateFields.current_password, user.password);
 
         if (!isPasswordCorrect) {
-            resolve({
-                err: 1,
-                message: 'Current password is incorrect'
-            })
+            return reject('Current password is incorrect')
         }
 
         user.password = hashPassword.hashPassword(updateFields.new_password);
@@ -110,7 +94,7 @@ export const updatePassword = (updateFields) => new Promise(async (resolve, reje
     } catch (error) {
         reject(error)
     }
-})
+});
 
 export const updatePhone = (updateFields) => new Promise(async (resolve, reject) => {
     try {
@@ -128,10 +112,7 @@ export const updatePhone = (updateFields) => new Promise(async (resolve, reject)
         });
 
         if (!customer) {
-            resolve({
-                err: 1,
-                message: 'User not found'
-            })
+            return reject('User not found')
         }
 
         customer.phone = updateFields.phone;
@@ -144,17 +125,14 @@ export const updatePhone = (updateFields) => new Promise(async (resolve, reject)
     } catch (error) {
         reject(error)
     }
-})
+});
 
 export const updateEmail = (newEmail, userId) => new Promise(async (resolve, reject) => {
     try {
         const isEmailDuplicated = isDuplicate(db.User, 'email', newEmail);
         let check = await isEmailDuplicated;
 
-        if (check) resolve({
-            err: 1,
-            message: "Email is already used"
-        });
+        if (check) return reject("Email is already used");
 
         const user = await db.User.findOne({
             where: {
@@ -163,10 +141,7 @@ export const updateEmail = (newEmail, userId) => new Promise(async (resolve, rej
         });
 
         if (!user) {
-            resolve({
-                err: 1,
-                message: 'User not found'
-            })
+            return reject('User not found')
         }
 
         user.email = newEmail;
@@ -179,7 +154,7 @@ export const updateEmail = (newEmail, userId) => new Promise(async (resolve, rej
     } catch (error) {
         reject(error)
     }
-})
+});
 
 export const updateImage = (updateFields) => new Promise(async (resolve, reject) => {
     try {
@@ -190,10 +165,7 @@ export const updateImage = (updateFields) => new Promise(async (resolve, reject)
         });
 
         if (!user) {
-            resolve({
-                err: 1,
-                message: 'User not found'
-            })
+            return reject('User not found')
         }
 
         user.image = updateFields.image;
@@ -206,7 +178,7 @@ export const updateImage = (updateFields) => new Promise(async (resolve, reject)
     } catch (error) {
         reject(error)
     }
-})
+});
 
 export const removeUser = (userId) => new Promise(async (resolve, reject) => {
     try {
@@ -217,10 +189,7 @@ export const removeUser = (userId) => new Promise(async (resolve, reject) => {
         });
 
         if (!user) {
-            resolve({
-                err: 1,
-                message: 'User not found'
-            })
+            return reject('User not found')
         }
 
         user.setStatus('inactive');
@@ -233,4 +202,4 @@ export const removeUser = (userId) => new Promise(async (resolve, reject) => {
     } catch (error) {
         reject(error)
     }
-})
+});

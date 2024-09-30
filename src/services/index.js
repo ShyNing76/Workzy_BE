@@ -1,7 +1,8 @@
-export * from './authService';
-export * from './customerService';
+export * from './auth.service';
+export * from './customer.service';
 export * from './workspaceService';
-export * from './managerService';
-export * from './buildingService';
+export * from './manager.service';
+export * from './building.service';
+export * from './notification.service';
+export * from './workspaceType.service';
 export * from './staffService';
-
