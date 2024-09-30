@@ -11,7 +11,7 @@ export const getProfile = (tokenUser) => new Promise(async (resolve, reject) => 
                 user_id: tokenUser.user_id
             },
             attributes: {
-                exclude: ['password', 'created_at', 'updated_at', 'user_id', 'createdAt', 'updatedAt']
+                exclude: ['password', 'created_at', 'updated_at', 'createdAt', 'updatedAt']
             },
             raw: true,
             nest: true
