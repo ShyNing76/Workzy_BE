@@ -48,7 +48,7 @@ export const updateAmenityService = (amenity_id, data) => new Promise(async (res
                 message: `Amenity is already used`
             })
         
-
+        
         const amenity = await db.Amenity.findOne({
             where: {
                 amenity_id: amenity_id,
@@ -61,6 +61,9 @@ export const updateAmenityService = (amenity_id, data) => new Promise(async (res
             err: 1,
             message: "Amenity not found"
         });
+        
+        data.depreciation_price = data.original_price * 0.7;
+        if(data.type == "service") data.depreciation_price = 0;
 
         await amenity.update({
             ...data
@@ -119,17 +122,17 @@ export const deleteAmenityService = async ({amenity_id}) => new Promise(async (r
     }
 })
 
-export const getAllAmenityService = ({page, limit, order, image, ...query}) => new Promise(async (resolve, reject) => {
+export const getAllAmenityService = ({page, limit, order, amenity_name, ...query}) => new Promise(async (resolve, reject) => {
     try {
         const queries = { raw: true, nest: true };
         const offset = !page || +page <= 1 ? 0 : +page - 1;
         const finalLimit = +limit || +process.env.PAGE_LIMIT;
         queries.offset = offset * finalLimit;
         queries.limit = finalLimit;
-        if (order) queries.order = [order || "workspace_id"];
-        if (image) query.image = image;
+        if (order) queries.order = [order];
+        if (amenity_name) query.amenity_name = amenity_name;
 
-        const workspaceImages = await db.WorkspaceImage.findAndCountAll({
+        const amenities = await db.Amenity.findAndCountAll({
             where: {
                 ...query, 
             },
@@ -137,44 +140,33 @@ export const getAllAmenityService = ({page, limit, order, image, ...query}) => n
             attributes: {
                 exclude: ["createdAt", "updatedAt"]
             },
-            include: [
-                {
-                    model: db.Workspace,
-                    attributes: {exclude : ["createdAt", "updatedAt"]},
-                }, 
-            ],
         });
 
         resolve({
-            err: workspaceImages.count > 0 ? 0 : 1,
-            message: workspaceImages.count > 0 ? "Got" : "No Workspace Image Exist",
-            data: workspaceImages
+            err: amenities.count > 0 ? 0 : 1,
+            message: amenities.count > 0 ? "Got" : "No Amenity Exist",
+            data: amenities
         });
     } catch (error) {
         reject(error)
     }
 })
 
-export const getAmenityByIdService = (workspaceId) => new Promise(async (resolve, reject) => {
+export const getAmenityByIdService = (amenity_id) => new Promise(async (resolve, reject) => {
     try {
-        const workspaceImage = await db.WorkspaceImage.findAll({
+        const amenity = await db.Amenity.findOne({
             where: {
-                workspace_id: workspaceId
+                amenity_id: amenity_id
             },
             attributes: {
                 exclude: ["createdAt", "updatedAt"]
             },
-            include: {
-                model: db.Workspace,
-                attributes: {
-                exclude: ["createdAt","updatedAt"]
-                },
-            }
+            raw: true
         });
         resolve({
-            err: workspaceImage.length > 0 ? 0 : 1,
-            message: workspaceImage.length > 0 ? "Got" : "No Workspace Exist",
-            data: workspaceImage
+            err: amenity ? 0 : 1,
+            message: amenity ? "Got" : "No Amenity Exist",
+            data: amenity
         });
     } catch (error) {
         reject(error)

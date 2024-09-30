@@ -84,7 +84,7 @@ export const getAllWorkspaceImageService = ({page, limit, order, image, ...query
         const finalLimit = +limit || +process.env.PAGE_LIMIT;
         queries.offset = offset * finalLimit;
         queries.limit = finalLimit;
-        if (order) queries.order = [order || "workspace_id"];
+        if (order) queries.order = [order];
         if (image) query.image = image;
 
         const workspaceImages = await db.WorkspaceImage.findAndCountAll({
@@ -115,7 +115,7 @@ export const getAllWorkspaceImageService = ({page, limit, order, image, ...query
 
 export const getWorkspaceImageByWorkspaceIdService = (workspaceId) => new Promise(async (resolve, reject) => {
     try {
-        const workspaceImage = await db.WorkspaceImage.findAll({
+        const workspaceImage = await db.WorkspaceImage.findOne({
             where: {
                 workspace_id: workspaceId
             },
@@ -130,8 +130,8 @@ export const getWorkspaceImageByWorkspaceIdService = (workspaceId) => new Promis
             }
         });
         resolve({
-            err: workspaceImage.length > 0 ? 0 : 1,
-            message: workspaceImage.length > 0 ? "Got" : "No Workspace Exist",
+            err: workspaceImage > 0 ? 0 : 1,
+            message: workspaceImage > 0 ? "Got" : "No Workspace Exist",
             data: workspaceImage
         });
     } catch (error) {

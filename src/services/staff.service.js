@@ -66,7 +66,7 @@ export const getAllStaffService = ({page, limit, order, name, ...query}) => new 
         const finalLimit = +limit || +process.env.PAGE_LIMIT;
         queries.offset = offset * finalLimit;
         queries.limit = finalLimit;
-        if (order) queries.order = [order || "email"];
+        if (order) queries.order = [order];
         if (name) query.name = { [Op.substring]: name };
 
         const staffs = await db.User.findAndCountAll({

@@ -1,7 +1,11 @@
-export * from './authController';
-export * from './customerController';
-export * from './workspaceController';
-export * from './managerController';
-export * from './buildingController';
-export * from './staffController';
-export * from './workspaceImageController';
+export * from './auth.controller';
+export * from './customer.controller';
+export * from './workspace.controller';
+export * from './manager.controller';
+export * from './building.controller';
+export * from './staff.controller';
+export * from './workspaceImage.controller';
+export * from './amenity.controller';
+export * from './amenitiesWorkspace.controller';
+
+
