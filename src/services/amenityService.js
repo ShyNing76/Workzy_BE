@@ -87,7 +87,7 @@ export const deleteAmenityService = async ({amenity_id}) => new Promise(async (r
         if (amenities.length === 0) 
             return resolve({
                 err: 1,
-                message: "No amenity image found"
+                message: "No amenity found"
             })
         
         let alreadyInactiveCount = 0;
@@ -106,12 +106,12 @@ export const deleteAmenityService = async ({amenity_id}) => new Promise(async (r
         if (deletedCount > 0) {
             resolve({
                 err: 0,
-                message: `${deletedCount} workspace image(s) deleted successfully!`
+                message: `${deletedCount} amenity(s) deleted successfully!`
             });
         } else {
             resolve({
                 err: 1,
-                message: alreadyInactiveCount > 0 ? `${alreadyInactiveCount} selected images were already deleted.` : 'No images were deleted.'
+                message: alreadyInactiveCount > 0 ? `${alreadyInactiveCount} selected amenities were already deleted.` : 'No images were deleted.'
             });
         }
     } catch (error) {
