@@ -23,6 +23,10 @@ function initWebRoutes(app) {
         // #swagger.tags = ['Workspace']
     );
 
+    app.use('/api/v1/workspace-type', require('./workspaceType')
+        // #swagger.tags = ['Workspace Type']
+    );
+
     app.use('/api/v1/notification', require('./notification')
         // #swagger.tags = ['Notification']
     );

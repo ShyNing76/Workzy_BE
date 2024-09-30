@@ -1,4 +1,4 @@
-import {badRequest, created, internalServerError, ok} from "../middlewares/handle_error";
+import {badRequest, created, internalServerError, notFound, ok} from "../middlewares/handle_error";
 import {address, name, location} from "../helper/joi_schema";
 import * as services from "../services";
 import Joi from "joi";
@@ -8,6 +8,8 @@ export const getBuildingController = async (req, res) => {
         const response = await services.getBuildingService(req.query);
         return ok(res, response);
     } catch (error) {
+        if (error === 'No building found')
+            return badRequest(res, error);
         internalServerError(res, error);
     }
 }

@@ -31,8 +31,7 @@ export const conflict = (res, message) => {
 }
 
 export const created = (res, data) => {
-    const error = createError.Created(data);
-    return res.status(error.status).json(data);
+    return res.status(201).json(data);
 }
 
 export const ok = (res, data) => {

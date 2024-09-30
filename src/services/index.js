@@ -4,3 +4,4 @@ export * from './workspaceService';
 export * from './manager.service';
 export * from './building.service';
 export * from './notification.service';
+export * from './workspaceType.service';

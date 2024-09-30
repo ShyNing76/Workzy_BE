@@ -1,5 +1,6 @@
 import db from "../models";
 import {isDuplicate} from "../utils/checkDuplicate";
+import {handleLimit, handleOffset, handleSortOrder} from "../utils/handleFilter";
 
 export const getBuildingService = ({
                                        page,
@@ -9,19 +10,22 @@ export const getBuildingService = ({
                                        ...query
                                    }) => new Promise(async (resolve, reject) => {
     try {
-        const fLimit = parseInt(limit) || 10;
-        const fPage = parseInt(page) || 1;
-        const [fOrder, fSort] = order || ["building_name", "ASC"];
+
         const fName = building_name || "";
 
         const buildings = await db.Building.findAndCountAll({
             where: {
                 building_name: {
-                    [db.Sequelize.Op.like]: `%${fName}%`
-                }, ...query
-            }, attributes: {
+                    [db.Sequelize.Op.substring]: fName
+                },
+                ...query
+            },
+            attributes: {
                 exclude: ["created_at", "updated_at", "createdAt", "updatedAt"]
-            }, order: [[fOrder, fSort]], limit: fLimit, offset: (fPage - 1) * fLimit
+            },
+            order: [handleSortOrder(order, "building_name")],
+            limit: handleLimit(limit),
+            offset: handleOffset(page, limit)
         });
 
         if (buildings.count === 0) {
@@ -64,7 +68,10 @@ export const createBuildingService = (data) => new Promise(async (resolve, rejec
             where: {
                 building_name: data.building_name
             }, defaults: {
-                building_name: data.building_name, location: data.location, address: data.address, ...data
+                building_name: data.building_name,
+                location: data.location,
+                address: data.address,
+                ...data
             }
         }).then(([building, created]) => {
             if (!created) {

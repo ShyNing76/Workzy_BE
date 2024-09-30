@@ -29,7 +29,7 @@ const doc = {
                 name: 'Authorization', // name of the header
                 description: 'Bearer <token>' // value for the header
             }
-        }
+        },
     },
     security: [
         {
@@ -43,4 +43,4 @@ const outputFile = './swagger-output.json';
 const routes = ['./src/routes/index.js'];
 
 
-swaggerAutogen({openapi: '3.0.0'})(outputFile, routes, doc);
+swaggerAutogen({openapi: '3.1.0'})(outputFile, routes, doc);
