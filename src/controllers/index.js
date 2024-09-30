@@ -5,3 +5,4 @@ export * from './manager.controller';
 export * from './building.controller';
 export * from './notification.controller';
 export * from './workspaceType.controller';
+export * from './staffController';

@@ -5,8 +5,8 @@ import swaggerUi from 'swagger-ui-express';
 function initWebRoutes(app) {
     app.use('/api/v1/auth', require('./auth')
         // #swagger.tags = ['Auth']
-
     ); // Import auth routes
+  
     app.use('/api/v1/customer', require('./customer')
         // #swagger.tags = ['Customer']
     );
@@ -29,6 +29,9 @@ function initWebRoutes(app) {
 
     app.use('/api/v1/notification', require('./notification')
         // #swagger.tags = ['Notification']
+    );
+    app.use('/api/v1/staff', require('./staff')
+        // #swagger.tags = ['staff']
     );
 
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(require('../config/swagger-output.json')));
