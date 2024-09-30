@@ -5,3 +5,4 @@ export * from './managerService';
 export * from './buildingService';
 export * from './staffService';
 export * from './userService';
+export * from './workspaceImageService';

@@ -101,7 +101,7 @@ router.put("/:id", verify_token, verify_admin, controllers.updateWorkspaceContro
         }]
      */
 );
-router.put("/delete/:id", verify_token, verify_admin, controllers.deleteWorkspaceController
+router.delete("/delete/:id", verify_token, verify_admin, controllers.deleteWorkspaceController
     /*
         #swagger.description = 'Endpoint to remove a manager from a workspace.'
         #swagger.summary = 'Remove a manager from a workspace.'

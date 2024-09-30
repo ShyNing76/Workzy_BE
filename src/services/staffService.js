@@ -90,6 +90,7 @@ export const getAllStaffService = ({page, limit, order, name, ...query}) => new 
                     ]
                 }, 
             ],
+            raw: true
         });
         staffs.rows.forEach(staff => {
             if (staff.date_of_birth) {
@@ -128,11 +129,9 @@ export const getStaffByIdService = (id) => new Promise(async (resolve, reject) =
                         exclude: ["building_id","manager_id","status","createdAt","updatedAt"]
                     },
                 }
-            }
+            },
+            raw: true
         });
-        staff.date_of_birth = moment(staff.date_of_birth).format("MM/DD/YYYY");
-        console.log(staff.date_of_birth)
-        console.log(moment(staff.date_of_birth).format("MM/DD/YYYY"))
         resolve({
             err: staff ? 0 : 1,
             message: staff ? "Got" : "No Staff Exist",
@@ -169,7 +168,8 @@ export const updateStaffService = (id, data) => new Promise(async (resolve, reje
                     }   
                 ],
                 user_id: { [Op.ne]: id }
-            }
+            },
+            raw: true
         });
 
         if(isDuplicated){
@@ -184,7 +184,8 @@ export const updateStaffService = (id, data) => new Promise(async (resolve, reje
             where: {
                 user_id: id,
                 role_id: 3
-            }
+            },
+            raw: true
         });
 
         if(!staff) return resolve({
@@ -208,69 +209,21 @@ export const updateStaffService = (id, data) => new Promise(async (resolve, reje
     }
 })
 
-// export const updateStaffProfileService = (id, data) => new Promise(async (resolve, reject) => {
-//     try {
-//         const staff = await db.User.findOne({
-//             where: {
-//                 user_id: id
-//             }
-//         });
-
-//         if(!staff) return resolve({
-//             err: 1,
-//             message: "Staff not found"
-//         });
-
-//         await staff.update({
-//             ...data
-//         })
-//         resolve({
-//             err: 0,
-//             message: "Update Successfully"
-//         })
-
-//     } catch (error) {
-//         reject(error)
-//     }
-// })
-
-// export const updateStaffPasswordService = (id, password) => new Promise(async (resolve, reject) => {
-//     try {
-//         const staff = await db.User.findOne({
-//             where: {
-//                 user_id: id,
-//                 role_id: 3
-//             }
-//         });
-
-//         if(!staff) return resolve({
-//             err: 1,
-//             message: "Staff not found"
-//         });
-
-//         staff.password = hashPassword(password);
-//         await staff.save();
-//         resolve({
-//             err: 0,
-//             message: "Update Successfully"
-//         })
-
-//     } catch (error) {
-//         reject(error)
-//     }
-// })
-
 export const deleteStaffService = (id) => new Promise(async (resolve, reject) => {
     try {
 
         const user = await db.User.findOne({
-            where: {user_id: id, role_id: 3}
+            where: {user_id: id, role_id: 3},
+            raw: true
         })
         if(!user) return resolve({
-            err: 0,
+            err: 1,
             message: "User not found"
         })
-
+        if(user.status === "inactive") return resolve({
+            err: 1,
+            message: "Staff is already deleted"
+        })
         user.status = "inactive";
         await user.save();
 
@@ -287,18 +240,24 @@ export const assignStaffToBuildingService = async (id, building_id) => new Promi
     try {
 
         const [staff, isBuildingExist] = await Promise.all([
-            db.Staff.findOne({
+            db.User.findOne({
                 where: {
-                    staff_id: id
-                }
+                    user_id: id,
+                    role_id: 3
+                },
+                include: [{
+                    model: db.Staff,
+                }],
+                raw: true
             }), 
             db.Building.findOne({
                 where: {
                     building_id: building_id
-                }
+                },
+                raw: true
             })
         ])
-        if(!staff) return resolve({
+        if(!staff || staff.status == "inactive") return resolve({
             err: 1,
             message: "Staff is not exist"
         })
@@ -306,9 +265,8 @@ export const assignStaffToBuildingService = async (id, building_id) => new Promi
             err: 1,
             message: "Building is not exist"
         })
-
-        staff.building_id = building_id;
-        await staff.save();
+        staff.Staff.building_id = building_id;
+        await staff.Staff.save();
         
         resolve({
             err: 0,

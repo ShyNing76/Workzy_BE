@@ -23,6 +23,10 @@ function initWebRoutes(app) {
         // #swagger.tags = ['Workspace']
     );
 
+    app.use('/api/v1/workspaceImage', require('./workspaceImage')
+        // #swagger.tags = ['Workspace Image']
+    );
+
     app.use('/api/v1/staff', require('./staff')
         // #swagger.tags = ['Staff']
     );

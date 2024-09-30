@@ -22,7 +22,7 @@ export const createStaffController = async (req, res) => {
 
 export const getStaffProfileController = async (req, res) => {
     try {
-        const response = await services.getStaffByIdService(req.user.id);
+        const response = await services.getStaffByIdService(req.user);
         return res.status(200).json(response);
     } catch (error) {
         return res.status(500).json({error: error.message});
@@ -55,7 +55,7 @@ export const updateStaffController = async (req, res) => {
             phone,
         }).validate({email: req.body.email, phone: req.body.phone}).error;
         if (error) return badRequest(res, error.details[0].message);
-        const response = await services.updateStaffService( req.params.id, req.body);
+        const response = await services.updateStaffService(req.params.id, req.body);
         return res.status(200).json(response);
     } catch (error) {
         return res.status(500).json({error: error.message});
@@ -65,12 +65,11 @@ export const updateStaffController = async (req, res) => {
 export const updateStaffProfileController = async (req, res) => {
     try {
         const error = Joi.object({
-            name,
             gender,
             date_of_birth
         }).validate(req.body).error;
         if (error) return badRequest(res, error.details[0].message);
-        const response = await services.updateProfileService( {...req.user, ...req.body});
+        const response = await services.updateUserProfileService( {...req.user, ...req.body});
         return res.status(200).json(response);
     } catch (error) {
         return res.status(500).json({error: error.message});
@@ -83,7 +82,7 @@ export const updateStaffPasswordController = async (req, res) => {
             password
         }).validate(req.body).error;
         if (error) return badRequest(res, error.details[0].message);
-        const response = await services.updatePassword({...req.user, ...req.body});
+        const response = await services.updateUserPassword({...req.user, ...req.body});
         return res.status(200).json(response);
     } catch (error) {
         return res.status(500).json({error: error.message});
@@ -92,7 +91,6 @@ export const updateStaffPasswordController = async (req, res) => {
 
 export const deleteStaffController = async (req, res) => {
     try {
-        console.log(req.params.id)
         const response = await services.deleteStaffService(req.params.id);
         return res.status(200).json(response);
     } catch (error) {

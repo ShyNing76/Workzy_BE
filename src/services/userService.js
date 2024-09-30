@@ -1,9 +1,10 @@
 import db from '../models'
 import moment from "moment";
-import * as hashPassword from '../utils/hashPassword';
+import {hashPassword} from '../utils/hashPassword';
 import {isDuplicate} from '../utils/checkDuplicate';
 
-export const updateProfileService = (updateFields) => new Promise(async (resolve, reject) => {
+
+export const updateUserProfileService = (updateFields) => new Promise(async (resolve, reject) => {
     try {
         const user = await db.User.findOne({
             where: {
@@ -15,9 +16,8 @@ export const updateProfileService = (updateFields) => new Promise(async (resolve
             err: 1,
             message: "User not found"
         });
-
         await staff.update({
-            ...data
+            ...updateFields
         })
         resolve({
             err: 0,
@@ -29,7 +29,7 @@ export const updateProfileService = (updateFields) => new Promise(async (resolve
     }
 })
 
-export const updatePassword = (updateFields) => new Promise(async (resolve, reject) => {
+export const updateUserPassword = (updateFields) => new Promise(async (resolve, reject) => {
     try {
         const user = await db.User.findOne({
             where: {
@@ -44,16 +44,7 @@ export const updatePassword = (updateFields) => new Promise(async (resolve, reje
             })
         }
 
-        const isPasswordCorrect = hashPassword.comparePassword(updateFields.current_password, user.password);
-
-        if (!isPasswordCorrect) {
-            resolve({
-                err: 1,
-                message: 'Current password is incorrect'
-            })
-        }
-
-        user.password = hashPassword.hashPassword(updateFields.new_password);
+        user.password = hashPassword(updateFields.password);
         await user.save();
 
         resolve({
@@ -65,11 +56,11 @@ export const updatePassword = (updateFields) => new Promise(async (resolve, reje
     }
 })
 
-export const updatePhone = (updateFields) => new Promise(async (resolve, reject) => {
+export const updateUserPhone = (updateFields) => new Promise(async (resolve, reject) => {
     try {
         const isPhoneDuplicated = isDuplicate(db.User, 'phone', updateFields.phone);
         let check = await isPhoneDuplicated;
-        if (check) resolve({
+        if (check) return resolve({
             err: 1,
             message: "Phone is already used"
         });
@@ -80,12 +71,7 @@ export const updatePhone = (updateFields) => new Promise(async (resolve, reject)
             }
         });
 
-        if (!customer) {
-            resolve({
-                err: 1,
-                message: 'User not found'
-            })
-        }
+        if (!customer) return resolve({err: 1, message: 'User not found'})
 
         customer.phone = updateFields.phone;
         await customer.save();
@@ -99,12 +85,12 @@ export const updatePhone = (updateFields) => new Promise(async (resolve, reject)
     }
 })
 
-export const updateEmail = (newEmail, userId) => new Promise(async (resolve, reject) => {
+export const updateUserEmail = (newEmail, userId) => new Promise(async (resolve, reject) => {
     try {
         const isEmailDuplicated = isDuplicate(db.User, 'email', newEmail);
         let check = await isEmailDuplicated;
 
-        if (check) resolve({
+        if (check) return resolve({
             err: 1,
             message: "Email is already used"
         });
@@ -112,15 +98,11 @@ export const updateEmail = (newEmail, userId) => new Promise(async (resolve, rej
         const user = await db.User.findOne({
             where: {
                 user_id: userId
-            }
+            },
+            raw: true
         });
 
-        if (!user) {
-            resolve({
-                err: 1,
-                message: 'User not found'
-            })
-        }
+        if (!user) return resolve({err: 1, message: 'User not found'})
 
         user.email = newEmail;
         await user.save();
@@ -134,7 +116,7 @@ export const updateEmail = (newEmail, userId) => new Promise(async (resolve, rej
     }
 })
 
-export const updateImage = (updateFields) => new Promise(async (resolve, reject) => {
+export const updateUserImage = (updateFields) => new Promise(async (resolve, reject) => {
     try {
         const user = await db.User.findOne({
             where: {
@@ -142,12 +124,7 @@ export const updateImage = (updateFields) => new Promise(async (resolve, reject)
             }
         });
 
-        if (!user) {
-            resolve({
-                err: 1,
-                message: 'User not found'
-            })
-        }
+        if (!user) return resolve({err: 1, message: 'User not found'})
 
         user.image = updateFields.image;
         await user.save();

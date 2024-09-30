@@ -1,6 +1,5 @@
 import express from "express";
 import * as controllers from "../controllers";
-import {getAllManagersController} from "../controllers";
 import {verify_admin, verify_admin_or_manager, verify_staff, verify_token} from "../middlewares/verifyToken";
 
 const router = express.Router();
@@ -45,25 +44,24 @@ router.get("/:id", verify_token, verify_admin_or_manager, controllers.getStaffBy
      */
 );
 
-router.get("/profile", verify_token, verify_staff, controllers.getStaffProfileController
-    /*
-        #swagger.description = 'Get a staff by ID.'
-        #swagger.summary = 'Get a staff by ID.'
-        #swagger.parameters['id'] = { description: 'Staff ID.' }
-        #swagger.responses[200] = {
-            description: 'Staff found.'
-        }
-        #swagger.responses[404] = {
-            description: 'Staff not found.'
-        }
-        #swagger.responses[500] = {
-            description: 'Internal server error.'
-        }
-        #swagger.security = [{
-            "apiKeyAuth": []
-        }]
-     */
-);
+// router.get("/profile", verify_token, verify_staff, controllers.getStaffProfileController
+//     /*
+//         #swagger.description = 'Get a profile staff.'
+//         #swagger.summary = 'Get a profile staff.'
+//         #swagger.responses[200] = {
+//             description: 'Staff found.'
+//         }
+//         #swagger.responses[404] = {
+//             description: 'Staff not found.'
+//         }
+//         #swagger.responses[500] = {
+//             description: 'Internal server error.'
+//         }
+//         #swagger.security = [{
+//             "apiKeyAuth": []
+//         }]
+//      */
+// );
 
 router.post("/", verify_token, verify_admin, controllers.createStaffController
     /*
@@ -158,7 +156,7 @@ router.put("/:id", verify_token, verify_admin, controllers.updateStaffController
 );
 
 
-router.put("/profile", verify_token, verify_staff, controllers.updateStaffProfileController
+router.put("/profile/", verify_token, verify_staff, controllers.updateStaffProfileController
     /*
         #swagger.description = 'Endpoint to update a staff.'
         #swagger.summary = 'Update a staff.'
@@ -170,10 +168,6 @@ router.put("/profile", verify_token, verify_staff, controllers.updateStaffProfil
                     schema: {
                         type: 'object',
                         properties: {
-                            email: {
-                                type: 'string',
-                                example: 'staff@gmail.com'
-                            },
                             phone: {
                                 type: 'string',
                                 example: '0987654321'
