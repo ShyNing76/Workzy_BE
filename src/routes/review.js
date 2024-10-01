@@ -111,4 +111,4 @@ router.get("/:id", verify_token, verify_admin_or_manager, controllers.getReviewB
      */
 );
 
-export default router;
+module.exports = router;

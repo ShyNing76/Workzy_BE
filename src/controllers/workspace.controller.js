@@ -10,8 +10,8 @@ export const createWorkspaceController = async (req, res) => {
             workspace_price,
         }).validate({workspace_name: req.body.workspace_name, workspace_price: req.body.workspace_price}).error;
         if(error) return badRequest(res, error);
-        const workspace = await services.createWorkspaceService(req.body);
-        return res.status(201).json({workspace});
+        const response = await services.createWorkspaceService(req.body);
+        return res.status(201).json(response);
     } catch (error) {
         return res.status(500).json({error: error.message});
     }
@@ -20,12 +20,12 @@ export const createWorkspaceController = async (req, res) => {
 export const updateWorkspaceController = async (req, res) => {
     try {
         const error = Joi.object({
-            workspaceName,
-            workspacePricePerHour,
-        }).validate({workspaceName: req.body.workspaceName, workspacePricePerHour: req.body.workspacePricePerHour}).error;
+            workspace_name,
+            workspace_price,
+        }).validate({workspace_name: req.body.workspace_name, workspace_price: req.body.workspace_price}).error;
         if(error) return badRequest(res, error);
-        const workspace = await services.updateWorkspaceService(req.params.id, req.body);
-        return res.status(201).json({workspace});
+        const response = await services.updateWorkspaceService(req.params.id, req.body);
+        return res.status(200).json(response);
     } catch (error) {
         return res.status(500).json({error: error.message});
     }

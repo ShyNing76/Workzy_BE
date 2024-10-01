@@ -20,14 +20,13 @@ export const createWorkspaceService = async ({workspace_name, workspace_price, .
                 price_per_day,
                 price_per_month,
                 ...data,
-                status: "active"
             }
         });
 
         resolve({
             err: workspace[1] ? 0 : 1,
             message: workspace[1] ? 'Workspace created successfully!' : 'Workspace already exists',
-            data: workspace
+            data: workspace[1] ? workspace : null
         })
 
     } catch (error) {
@@ -35,21 +34,14 @@ export const createWorkspaceService = async ({workspace_name, workspace_price, .
     }
 })
 
-export const updateWorkspaceService = async (id, {workspace_name, building_id, workspacePricePerHour, ...data}) => new Promise(async (resolve, reject) => {
-    const t = await db.Sequelize.Transaction();
+export const updateWorkspaceService = async (id, {workspace_name, building_id, workspace_price, workspace_type_id, ...data}) => new Promise(async (resolve, reject) => {
+    const t = await db.sequelize.transaction();
     try {
 
-        const [isWorkspaceExist, isBuildingExist] = await Promise.all([
-            db.Workspace.findOne({
-                where: {
-                    workspace_id: id
-                }
-            }), 
-            db.Building.findOne({
-                where: {
-                    building_id: building_id
-                }
-            })
+        const [isWorkspaceExist, isBuildingExist, isTypeExist] = await Promise.all([
+            db.Workspace.findByPk(id), 
+            db.Building.findByPk(building_id),
+            db.WorkspaceType.findByPk(workspace_type_id)
         ])
         if(!isWorkspaceExist) return resolve({
             err: 1,
@@ -59,13 +51,17 @@ export const updateWorkspaceService = async (id, {workspace_name, building_id, w
             err: 1,
             message: "Building is not exist"
         })
+        if(!isTypeExist) return resolve({
+            err: 1,
+            message: "Workspace Type is not exist"
+        })
 
         const isWorkspaceNameDuplicated = await db.Workspace.findOne({
             where: {
                 workspace_name: workspace_name,
                 workspace_id: { [Op.ne]: id }
             },
-            Transaction: t
+            transaction: t
         })
 
         if(isWorkspaceNameDuplicated) return resolve({
@@ -73,13 +69,14 @@ export const updateWorkspaceService = async (id, {workspace_name, building_id, w
             message: "Workspace name is already used"
         })
 
-        const price_per_day = workspacePricePerHour * 8 * 0.8;
-        const price_per_month = workspacePricePerHour * 22 * 0.8;
+        const price_per_day = workspace_price * 8 * 0.8;
+        const price_per_month = workspace_price * 22 * 0.8;
 
         const [updatedRowsCount] = await db.Workspace.update({
             workspace_name: workspace_name,
             building_id: building_id,
-            price_per_hour: workspacePricePerHour,
+            workspace_type_id: data.workspace_type_id,
+            price_per_hour: workspace_price,
             price_per_day: price_per_day,
             price_per_month: price_per_month,
             ...data
@@ -88,7 +85,7 @@ export const updateWorkspaceService = async (id, {workspace_name, building_id, w
             where: {
                 workspace_id: id
             },
-            Transaction: t
+            transaction: t
         });
         await t.commit();
         resolve({

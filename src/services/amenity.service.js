@@ -23,7 +23,7 @@ export const createAmenityService = async (data) => new Promise(async (resolve, 
         resolve({
             err: amenity[1] ? 0 : 1,
             message: amenity[1] ? 'Amenity created successfully!' : 'Amenity already exists',
-            data: amenity
+            data: amenity[1] ? amenity : null,
         })
 
     } catch (error) {
