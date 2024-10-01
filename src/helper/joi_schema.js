@@ -36,3 +36,9 @@ export const refreshToken = Joi.string().required()
 export const type = Joi.string().valid("booking", "payment", "system").required()
 
 export const description = Joi.string().required()
+
+export const workspace_name = Joi.string().pattern(new RegExp('^[A-Za-z0-9]+_[A-Za-z0-9]+_[0-9]+$')).required()
+
+export const workspace_price = Joi.number().positive().required()
+
+export const workspace_images = Joi.array().required()
