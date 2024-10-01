@@ -132,12 +132,33 @@ router.delete("/delete/", verify_token, verify_admin, controllers.deleteWorkspac
     /*
         #swagger.description = 'Endpoint to remove a workspace.'
         #swagger.summary = 'Remove a workspace.'
-        #swagger.parameters['workspace_ids'] = { description: 'Workspace ID.' }
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            workspace_ids: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    format: 'uuid'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         #swagger.responses[200] = {
-            description: 'Workspace removed successfully.'
+            description: 'Workspace updated successfully.'
         }
         #swagger.responses[400] = {
             description: 'Invalid data.'
+        }
+        #swagger.responses[404] = {
+            description: 'Workspace not found.'
         }
         #swagger.responses[500] = {
             description: 'Internal server error.'

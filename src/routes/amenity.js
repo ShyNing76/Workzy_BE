@@ -139,17 +139,37 @@ router.delete("/", verify_token, verify_admin, controllers.deleteAmenityControll
         #swagger.description = 'Endpoint to delete an amenity.'
         #swagger.summary = 'Delete an amenity.'
         #swagger.tags = ['Amenities']
-        #swagger.parameters['amenity_id'] = { 
-            in: 'query',
-            description: 'Amenity ID.',
+        #swagger.requestBody = {
             required: true,
-            type: 'string'
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            amenity_ids: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    format: 'uuid'
+                                }
+                            },
+                        }
+                    }
+                }
+            }
         }
         #swagger.responses[200] = {
-            description: 'Amenity deleted successfully.'
+            description: 'Amenity updated successfully.',
+            content: {
+                "application/json": {
+                    schema: {
+                        $ref: "#/components/schemas/Amenity"
+                    }
+                }
+            }
         }
         #swagger.responses[400] = {
-            description: 'Invalid amenity ID.'
+            description: 'Invalid data.'
         }
         #swagger.responses[401] = {
             description: 'Unauthorized - Invalid or missing token.'

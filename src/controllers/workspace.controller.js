@@ -37,9 +37,9 @@ export const deleteWorkspaceController = async (req, res) => {
     try {
         const error = Joi.object({
             workspace_ids: Joi.array().required()
-        }).validate({workspace_ids: req.query.workspace_ids}).error;
+        }).validate({workspace_ids: req.body.workspace_ids}).error;
         if(error) return badRequest(res, error);
-        const response = await services.deleteWorkspaceService(req.query);
+        const response = await services.deleteWorkspaceService(req.body);
         return res.status(200).json(response);
     } catch (error) {
         return res.status(500).json({error: error.message});
