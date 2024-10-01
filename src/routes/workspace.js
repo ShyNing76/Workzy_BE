@@ -8,6 +8,10 @@ router.post("/", verify_token, verify_admin, controllers.createWorkspaceControll
     /*
         #swagger.description = 'Endpoint to create a new workspace.'
         #swagger.summary = 'Create a new workspace.'
+        #swagger.parameters['workspace_name'] = { description: 'Workspace name.' }
+        #swagger.parameters['workspace_price'] = { description: 'Workspace price.' }
+        #swagger.parameters['capacity'] = { description: 'Workspace capacity.' }
+        #swagger.parameters['description'] = { description: 'Workspace description.' }
         #swagger.requestBody = {
             required: true,
             content: {
@@ -18,6 +22,16 @@ router.post("/", verify_token, verify_admin, controllers.createWorkspaceControll
                             workspace_name: {
                                 type: 'string',
                                 example: 'Landmark81_POD_1'
+                            },
+                            building_id: {
+                                type: 'string',
+                                format: 'uuid',
+                                example: '621ca0c8-e3ad-4bd8-9df5-eafe998b5b04'
+                            },
+                            workspace_type_id: {
+                                type: 'string',
+                                format: 'uuid',
+                                example: '3b214914-63e8-47e3-a856-921fdee63719'
                             },
                             workspace_price: {
                                 type: 'int',
@@ -41,6 +55,9 @@ router.post("/", verify_token, verify_admin, controllers.createWorkspaceControll
         }
         #swagger.responses[400] = {
             description: 'Invalid data.'
+        }
+        #swagger.responses[404] = {
+            description: 'Building or workspace type not found.'
         }
         #swagger.responses[500] = {
             description: 'Internal server error.'
@@ -66,6 +83,16 @@ router.put("/:id", verify_token, verify_admin, controllers.updateWorkspaceContro
                                 type: 'string',
                                 example: 'Landmark81_POD_1'
                             },
+                            building_id: {
+                                type: 'string',
+                                format: 'uuid',
+                                example: '621ca0c8-e3ad-4bd8-9df5-eafe998b5b04'
+                            },
+                            workspace_type_id: {
+                                type: 'string',
+                                format: 'uuid',
+                                example: '3b214914-63e8-47e3-a856-921fdee63719'
+                            },
                             workspace_price: {
                                 type: 'int',
                                 example: '1000000'
@@ -79,7 +106,7 @@ router.put("/:id", verify_token, verify_admin, controllers.updateWorkspaceContro
                                 example: 'Workspace description.'
                             },
                         },
-                        required: ['workspace_name','workspace_price']
+                        required: ['workspace_name','workspace_price','building_id','workspace_type_id']
                     }
                 }
             }
@@ -101,16 +128,16 @@ router.put("/:id", verify_token, verify_admin, controllers.updateWorkspaceContro
         }]
      */
 );
-router.delete("/delete/:id", verify_token, verify_admin, controllers.deleteWorkspaceController
+router.delete("/delete/", verify_token, verify_admin, controllers.deleteWorkspaceController
     /*
-        #swagger.description = 'Endpoint to remove a manager from a workspace.'
-        #swagger.summary = 'Remove a manager from a workspace.'
-        #swagger.parameters['id'] = { description: 'Workspace ID.' }
+        #swagger.description = 'Endpoint to remove a workspace.'
+        #swagger.summary = 'Remove a workspace.'
+        #swagger.parameters['workspace_ids'] = { description: 'Workspace ID.' }
         #swagger.responses[200] = {
             description: 'Workspace removed successfully.'
         }
-        #swagger.responses[404] = {
-            description: 'Workspace not found.'
+        #swagger.responses[400] = {
+            description: 'Invalid data.'
         }
         #swagger.responses[500] = {
             description: 'Internal server error.'
@@ -128,7 +155,7 @@ router.get("/", verify_token, controllers.getAllWorkspaceController
         #swagger.parameters['order'] = { description: 'Order by name, status.' }
         #swagger.parameters['page'] = { description: 'Page number.' }
         #swagger.parameters['limit'] = { description: 'Number of items per page.' }
-        #swagger.parameters['name'] = { description: 'Workspace name.' }
+        #swagger.parameters['workspace_name'] = { description: 'Workspace name.' }
         #swagger.responses[200] = {
             description: 'Workspace found.'
         }
@@ -142,7 +169,7 @@ router.get("/", verify_token, controllers.getAllWorkspaceController
 );
 router.get("/:id", verify_token, controllers.getWorkspaceByIdController
     /*
-        #swagger.description = 'Get a workspace by ID.'
+        #swagger.description = 'Endpoint to get a workspace by ID.'
         #swagger.summary = 'Get a workspace by ID.'
         #swagger.parameters['id'] = { description: 'Workspace ID.' }
         #swagger.responses[200] = {
@@ -162,8 +189,10 @@ router.get("/:id", verify_token, controllers.getWorkspaceByIdController
 router.put("/assign/:id", verify_token, controllers.assignWorkspaceToBuildingController
     /*
         #swagger.description = 'Endpoint to assign a workspace to a building.'
-        #swagger.summary = 'Assign a workspace to a building.'
-        #swagger.parameters['id'] = { description: 'Workspace ID.' }
+        #swagger.summary = 'Assign a workspace to a building.' 
+        #swagger.parameters['workspace_id'] = { description: 'Workspace ID.' }
+        #swagger.parameters['building_id'] = { description: 'Building ID.' }
+
         #swagger.requestBody = {
             required: true,
             content: {
@@ -173,10 +202,16 @@ router.put("/assign/:id", verify_token, controllers.assignWorkspaceToBuildingCon
                         properties: {
                             workspace_id: {
                                 type: 'integer',
-                                example: 1
+                                format: 'uuid',
+                                example: '0c2cfee2-d9b7-4215-baaf-f40632e7de2c'
+                            },
+                            building_id: {
+                                type: 'string',
+                                format: 'uuid',
+                                example: '621ca0c8-e3ad-4bd8-9df5-eafe998b5b04'
                             }
                         },
-                        required: ['workspace_id']
+                        required: ['workspace_id','building_id']
                     }
                 }
             }

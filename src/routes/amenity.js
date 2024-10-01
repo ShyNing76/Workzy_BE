@@ -138,7 +138,8 @@ router.delete("/", verify_token, verify_admin, controllers.deleteAmenityControll
     /*
         #swagger.description = 'Endpoint to delete an amenity.'
         #swagger.summary = 'Delete an amenity.'
-        #swagger.parameters['id'] = { 
+        #swagger.tags = ['Amenities']
+        #swagger.parameters['amenity_id'] = { 
             in: 'query',
             description: 'Amenity ID.',
             required: true,

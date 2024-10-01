@@ -46,16 +46,16 @@ export const createWishListService = async ({workspace_id}, customer_id) => new 
 
 export const deleteWishListService = async ({wishlist_id}) => new Promise(async (resolve, reject) => {
     try {
-          const wishlist = await db.Wishlist.destroy({
+        const wishlist = await db.Wishlist.destroy({
             where: {
                 wishlist_id: {[Op.in]: wishlist_id}
             }
-          });
-          resolve({
+        });
+        resolve({
             err: wishlist > 0 ? 0 : 1,
             mes: wishlist > 0 ? `WishList deleted successfully!`
             : "No WishList found to delete"
-          })
+        })
     } catch (error) {
         reject(error)
     }
