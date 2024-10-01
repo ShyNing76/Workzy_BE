@@ -6,8 +6,8 @@ const router = express.Router();
 
 router.post("/", verify_token, controllers.createWishListController
     /*
-        #swagger.description = 'Endpoint to create a new workspace.'
-        #swagger.summary = 'Create a new workspace.'
+        #swagger.description = 'Endpoint to add an item to the user\'s wishlist.'
+        #swagger.summary = 'Add an item to wishlist.'
         #swagger.requestBody = {
             required: true,
             content: {
@@ -15,29 +15,24 @@ router.post("/", verify_token, controllers.createWishListController
                     schema: {
                         type: 'object',
                         properties: {
-                            workspace_name: {
+                            workspace_id: {
                                 type: 'string',
-                                example: 'Landmark81_POD_1'
+                                format: 'uuid',
+                                example: 'workspace123'
                             },
-                            workspace_price: {
-                                type: 'int',
-                                example: '1000000'
-                            },
-                            capacity: {
-                                type: 'int',
-                                example: '20'
-                            },
-                            description: {
+                                customer_id: {
                                 type: 'string',
-                                example: 'Workspace description.'
+                                format: 'uuid',
+                                example: 'workspace123'
                             },
+
                         }
                     }
                 }
             }
         }
         #swagger.responses[201] = {
-            description: 'Workspace created successfully.'
+            description: 'Workspace added to wishlist successfully.'
         }
         #swagger.responses[400] = {
             description: 'Invalid data.'
@@ -53,14 +48,20 @@ router.post("/", verify_token, controllers.createWishListController
 
 router.delete("/", verify_token, controllers.deleteWishListController
     /*
-        #swagger.description = 'Endpoint to remove a manager from a workspace.'
-        #swagger.summary = 'Remove a manager from a workspace.'
-        #swagger.parameters['id'] = { description: 'Workspace ID.' }
+        #swagger.description = 'Endpoint to remove an item from the user\'s wishlist.'
+        #swagger.summary = 'Remove an item from wishlist.'
+        #swagger.parameters['wishlistId'] = {
+            in: 'path',
+            description: 'ID of the wishlist item to delete'}
+            required: true,
+            type: 'string',
+            format: 'uuid'
+        }
         #swagger.responses[200] = {
-            description: 'Workspace removed successfully.'
+            description: 'Item removed from wishlist successfully.'
         }
         #swagger.responses[404] = {
-            description: 'Workspace not found.'
+            description: 'Item not found in wishlist.'
         }
         #swagger.responses[500] = {
             description: 'Internal server error.'
@@ -68,7 +69,7 @@ router.delete("/", verify_token, controllers.deleteWishListController
         #swagger.security = [{
             "apiKeyAuth": []
         }]
-     */
+    */
 );
 
 module.exports = router;
