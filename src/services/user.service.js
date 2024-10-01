@@ -94,7 +94,7 @@ export const updatePhone = (updateFields) => new Promise(async (resolve, reject)
     try {
         const isPhoneDuplicated = isDuplicate(db.User, 'phone', updateFields.phone);
         let check = await isPhoneDuplicated;
-        if (check) resolve({
+        if (check) return resolve({
             err: 1,
             message: "Phone is already used"
         });

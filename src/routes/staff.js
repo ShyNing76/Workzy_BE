@@ -1,7 +1,6 @@
 import express from "express";
 import * as controllers from "../controllers";
-import {getAllManagersController} from "../controllers";
-import {verify_admin, verify_admin_or_manager, verify_token} from "../middlewares/verifyToken";
+import {verify_admin, verify_admin_or_manager, verify_staff, verify_token} from "../middlewares/verifyToken";
 
 const router = express.Router();
 
@@ -44,6 +43,25 @@ router.get("/:id", verify_token, verify_admin_or_manager, controllers.getStaffBy
         }]
      */
 );
+
+// router.get("/profile", verify_token, verify_staff, controllers.getStaffProfileController
+//     /*
+//         #swagger.description = 'Get a profile staff.'
+//         #swagger.summary = 'Get a profile staff.'
+//         #swagger.responses[200] = {
+//             description: 'Staff found.'
+//         }
+//         #swagger.responses[404] = {
+//             description: 'Staff not found.'
+//         }
+//         #swagger.responses[500] = {
+//             description: 'Internal server error.'
+//         }
+//         #swagger.security = [{
+//             "apiKeyAuth": []
+//         }]
+//      */
+// );
 
 router.post("/", verify_token, verify_admin, controllers.createStaffController
     /*
@@ -93,7 +111,7 @@ router.post("/", verify_token, verify_admin, controllers.createStaffController
      */
 );
 
-router.put("/:id", verify_token, verify_admin_or_manager, controllers.updateStaffProfileController
+router.put("/:id", verify_token, verify_admin, controllers.updateStaffController
     /*
         #swagger.description = 'Endpoint to update a staff.'
         #swagger.summary = 'Update a staff.'
@@ -108,6 +126,10 @@ router.put("/:id", verify_token, verify_admin_or_manager, controllers.updateStaf
                             email: {
                                 type: 'string',
                                 example: 'staff@gmail.com'
+                            },
+                             password: {
+                                type: 'string',
+                                example: 'staff123'
                             },
                             phone: {
                                 type: 'string',
@@ -133,6 +155,67 @@ router.put("/:id", verify_token, verify_admin_or_manager, controllers.updateStaf
      */
 );
 
+
+router.put("/profile/", verify_token, verify_staff, controllers.updateStaffProfileController
+    /*
+        #swagger.description = 'Endpoint to update a staff.'
+        #swagger.summary = 'Update a staff.'
+        #swagger.parameters['id'] = { description: 'Staff ID.' }
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            phone: {
+                                type: 'string',
+                                example: '0987654321'
+                            },
+                            date_of_birth: {
+                                type: 'string',
+                                example: 'MM/DD/YYYY'
+                            },
+                            name: {
+                                type: 'string',
+                                example: 'Staff'
+                            },
+                            gender: {
+                                type: 'string',
+                                example: 'Male|Female|Other'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+     */
+);
+
+router.put("/profile/password", verify_token, verify_staff, controllers.updateStaffPasswordController
+    /*
+        #swagger.description = 'Endpoint to update a staff.'
+        #swagger.summary = 'Update a staff.'
+        #swagger.parameters['id'] = { description: 'Staff ID.' }
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            password: {
+                                type: 'string',
+                                example: 'staff123'
+                            },
+                        }
+                    }
+                }
+            }
+        }
+     */
+);
+
 router.delete("/:id", verify_token, verify_admin, controllers.deleteStaffController
     /*
         #swagger.description = 'Endpoint to delete a staff.'
@@ -140,6 +223,46 @@ router.delete("/:id", verify_token, verify_admin, controllers.deleteStaffControl
         #swagger.parameters['id'] = { description: 'Staff ID.' }
         #swagger.responses[200] = {
             description: 'Staff deleted successfully.'
+        }
+        #swagger.responses[404] = {
+            description: 'Staff not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
+router.put("/assign/:id", verify_token, verify_admin_or_manager, controllers.assignStaffToBuildingController
+    /*
+        #swagger.description = 'Endpoint to assign a staff to a building.'
+        #swagger.summary = 'Assign a staff to a building.'
+        #swagger.parameters['id'] = { description: 'Staff ID.' }
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            building_id: {
+                                type: 'integer',
+                                example: 1
+                            }
+                        },
+                        required: ['building_id']
+                    }
+                }
+            }
+        }
+        #swagger.responses[200] = {
+            description: 'Staff assigned successfully.'
+        }
+        #swagger.responses[400] = {
+            description: 'Invalid data.'
         }
         #swagger.responses[404] = {
             description: 'Staff not found.'
