@@ -4,16 +4,10 @@ import {verify_admin, verify_token} from "../middlewares/verifyToken";
 
 const router = express.Router();
 
-router.post("/:workspace_id", verify_token, verify_admin, controllers.createAmenitiesWorkspaceController
+router.post("/", verify_token, verify_admin, controllers.createAmenitiesWorkspaceController
     /*
         #swagger.description = 'Endpoint to create a new amenity-workspace association.'
         #swagger.summary = 'Create a new amenity-workspace association.'
-        #swagger.parameters['workspace_id'] = {
-            description: 'Workspace ID.',
-            required: true,
-            type: 'string',
-            format: 'uuid'
-        }
         #swagger.requestBody = {
             required: true,
             content: {
@@ -21,6 +15,11 @@ router.post("/:workspace_id", verify_token, verify_admin, controllers.createAmen
                     schema: {
                         type: 'object',
                         properties: {
+                            workspace_id: {
+                                type: 'string',
+                                format: 'uuid',
+                                example: '0c2cfee2-d9b7-4215-baaf-f40632e7de2c'
+                            },
                             amenity_ids: {
                                 type: 'array',
                                 items: {

@@ -2,7 +2,7 @@ import db from '../models/';
 import { Op } from 'sequelize';
 import {v4} from "uuid";
 
-export const createAmenitiesWorkspaceService = async ({amenity_ids}, workspace_id) => new Promise(async (resolve, reject) => {
+export const createAmenitiesWorkspaceService = async ({amenity_ids, workspace_id}) => new Promise(async (resolve, reject) => {
     try {
         const workspace = await db.Workspace.findByPk(workspace_id);
         if(!workspace) return resolve({

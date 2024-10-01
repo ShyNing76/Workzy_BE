@@ -1,7 +1,8 @@
 import db from '../models/';
+import { Op } from 'sequelize';
 import {v4} from "uuid";
 
-export const createWishListService = async ({workspace_id}, customer_id) => new Promise(async (resolve, reject) => {
+export const createWishListService = async ({workspace_ids, customer_id}) => new Promise(async (resolve, reject) => {
     try {
 
         const customer = await db.Customer.findByPk(customer_id);
@@ -13,7 +14,7 @@ export const createWishListService = async ({workspace_id}, customer_id) => new 
 
         const workspaces = await db.Workspace.findAll({
             where: {
-                workspace_id: {[Op.in]: workspace_id}
+                workspace_id: {[Op.in]: workspace_ids}
             }
         })
 
@@ -25,19 +26,25 @@ export const createWishListService = async ({workspace_id}, customer_id) => new 
         
 
             const wishList = workspaces.map(workspace => {
-                return db.Wishlist.create({
-                    wishlist_id: v4(), 
-                    workspace_id: workspace.workspace_id,
-                    customer_id: customer.customer_id
-                });
+                return db.Wishlist.findOrCreate({
+                    where: {
+                        workspace_id: workspace.workspace_id,
+                        customer_id: customer.customer_id
+                    },
+                    defaults: {
+                        wishlist_id: v4(), 
+                        workspace_id: workspace.workspace_id,
+                        customer_id: customer.customer_id
+                    }
+                })
             });
     
             // Execute all insertions
-            await Promise.all(wishList);
-    
+            const results = await Promise.all(wishList);
+            const newRecordsCount = results.filter(result => result[1]).length; // result[1] is true if a new entry was created
             resolve({
-                err: 0,
-                message: 'WishList created successfully!',
+                err: newRecordsCount > 0 ? 0 : 1,
+                message: newRecordsCount > 0 ? `${newRecordsCount} WishList created successfully!` : 'Error creating WishList',
             });
     } catch (error) {
         reject(error)
@@ -53,8 +60,7 @@ export const deleteWishListService = async ({wishlist_id}) => new Promise(async 
         });
         resolve({
             err: wishlist > 0 ? 0 : 1,
-            mes: wishlist > 0 ? `WishList deleted successfully!`
-            : "No WishList found to delete"
+            message: wishlist > 0 ? `${wishlist} WishList deleted successfully!` : "No WishList found to delete"
         })
     } catch (error) {
         reject(error)
