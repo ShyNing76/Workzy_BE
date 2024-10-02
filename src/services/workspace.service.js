@@ -13,7 +13,7 @@ export const createWorkspaceService = async ({workspace_name, workspace_price, .
             },
             defaults: {
                 workspace_id: v4(),
-                building_id: data.building_id,
+                building_id: "",
                 workspace_type_id: data.workspace_type_id,
                 workspace_name: workspace_name,
                 price_per_hour: workspace_price,

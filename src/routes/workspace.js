@@ -23,11 +23,6 @@ router.post("/", verify_token, verify_admin, controllers.createWorkspaceControll
                                 type: 'string',
                                 example: 'Landmark81_POD_1'
                             },
-                            building_id: {
-                                type: 'string',
-                                format: 'uuid',
-                                example: '621ca0c8-e3ad-4bd8-9df5-eafe998b5b04'
-                            },
                             workspace_type_id: {
                                 type: 'string',
                                 format: 'uuid',
@@ -212,8 +207,6 @@ router.put("/assign/:id", verify_token, controllers.assignWorkspaceToBuildingCon
         #swagger.description = 'Endpoint to assign a workspace to a building.'
         #swagger.summary = 'Assign a workspace to a building.' 
         #swagger.parameters['workspace_id'] = { description: 'Workspace ID.' }
-        #swagger.parameters['building_id'] = { description: 'Building ID.' }
-
         #swagger.requestBody = {
             required: true,
             content: {
@@ -221,18 +214,13 @@ router.put("/assign/:id", verify_token, controllers.assignWorkspaceToBuildingCon
                     schema: {
                         type: 'object',
                         properties: {
-                            workspace_id: {
-                                type: 'integer',
-                                format: 'uuid',
-                                example: '0c2cfee2-d9b7-4215-baaf-f40632e7de2c'
-                            },
                             building_id: {
                                 type: 'string',
                                 format: 'uuid',
                                 example: '621ca0c8-e3ad-4bd8-9df5-eafe998b5b04'
                             }
                         },
-                        required: ['workspace_id','building_id']
+                        required: ['building_id']
                     }
                 }
             }
