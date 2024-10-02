@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 import db from '../models';
+
 const {Sequelize} = require('sequelize');
 
 const sequelize = new Sequelize(process.env.DATABASE_NAME, process.env.DATABASE_USERNAME, process.env.DATABASE_PASSWORD, {
@@ -25,4 +26,11 @@ export async function connection() {
     }
 }
 
-connection();
+export async function connectionServer() {
+    try {
+        await sequelize.authenticate();
+        console.log('Connection has been established successfully.');
+    } catch (error) {
+        console.error('Unable to connect to the database:', error);
+    }
+}

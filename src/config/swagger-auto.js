@@ -40,7 +40,7 @@ const doc = {
 
 
 const outputFile = './swagger-output.json';
-const routes = ['./src/routes/index.js'];
+const routes = ['./src/routes/v1/index.js'];
 
 
 swaggerAutogen({openapi: '3.1.0'})(outputFile, routes, doc);

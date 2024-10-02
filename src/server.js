@@ -1,10 +1,10 @@
-import initWebRoutes from "./routes";
+import initWebRoutes from "./routes/v1";
 import express from 'express';
 import cors from 'cors';
 
 require('dotenv').config();
 require('./config/passport');
-// require('./config/connection');
+// require('./config/connection').connectionServer(); // test connection
 
 const app = express();
 app.use(cors(

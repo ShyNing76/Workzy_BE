@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import uuid from 'uuid';
 import db from '../models';
 import * as hashPassword from '../utils/hashPassword';
-import * as authServices from '../services/auth.service';
+import * as authServices from '../services/auth/auth.service';
 
 describe('Login Service', () => {
     let findOneStub, comparePasswordStub, jwtSignStub; // Declare the stubs

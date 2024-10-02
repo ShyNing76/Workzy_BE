@@ -44,7 +44,7 @@ module.exports = (sequelize, DataTypes) => {
             },
             building_id: {
                 type: DataTypes.UUID,
-                allowNull: false,
+                allowNull: true,
             },
             workspace_name: {
                 type: DataTypes.STRING(200),
