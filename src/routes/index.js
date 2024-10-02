@@ -43,7 +43,7 @@ function initWebRoutes(app) {
     );
 
     app.use('/api/v1/amenity', require('./amenity')
-        // #swagger.tags = ['Amenity']
+        // #swagger.tags = ['Amenities']
     );
 
     app.use('/api/v1/amenityWorkspace', require('./amenityWorkspace')

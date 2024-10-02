@@ -8,7 +8,6 @@ router.post("/", verify_token, verify_admin, controllers.createAmenityController
     /*
         #swagger.description = 'Endpoint to create a new amenity.'
         #swagger.summary = 'Create a new amenity.'
-        #swagger.tags = ['Amenities']
         #swagger.requestBody = {
             required: true,
             content: {
@@ -69,8 +68,7 @@ router.put("/:id", verify_token, verify_admin, controllers.updateAmenityControll
     /*
         #swagger.description = 'Endpoint to update an amenity.'
         #swagger.summary = 'Update an amenity.'
-        #swagger.tags = ['Amenities']
-        #swagger.parameters['id'] = { 
+        #swagger.parameters['id'] = {
             in: 'path',
             description: 'Amenity ID.',
             required: true,
@@ -172,8 +170,7 @@ router.get("/", verify_token, verify_admin, controllers.getAllAmenityController
     /*
         #swagger.description = 'Endpoint to get all amenities.'
         #swagger.summary = 'Get all amenities.'
-        #swagger.tags = ['Amenities']
-        #swagger.parameters['order'] = { 
+        #swagger.parameters['order'] = {
             in: 'query',
             description: 'Order by name, type, or price.',
             type: 'string'
@@ -235,8 +232,7 @@ router.get("/:id", verify_token, verify_admin, controllers.getAmenityByIdControl
     /*
         #swagger.description = 'Endpoint to get an amenity by ID.'
         #swagger.summary = 'Get an amenity by ID.'
-        #swagger.tags = ['Amenities']
-        #swagger.parameters['id'] = { 
+        #swagger.parameters['id'] = {
             in: 'path',
             description: 'Amenity ID.',
             required: true,

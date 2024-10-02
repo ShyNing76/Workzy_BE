@@ -45,6 +45,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING(200),
                 defaultValue: null,
             },
+            google_address: {
+                type: DataTypes.STRING(200),
+                defaultValue: null,
+            },
             description: {
                 type: DataTypes.TEXT,
                 defaultValue: null,
