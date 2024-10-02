@@ -1,29 +1,34 @@
 import db from '../models';
+import { Op } from 'sequelize';
 import {v4} from "uuid";
 
 export const createAmenityService = async (data) => new Promise(async (resolve, reject) => {
     try {
         data.depreciation_price = data.original_price * 0.7;
         if(data.type == "service") data.depreciation_price = 0;
+        console.log(data.image)
+        console.log(data.original_price)
+        console.log(data.depreciation_price)
+
 
         const amenity = await db.Amenity.findOrCreate({
             where: {
                 amenity_name: data.amenity_name
             },
-            default: {
+            defaults: {
                 amenity_id: v4(),
                 amenity_name: data.amenity_name,
                 image: data.image,
                 original_price: data.original_price,
                 depreciation_price: data.depreciation_price,
-                type: data.type,
+                ...data,
                 status: "active"
             }
         })
         resolve({
             err: amenity[1] ? 0 : 1,
             message: amenity[1] ? 'Amenity created successfully!' : 'Amenity already exists',
-            data: amenity[1] ? amenity : null,
+            data: amenity[0] ? amenity : null,
         })
 
     } catch (error) {
@@ -33,7 +38,6 @@ export const createAmenityService = async (data) => new Promise(async (resolve, 
 
 export const updateAmenityService = (amenity_id, data) => new Promise(async (resolve, reject) => {
     try {
-
         const isDuplicated = await db.Amenity.findOne({
             where: {
                 amenity_name: data.amenity_name,
@@ -43,34 +47,27 @@ export const updateAmenityService = (amenity_id, data) => new Promise(async (res
         });
 
         if(isDuplicated)
-            return resolve({
+            return reject({
                 err: 1,
                 message: `Amenity is already used`
             })
         
-        
-        const amenity = await db.Amenity.findOne({
-            where: {
-                amenity_id: amenity_id,
-                type: data.type
-            },
-            raw: true
-        });
-
-        if(!amenity) return resolve({
-            err: 1,
-            message: "Amenity not found"
-        });
-        
         data.depreciation_price = data.original_price * 0.7;
         if(data.type == "service") data.depreciation_price = 0;
 
-        await amenity.update({
-            ...data
-        })
+        const [updatedRowsCount] = await db.Amenity.update(
+            {
+                ...data
+            },
+            {
+                where: {
+                    amenity_id: amenity_id,
+                },
+            raw: true
+        });        
         resolve({
-            err: 0,
-            message: "Update Successfully"
+            err: updatedRowsCount > 0 ? 0 : 1,
+            message: updatedRowsCount > 0 ? "Update Successfully" : "Cannot find any amenity to update",
         })
 
     } catch (error) {
@@ -79,44 +76,21 @@ export const updateAmenityService = (amenity_id, data) => new Promise(async (res
     }
 })
 
-export const deleteAmenityService = async ({amenity_id}) => new Promise(async (resolve, reject) => {
+export const deleteAmenityService = async ({amenity_ids}) => new Promise(async (resolve, reject) => {
     try {
-        const amenities = await db.Amenity.findAll({
-                where: {
-                    amenity_id: amenity_id
-                }
-            }) 
-            
-        if (amenities.length === 0) 
-            return resolve({
-                err: 1,
-                message: "No amenity found"
-            })
-        
-        let alreadyInactiveCount = 0;
-        let deletedCount = 0;
-
-        for (const amenity of amenities) {
-            if (amenity.status === "inactive") {
-                alreadyInactiveCount++;
-            } else {
-                amenity.status = "inactive";
-                await amenity.save(); // Save each image after updating
-                deletedCount++;
+        const [updatedRowsCount] = await db.Amenity.update({
+            status: "inactive"
+        },{
+            where: {
+                amenity_id: { [Op.in]: amenity_ids },
+                status: "active"
             }
-        }
-
-        if (deletedCount > 0) {
-            resolve({
-                err: 0,
-                message: `${deletedCount} amenity(s) deleted successfully!`
-            });
-        } else {
-            resolve({
-                err: 1,
-                message: alreadyInactiveCount > 0 ? `${alreadyInactiveCount} selected amenities were already deleted.` : 'No images were deleted.'
-            });
-        }
+        }) 
+        resolve({
+            err: updatedRowsCount > 0 ? 0 : 1,
+            message: updatedRowsCount > 0 ? `${updatedRowsCount} Amenity (s) deleted successfully!` : "Cannot find any amenity to delete",
+        })
+        
     } catch (error) {
         reject(error)
     }

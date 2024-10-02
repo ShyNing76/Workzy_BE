@@ -13,7 +13,7 @@ export const createWorkspaceService = async ({workspace_name, workspace_price, .
             },
             defaults: {
                 workspace_id: v4(),
-                building_id: data.building_id,
+                building_id: "",
                 workspace_type_id: data.workspace_type_id,
                 workspace_name: workspace_name,
                 price_per_hour: workspace_price,
@@ -43,15 +43,15 @@ export const updateWorkspaceService = async (id, {workspace_name, building_id, w
             db.Building.findByPk(building_id),
             db.WorkspaceType.findByPk(workspace_type_id)
         ])
-        if(!isWorkspaceExist) return resolve({
+        if(!isWorkspaceExist) return reject({
             err: 1,
             message: "Workspace is not exist"
         })
-        if(!isBuildingExist) return resolve({
+        if(!isBuildingExist) return reject({
             err: 1,
             message: "Building is not exist"
         })
-        if(!isTypeExist) return resolve({
+        if(!isTypeExist) return reject({
             err: 1,
             message: "Workspace Type is not exist"
         })
@@ -64,7 +64,7 @@ export const updateWorkspaceService = async (id, {workspace_name, building_id, w
             transaction: t
         })
 
-        if(isWorkspaceNameDuplicated) return resolve({
+        if(isWorkspaceNameDuplicated) return reject({
             err: 1,
             message: "Workspace name is already used"
         })
@@ -99,38 +99,25 @@ export const updateWorkspaceService = async (id, {workspace_name, building_id, w
     }
 })
 
-export const deleteWorkspaceService = async ({ids}) => new Promise(async (resolve, reject) => {
+export const deleteWorkspaceService = async ({workspace_ids}) => new Promise(async (resolve, reject) => {
     try {
-        const workspace = await db.Workspace.findAll({
-                where: {
-                    workspace_id: {
-                        [Op.in]: ids
-                    }
-                }
-            }) 
-            
-            if (workspace.length === 0) {
-                return {
-                    err: 1,
-                    message: "No workspace found"
-                };
-            }
-
         const [updatedRowsCount] = await db.Workspace.update({
             status: "inactive"
         }, {
             where: {
-                workspace_id: ids
-            }
-        })
-        
+                workspace_id: {
+                    [Op.in]: workspace_ids
+                },
+                status: "active"
+            },
+        });
         resolve({
             err: updatedRowsCount > 0 ? 0 : 1,
-            message: updatedRowsCount > 0 ? 'Workspace deleted successfully!' : 'Error deleting Workspace',
-        })
+            message: updatedRowsCount > 0 ? `${updatedRowsCount} Workspace deleted successfully!` : 'Cannot find any workspace to delete',
+        });
 
     } catch (error) {
-        reject(error)
+        reject(error);
     }
 })
 

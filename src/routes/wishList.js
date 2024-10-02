@@ -15,17 +15,19 @@ router.post("/", verify_token, controllers.createWishListController
                     schema: {
                         type: 'object',
                         properties: {
-                            workspace_id: {
+                            workspace_ids: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    format: 'uuid'
+                                },
+                                example: ['0c2cfee2-d9b7-4215-baaf-f40632e7de2c', '621ca0c8-e3ad-4bd8-9df5-eafe998b5b04']
+                            },
+                            customer_id: {
                                 type: 'string',
                                 format: 'uuid',
                                 example: 'workspace123'
                             },
-                                customer_id: {
-                                type: 'string',
-                                format: 'uuid',
-                                example: 'workspace123'
-                            },
-
                         }
                     }
                 }
@@ -50,15 +52,28 @@ router.delete("/", verify_token, controllers.deleteWishListController
     /*
         #swagger.description = 'Endpoint to remove an item from the user\'s wishlist.'
         #swagger.summary = 'Remove an item from wishlist.'
-        #swagger.parameters['wishlistId'] = {
-            in: 'path',
-            description: 'ID of the wishlist item to delete'}
+        #swagger.requestBody = {
             required: true,
-            type: 'string',
-            format: 'uuid'
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            wishlist_id: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    format: 'uuid'
+                                },
+                                example: ['0c2cfee2-d9b7-4215-baaf-f40632e7de2c', '621ca0c8-e3ad-4bd8-9df5-eafe998b5b04']
+                            },
+                        }
+                    }
+                }
+            }
         }
         #swagger.responses[200] = {
-            description: 'Item removed from wishlist successfully.'
+            description: 'Wishlist removed successfully.'
         }
         #swagger.responses[404] = {
             description: 'Item not found in wishlist.'
