@@ -1,5 +1,5 @@
 import Joi from "joi";
-import {badRequest} from "../middlewares/handle_error";
+import {badRequest , created, internalServerError, ok} from "../middlewares/handle_error";
 import * as services from "../services";
 
 export const createWishListController = async (req, res) => {
@@ -10,9 +10,11 @@ export const createWishListController = async (req, res) => {
         }).validate({customer_id: req.body.customer_id, workspace_ids: req.body.workspace_ids}).error;
         if(error) return badRequest(res, error);
         const response = await services.createWishListService(req.body);
-        return res.status(201).json(response);
-    } catch (error) {s
-        return res.status(500).json({error: error.message});
+        return created(res, response);
+    } catch (error) {
+        if(error === "No valid workspaces found"
+            || error === "Error creating WishList") return badRequest(res, error);
+        internalServerError(res, error);
     }
 }
 
@@ -23,8 +25,9 @@ export const deleteWishListController = async (req, res) => {
         }).validate({wishlist_id: req.body.wishlist_id}).error;
         if(error) return badRequest(res, error);
         const response = await services.deleteWishListService(req.body);
-        return res.status(201).json(response);
+        return ok(res, response);
     } catch (error) {
-        return res.status(500).json({error: error.message});
+        if(error === "No WishList found to delete") return badRequest(res, error);
+        internalServerError(res, error);
     }
 }

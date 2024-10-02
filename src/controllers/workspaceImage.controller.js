@@ -1,6 +1,5 @@
 import Joi from "joi";
-import {workspace_images} from "../helper/joi_schema";
-import {badRequest} from "../middlewares/handle_error";
+import {badRequest , created, internalServerError, ok} from "../middlewares/handle_error";
 import * as services from "../services";
 
 export const createWorkspaceImageController = async (req, res) => {

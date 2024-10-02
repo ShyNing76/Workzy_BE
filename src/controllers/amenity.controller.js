@@ -1,6 +1,5 @@
 import Joi from "joi";
-import {workspace_images} from "../helper/joi_schema";
-import {badRequest} from "../middlewares/handle_error";
+import {badRequest , created, internalServerError, ok} from "../middlewares/handle_error";
 import * as services from "../services";
 
 export const createAmenityController = async (req, res) => {
@@ -13,6 +12,7 @@ export const createAmenityController = async (req, res) => {
         const response = await services.createAmenityService(req.body);
         return created(res, response);
     } catch (error) {
+        if(error === "Amenity already exists") return badRequest(res, error);
         internalServerError(res, error)
     }
 }
@@ -27,6 +27,8 @@ export const updateAmenityController = async (req, res) => {
         const response = await services.updateAmenityService(req.params.id, req.body);
         return ok(res, response)
     } catch (error) {
+        if(error === "Amenity is already used" 
+            || error === "Cannot find any amenity to update") return badRequest(res, error);
         internalServerError(res, error)
     }
 }
@@ -40,6 +42,7 @@ export const deleteAmenityController = async (req, res) => {
         const response = await services.deleteAmenityService(req.body);
         return ok(res, response)
     } catch (error) {
+        if(error === "Cannot find any amenity to delete") return badRequest(res, error);
         internalServerError(res, error)
     }
 }
@@ -49,6 +52,7 @@ export const getAllAmenityController = async (req, res) => {
         const amenity = await services.getAllAmenityService(req.query);
         return ok(res, amenity)
     } catch (error) {
+        if(error === "No Amenity Exist") return badRequest(res, error);
         internalServerError(res, error)
     }
 }
@@ -62,8 +66,9 @@ export const getAmenityByIdController = async (req, res) => {
         }).error;
         if (error) return badRequest(res, error);
         const response = await services.getAmenityByIdService(req.params.id);
-        return ok(res, response)
+        return ok(res, response)    
     } catch (error) {
+        if(error === "No Amenity Exist") return badRequest(res, error);
         internalServerError(res, error)
     }
 }

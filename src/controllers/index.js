@@ -16,6 +16,7 @@ export * from './amenity.controller';
 export * from './amenitiesWorkspace.controller';
 export * from './wishList.controller';
 export * from './review.controller';
+export * from './search.controller';
 
 
 

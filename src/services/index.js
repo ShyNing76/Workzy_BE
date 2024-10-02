@@ -17,5 +17,6 @@ export * from './amenity.service';
 export * from './amenitiesWorkspace.service';
 export * from './wishList.service';
 export * from './review.service';
+export * from './search.service';
 
 

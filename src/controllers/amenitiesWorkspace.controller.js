@@ -1,5 +1,5 @@
 import Joi from "joi";
-import {badRequest} from "../middlewares/handle_error";
+import {badRequest , created, internalServerError, ok} from "../middlewares/handle_error";
 import * as services from "../services";
 
 export const createAmenitiesWorkspaceController = async (req, res) => {
@@ -12,6 +12,9 @@ export const createAmenitiesWorkspaceController = async (req, res) => {
         const response = await services.createAmenitiesWorkspaceService(req.body);
         return created(res, response);
     } catch (error) {
+        if(error === "No valid amenities found" 
+            || error === "No valid workspace found" 
+            || error === "Error associating amenities with workspace") return badRequest(res, error);
         internalServerError(res, error)
     }
 }
@@ -25,6 +28,7 @@ export const deleteAmenitiesWorkspaceController = async (req, res) => {
         const response = await services.deleteAmenitiesWorkspaceService(req.body);
         return ok(res, response)
     } catch (error) {
+        if(error === "No amenities-workspace records found to delete") return badRequest(res, error);
         internalServerError(res, error)
     }
 }

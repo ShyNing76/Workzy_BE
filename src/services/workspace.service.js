@@ -132,17 +132,16 @@ export const deleteWorkspaceService = async ({workspace_ids}) => new Promise(asy
 
 export const getAllWorkspaceService = ({page, limit, order, workspaceName, ...query}) => new Promise(async (resolve, reject) => {
     try {
-        const queries = { raw: true, nest: true };
-        queries.offset = handleOffset(page, limit);
-        queries.limit = handleLimit(limit);
-        if (order) queries.order = [handleSortOrder(order, "workspace_name")];
-        if (workspaceName) query.workspaceName = { [Op.substring]: workspaceName };
-
         const workspaces = await db.Workspace.findAndCountAll({
             where: {
-                ...query, 
+                workspace_name: {
+                    [Op.substring]: workspaceName || ""
+                },
+                ...query
             },
-            ...queries,
+            offset: handleOffset(page, limit),
+            limit: handleLimit(limit),
+            order: [handleSortOrder(order, "workspace_name")],
             attributes: {
                 exclude: ["building_id","createdAt", "updatedAt"]
             },
@@ -152,6 +151,8 @@ export const getAllWorkspaceService = ({page, limit, order, workspaceName, ...qu
                     attributes: {exclude : ["createdAt", "updatedAt"]},
                 }, 
             ],
+            raw: true, 
+            nest: true
         });
 
         resolve({
