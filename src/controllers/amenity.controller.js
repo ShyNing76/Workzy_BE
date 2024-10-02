@@ -11,9 +11,9 @@ export const createAmenityController = async (req, res) => {
         }).validate({amenity_name: req.body.amenity_name, original_price: req.body.original_price}).error;
         if(error) return badRequest(res, error);
         const response = await services.createAmenityService(req.body);
-        return res.status(201).json(response);
+        return created(res, response);
     } catch (error) {
-        return res.status(500).json({error: error.message});
+        internalServerError(res, error)
     }
 }
 
@@ -25,9 +25,9 @@ export const updateAmenityController = async (req, res) => {
         }).validate({amenity_name: req.body.amenity_name, original_price: req.body.original_price}).error;
         if(error) return badRequest(res, error);
         const response = await services.updateAmenityService(req.params.id, req.body);
-        return res.status(200).json(response);
+        return ok(res, response)
     } catch (error) {
-        return res.status(500).json({error: error.message});
+        internalServerError(res, error)
     }
 }
 
@@ -38,18 +38,18 @@ export const deleteAmenityController = async (req, res) => {
         }).validate({amenity_ids: req.body.amenity_ids}).error;
         if(error) return badRequest(res, error);
         const response = await services.deleteAmenityService(req.body);
-        return res.status(200).json(response);
+        return ok(res, response)
     } catch (error) {
-        return res.status(500).json({error: error.message});
+        internalServerError(res, error)
     }
 }
 
 export const getAllAmenityController = async (req, res) => {
     try {
         const amenity = await services.getAllAmenityService(req.query);
-        return res.status(200).json(amenity);
+        return ok(res, amenity)
     } catch (error) {
-        return res.status(500).json({error: error.message});
+        internalServerError(res, error)
     }
 }
 
@@ -62,8 +62,8 @@ export const getAmenityByIdController = async (req, res) => {
         }).error;
         if (error) return badRequest(res, error);
         const response = await services.getAmenityByIdService(req.params.id);
-        return res.status(200).json(response);
+        return ok(res, response)
     } catch (error) {
-        return res.status(500).json({error: error.message});
+        internalServerError(res, error)
     }
 }

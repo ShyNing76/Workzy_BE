@@ -1,8 +1,10 @@
 import db from '../models';
+import { createWorkspaceImageService } from './workspaceImage.service';
 import {v4} from "uuid";
 import {Op} from "sequelize";
 
-export const createWorkspaceService = async ({workspace_name, workspace_price, ...data}) => new Promise(async (resolve, reject) => {
+export const createWorkspaceService = async ({images, workspace_name, workspace_price, ...data}) => new Promise(async (resolve, reject) => {
+    const t = await db.sequelize.transaction();
     try {
         const price_per_day = workspace_price * 8 * 0.8;
         const price_per_month = workspace_price * 22 * 0.8;
@@ -13,23 +15,29 @@ export const createWorkspaceService = async ({workspace_name, workspace_price, .
             },
             defaults: {
                 workspace_id: v4(),
-                building_id: "",
+                building_id: data.building_id || null,
                 workspace_type_id: data.workspace_type_id,
                 workspace_name: workspace_name,
                 price_per_hour: workspace_price,
                 price_per_day,
                 price_per_month,
                 ...data,
-            }
+            },
+            transaction: t
         });
 
+        if(!workspace[1]) return reject("Workspace already exists")
+        const workspaceId = workspace[0].workspace_id;
+        const workspaceImages = await createWorkspaceImageService({images, workspaceId}, t);
+        if(workspaceImages !== 0) return reject(`${workspaceImages} Workspace Image is already exist`)
+        await t.commit();
         resolve({
-            err: workspace[1] ? 0 : 1,
-            message: workspace[1] ? 'Workspace created successfully!' : 'Workspace already exists',
-            data: workspace[1] ? workspace : null
+            err: 0,
+            message: 'Workspace created successfully!',
+            data: {workspace: workspace[0], workspaceImages}
         })
-
     } catch (error) {
+        await t.rollback();
         reject(error)
     }
 })

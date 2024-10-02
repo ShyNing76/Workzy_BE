@@ -155,67 +155,6 @@ router.put("/:id", verify_token, verify_admin, controllers.updateStaffController
      */
 );
 
-
-router.put("/profile/", verify_token, verify_staff, controllers.updateStaffProfileController
-    /*
-        #swagger.description = 'Endpoint to update a staff.'
-        #swagger.summary = 'Update a staff.'
-        #swagger.parameters['id'] = { description: 'Staff ID.' }
-        #swagger.requestBody = {
-            required: true,
-            content: {
-                "application/json": {
-                    schema: {
-                        type: 'object',
-                        properties: {
-                            phone: {
-                                type: 'string',
-                                example: '0987654321'
-                            },
-                            date_of_birth: {
-                                type: 'string',
-                                example: 'MM/DD/YYYY'
-                            },
-                            name: {
-                                type: 'string',
-                                example: 'Staff'
-                            },
-                            gender: {
-                                type: 'string',
-                                example: 'Male|Female|Other'
-                            }
-                        }
-                    }
-                }
-            }
-        }
-     */
-);
-
-router.put("/profile/password", verify_token, verify_staff, controllers.updateStaffPasswordController
-    /*
-        #swagger.description = 'Endpoint to update a staff.'
-        #swagger.summary = 'Update a staff.'
-        #swagger.parameters['id'] = { description: 'Staff ID.' }
-        #swagger.requestBody = {
-            required: true,
-            content: {
-                "application/json": {
-                    schema: {
-                        type: 'object',
-                        properties: {
-                            password: {
-                                type: 'string',
-                                example: 'staff123'
-                            },
-                        }
-                    }
-                }
-            }
-        }
-     */
-);
-
 router.delete("/:id", verify_token, verify_admin, controllers.deleteStaffController
     /*
         #swagger.description = 'Endpoint to delete a staff.'

@@ -10,9 +10,9 @@ export const createAmenitiesWorkspaceController = async (req, res) => {
         }).validate({amenity_ids: req.body.amenity_ids, workspace_id: req.body.workspace_id}).error;
         if(error) return badRequest(res, error);
         const response = await services.createAmenitiesWorkspaceService(req.body);
-        return res.status(201).json(response);
+        return created(res, response);
     } catch (error) {
-        return res.status(500).json({error: error.message});
+        internalServerError(res, error)
     }
 }
 
@@ -23,8 +23,8 @@ export const deleteAmenitiesWorkspaceController = async (req, res) => {
         }).validate({amenities_workspace_ids: req.body.amenities_workspace_ids}).error;
         if(error) return badRequest(res, error);
         const response = await services.deleteAmenitiesWorkspaceService(req.body);
-        return res.status(200).json(response);
+        return ok(res, response)
     } catch (error) {
-        return res.status(500).json({error: error.message});
+        internalServerError(res, error)
     }
 }

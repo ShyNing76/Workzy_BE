@@ -10,10 +10,10 @@ export const createWorkspaceImageController = async (req, res) => {
             workspace_id: Joi.number().required(),
         }).validate({workspace_id: req.body.workspace_id, workspace_images: req.body.workspace_images}).error;
         if(error) return badRequest(res, error);
-        const workspace = await services.createWorkspaceImageService(req.body);
-        return res.status(201).json({workspace});
+        const response = await services.createWorkspaceImageService(req.body);
+        return created(res, response)
     } catch (error) {
-        return res.status(500).json({error: error.message});
+        internalServerError(res, error)
     }
 }
 
@@ -23,20 +23,19 @@ export const deleteWorkspaceImageController = async (req, res) => {
             workspace_images,
         }).validate({workspace_images: req.query.workspace_images}).error;
         if(error) return badRequest(res, error);
-        const workspace = await services.deleteWorkspaceImageService(req.query);
-        return res.status(201).json({workspace});
+        const response = await services.deleteWorkspaceImageService(req.query);
+        return ok(res, response)
     } catch (error) {
-        return res.status(500).json({error: error.message});
+        internalServerError(res, error)
     }
 }
 
 export const getAllWorkspaceImageController = async (req, res) => {
     try {
         const response = await services.getAllWorkspaceImageService(req.query);
-        return res.status(200).json(response);
+        return ok(res, response)
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({error: error.message});
+        internalServerError(res, error)
     }
 }
 
@@ -49,8 +48,8 @@ export const getWorkspaceImageByWorkspaceIdController = async (req, res) => {
         }).error;
         if (error) return badRequest(res, error);
         const response = await services.getWorkspaceImageByWorkspaceIdService(req.params.id);
-        return res.status(200).json(response);
+        return ok(res, response)
     } catch (error) {
-        return res.status(500).json({error: error.message});
+        internalServerError(res, error)
     }
 }

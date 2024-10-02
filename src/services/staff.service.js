@@ -3,13 +3,14 @@ import {Op} from "sequelize";
 import moment from "moment";
 import {v4} from "uuid"; 
 import {hashPassword} from "../utils/hashPassword";
+import { raw } from "body-parser";
 
 export const createStaffService = ({password, ...data}) => new Promise(async (resolve, reject) => {
     try {
         const isDuplicated = await db.User.findOne({
             where: {
                 [Op.or]: [{
-                    email: data.email
+                    email: data.email 
                 },
                 {
                     phone: data.phone
@@ -20,7 +21,7 @@ export const createStaffService = ({password, ...data}) => new Promise(async (re
         
         if(isDuplicated){
             const field = isDuplicated.email === data.email ? "Email" : "Phone";
-            return resolve({
+            return reject({
                 err: 1,
                 message: `${field} is already used`
             })
@@ -36,7 +37,9 @@ export const createStaffService = ({password, ...data}) => new Promise(async (re
             }
         } ,
         {
-            include: db.Staff, 
+            include: [{model: db.Staff}], 
+            raw: true,
+            nest: true
         },
         );
 
@@ -51,7 +54,6 @@ export const createStaffService = ({password, ...data}) => new Promise(async (re
                 date_of_birth: moment(staff.date_of_birth).format("MM/DD/YYYY"),
                 role_id: staff.role_id,
                 staff_id: staff.Staff.staff_id
-
             }
         });
     } catch (error) {
@@ -135,7 +137,7 @@ export const getStaffByIdService = (id) => new Promise(async (resolve, reject) =
         resolve({
             err: staff ? 0 : 1,
             message: staff ? "Got" : "No Staff Exist",
-            data: {
+            data: staff ? {
                 user_id: staff.user_id,
                 role_id: staff.role_id,
                 name: staff.name,
@@ -147,7 +149,7 @@ export const getStaffByIdService = (id) => new Promise(async (resolve, reject) =
                 status: staff.status,
                 staff_id: staff.Staff.staff_id,
                 building_id: staff.Staff.building_id
-            }
+            } : {}
         });
     } catch (error) {
         reject(error)

@@ -1,10 +1,9 @@
 import db from '../models';
 import {v4} from "uuid";
 
-export const createWorkspaceImageService = async ({images, workspaceId}) => new Promise(async (resolve, reject) => {
+export const createWorkspaceImageService = async ({images, workspaceId}, transaction) => {
     try {
-        const workspaceImages = [];
-
+        let foundCount = 0;
         for (const image of images) {
             const [workspaceImage, created] = await db.WorkspaceImage.findOrCreate({
                 where: {
@@ -14,64 +13,33 @@ export const createWorkspaceImageService = async ({images, workspaceId}) => new 
                     workspace_image_id: v4(),
                     workspace_id: workspaceId || null, 
                     image: image
-                }
+                },
+                transaction: transaction
             });
-            
-            workspaceImages.push({
-                image: workspaceImage,
-                created
-            });
+            if(!created) foundCount++;
         }
-
-        resolve({
-            err: workspaceImages[1] ? 0 : 1,
-            message: workspaceImages[1] ? 'Workspace Image created successfully!' : 'Workspace Image already exists',
-            data: workspaceImages
-        })
-
+        return foundCount;
     } catch (error) {
-        reject(error)
+        await transaction.rollback();
     }
-})
+}
 
 export const deleteWorkspaceImageService = async ({workspaceImageID}) => new Promise(async (resolve, reject) => {
     try {
-        const workspaceImages = await db.WorkspaceImage.findAll({
+        const [updatedRowsCount] = await db.WorkspaceImage.update({
+                status: "inactive"
+            }, {
                 where: {
-                    workspace_image_id: workspaceImageID
+                    workspace_image_id: {
+                        [Op.in]: workspaceImageID
+                    },
+                    status: "active"
                 }
             }) 
-            
-        if (workspaceImages.length === 0) 
-            return resolve({
-                err: 1,
-                message: "No workspace image found"
-            })
-        
-        let alreadyInactiveCount = 0;
-        let deletedCount = 0;
-
-        for (const image of workspaceImages) {
-            if (image.status === "inactive") {
-                alreadyInactiveCount++;
-            } else {
-                image.status = "inactive";
-                await image.save(); // Save each image after updating
-                deletedCount++;
-            }
-        }
-
-        if (deletedCount > 0) {
-            resolve({
-                err: 0,
-                message: `${deletedCount} workspace image(s) deleted successfully!`
-            });
-        } else {
-            resolve({
-                err: 1,
-                message: alreadyInactiveCount > 0 ? `${alreadyInactiveCount} selected images were already deleted.` : 'No images were deleted.'
-            });
-        }
+        resolve({
+            err: updatedRowsCount > 0 ? 0 : 1,
+            message: updatedRowsCount > 0 ? `${updatedRowsCount} workspace image(s) deleted successfully!` : 'No workspace image found',
+        });
     } catch (error) {
         reject(error)
     }

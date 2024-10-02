@@ -8,10 +8,6 @@ router.post("/", verify_token, verify_admin, controllers.createWorkspaceControll
     /*
         #swagger.description = 'Endpoint to create a new workspace.'
         #swagger.summary = 'Create a new workspace.'
-        #swagger.parameters['workspace_name'] = { description: 'Workspace name.' }
-        #swagger.parameters['workspace_price'] = { description: 'Workspace price.' }
-        #swagger.parameters['capacity'] = { description: 'Workspace capacity.' }
-        #swagger.parameters['description'] = { description: 'Workspace description.' }
         #swagger.requestBody = {
             required: true,
             content: {
@@ -22,6 +18,18 @@ router.post("/", verify_token, verify_admin, controllers.createWorkspaceControll
                             workspace_name: {
                                 type: 'string',
                                 example: 'Landmark81_POD_1'
+                            },
+                            building_id: {
+                                type: 'string',
+                                format: 'uuid',
+                                example: '621ca0c8-e3ad-4bd8-9df5-eafe998b5b04'
+                            },
+                            images: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    format: 'uuid'
+                                }
                             },
                             workspace_type_id: {
                                 type: 'string',
