@@ -1,8 +1,10 @@
 import db from '../models';
 import {v4} from "uuid";
+import { handleLimit, handleOffset, handleSortOrder } from "../utils/handleFilter";
 
 export const createWorkspaceImageService = async ({images, workspaceId}, transaction) => {
     try {
+        const workspaceImages = [];
         let foundCount = 0;
         for (const image of images) {
             const [workspaceImage, created] = await db.WorkspaceImage.findOrCreate({
@@ -16,9 +18,17 @@ export const createWorkspaceImageService = async ({images, workspaceId}, transac
                 },
                 transaction: transaction
             });
+
             if(!created) foundCount++;
+            workspaceImages.push({
+                image: workspaceImage,
+                created
+            });
         }
-        return foundCount;
+        return {
+            workspaceImages,
+            foundCount
+        };
     } catch (error) {
         await transaction.rollback();
     }
@@ -48,11 +58,9 @@ export const deleteWorkspaceImageService = async ({workspaceImageID}) => new Pro
 export const getAllWorkspaceImageService = ({page, limit, order, image, ...query}) => new Promise(async (resolve, reject) => {
     try {
         const queries = { raw: true, nest: true };
-        const offset = !page || +page <= 1 ? 0 : +page - 1;
-        const finalLimit = +limit || +process.env.PAGE_LIMIT;
-        queries.offset = offset * finalLimit;
-        queries.limit = finalLimit;
-        if (order) queries.order = [order];
+        queries.offset = handleOffset(page, limit);
+        queries.limit = handleLimit(limit);
+        if (order) queries.order = [handleSortOrder(order, "image")];
         if (image) query.image = image;
 
         const workspaceImages = await db.WorkspaceImage.findAndCountAll({

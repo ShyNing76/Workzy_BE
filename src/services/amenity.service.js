@@ -1,6 +1,7 @@
 import db from '../models';
 import { Op } from 'sequelize';
 import {v4} from "uuid";
+import { handleLimit, handleOffset, handleSortOrder } from "../utils/handleFilter";
 
 export const createAmenityService = async (data) => new Promise(async (resolve, reject) => {
     try {
@@ -99,11 +100,9 @@ export const deleteAmenityService = async ({amenity_ids}) => new Promise(async (
 export const getAllAmenityService = ({page, limit, order, amenity_name, ...query}) => new Promise(async (resolve, reject) => {
     try {
         const queries = { raw: true, nest: true };
-        const offset = !page || +page <= 1 ? 0 : +page - 1;
-        const finalLimit = +limit || +process.env.PAGE_LIMIT;
-        queries.offset = offset * finalLimit;
-        queries.limit = finalLimit;
-        if (order) queries.order = [order];
+        queries.offset = handleOffset(page, limit);
+        queries.limit = handleLimit(limit);
+        if (order) queries.order = [handleSortOrder(order, "amenity_name")];
         if (amenity_name) query.amenity_name = amenity_name;
 
         const amenities = await db.Amenity.findAndCountAll({

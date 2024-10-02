@@ -2,6 +2,7 @@ import db from '../models';
 import { createWorkspaceImageService } from './workspaceImage.service';
 import {v4} from "uuid";
 import {Op} from "sequelize";
+import { handleLimit, handleOffset, handleSortOrder } from "../utils/handleFilter";
 
 export const createWorkspaceService = async ({images, workspace_name, workspace_price, ...data}) => new Promise(async (resolve, reject) => {
     const t = await db.sequelize.transaction();
@@ -29,7 +30,7 @@ export const createWorkspaceService = async ({images, workspace_name, workspace_
         if(!workspace[1]) return reject("Workspace already exists")
         const workspaceId = workspace[0].workspace_id;
         const workspaceImages = await createWorkspaceImageService({images, workspaceId}, t);
-        if(workspaceImages !== 0) return reject(`${workspaceImages} Workspace Image is already exist`)
+        if(workspaceImages.foundCount > 0) return reject(`${workspaceImages.foundCount} Workspace Image is already exist`)
         await t.commit();
         resolve({
             err: 0,
@@ -132,11 +133,9 @@ export const deleteWorkspaceService = async ({workspace_ids}) => new Promise(asy
 export const getAllWorkspaceService = ({page, limit, order, workspaceName, ...query}) => new Promise(async (resolve, reject) => {
     try {
         const queries = { raw: true, nest: true };
-        const offset = !page || +page <= 1 ? 0 : +page - 1;
-        const finalLimit = +limit || +process.env.PAGE_LIMIT;
-        queries.offset = offset * finalLimit;
-        queries.limit = finalLimit;
-        if (order) queries.order = [order || "workspace_id"];
+        queries.offset = handleOffset(page, limit);
+        queries.limit = handleLimit(limit);
+        if (order) queries.order = [handleSortOrder(order, "workspace_name")];
         if (workspaceName) query.workspaceName = { [Op.substring]: workspaceName };
 
         const workspaces = await db.Workspace.findAndCountAll({

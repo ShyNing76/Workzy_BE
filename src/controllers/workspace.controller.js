@@ -2,6 +2,7 @@ import Joi from "joi";
 import {workspace_name, workspace_price} from "../helper/joi_schema";
 import {badRequest, created, internalServerError, ok} from "../middlewares/handle_error";
 import * as services from "../services";
+import { response } from "express";
 
 export const createWorkspaceController = async (req, res) => {
     try {
@@ -14,7 +15,6 @@ export const createWorkspaceController = async (req, res) => {
         const response = await services.createWorkspaceService(req.body);
         return created(res, response);
     } catch (error) {
-        
         internalServerError(res, error)
     }
 }

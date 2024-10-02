@@ -3,7 +3,7 @@ import {Op} from "sequelize";
 import moment from "moment";
 import {v4} from "uuid"; 
 import {hashPassword} from "../utils/hashPassword";
-import { raw } from "body-parser";
+import { handleLimit, handleOffset, handleSortOrder } from "../utils/handleFilter";
 
 export const createStaffService = ({password, ...data}) => new Promise(async (resolve, reject) => {
     try {
@@ -64,16 +64,14 @@ export const createStaffService = ({password, ...data}) => new Promise(async (re
 export const getAllStaffService = ({page, limit, order, name, ...query}) => new Promise(async (resolve, reject) => {
     try {
         const queries = { raw: true, nest: true };
-        const offset = !page || +page <= 1 ? 0 : +page - 1;
-        const finalLimit = +limit || +process.env.PAGE_LIMIT;
-        queries.offset = offset * finalLimit;
-        queries.limit = finalLimit;
-        if (order) queries.order = [order];
+        queries.offset = handleOffset(page, limit);
+        queries.limit = handleLimit(limit);
+        if (order) queries.order = [handleSortOrder(order, "name")];
         if (name) query.name = { [Op.substring]: name };
 
         const staffs = await db.User.findAndCountAll({
             where: {
-            role_id: 3,
+                role_id: 3,
                 ...query, 
             },
             ...queries,
@@ -100,10 +98,9 @@ export const getAllStaffService = ({page, limit, order, name, ...query}) => new 
             }
         });
         resolve({
-            err: staffs ? 0 : 1,
-            message: staffs ? "Got" : "No Staff Exist",
+            err: staffs.count > 0 ? 0 : 1,
+            message: staffs.count > 0 ? "Got" : "No Staff Exist",
             data: staffs
-            
         });
     } catch (error) {
         reject(error)
