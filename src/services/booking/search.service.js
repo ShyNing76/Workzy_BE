@@ -1,4 +1,4 @@
-import db from "../models";
+import db from "../../models";
 import { Op } from "sequelize";
 
 export const searchBuildingService = ({location, workspace_type_name}) => new Promise(async (resolve, reject) => {

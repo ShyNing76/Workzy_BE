@@ -1,5 +1,5 @@
-import {badRequest, internalServerError, ok} from "../middlewares/handle_error";
-import * as services from "../services";
+import {badRequest, internalServerError, ok} from "../../middlewares/handle_error";
+import * as services from "../../services";
 
 export const searchBuildingController = async (req, res) => {
     try {
