@@ -10,3 +10,4 @@ ngrok.exe
 .dockerignore
 Dockerfile
 /uploads
+/.vscode

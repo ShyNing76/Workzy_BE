@@ -1,15 +1,19 @@
 import passport from "passport";
-import {Strategy as GoogleStrategy} from "passport-google-oauth20";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { v4 } from "uuid";
 import * as controllers from "../controllers";
-import {v4} from "uuid";
 
-passport.use(new GoogleStrategy({
+passport.use(
+    new GoogleStrategy(
+        {
             clientID: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
             callbackURL: "/api/v1/auth/google/callback",
-            scope: ["profile", "email",
-                'https://www.googleapis.com/auth/user.birthday.read',
-                'https://www.googleapis.com/auth/user.phonenumbers.read',
+            scope: [
+                "profile",
+                "email",
+                "https://www.googleapis.com/auth/user.birthday.read",
+                "https://www.googleapis.com/auth/user.phonenumbers.read",
             ],
         },
         async function (accessToken, refreshToken, profile, cb) {
