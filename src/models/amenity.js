@@ -43,6 +43,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.DECIMAL(10, 2),
                 defaultValue: 0.0,
             },
+            rent_price: {
+                type: DataTypes.DECIMAL(10, 2),
+                defaultValue: 0.0,
+            },
             type: {
                 type: DataTypes.ENUM("amenity", "service"),
                 defaultValue: "amenity",

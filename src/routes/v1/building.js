@@ -1,11 +1,16 @@
 import express from "express";
 import * as controllers from "../../controllers";
-import {verify_admin, verify_admin_or_manager, verify_token} from "../../middlewares/verifyToken";
+import {
+    verify_admin,
+    verify_admin_or_manager,
+    verify_token,
+} from "../../middlewares/verifyToken";
 
 const router = express.Router();
 
-
-router.get("/", controllers.getBuildingController
+router.get(
+    "/",
+    controllers.getBuildingController
     /*
         #swagger.description = 'Endpoint to get all buildings.'
         #swagger.summary = 'Get all buildings.'
@@ -42,7 +47,9 @@ router.get("/", controllers.getBuildingController
      */
 );
 
-router.get("/:id", controllers.getBuildingByIdController
+router.get(
+    "/:id",
+    controllers.getBuildingByIdController
     /*
         #swagger.description = 'Endpoint to get a building by ID.'
         #swagger.summary = 'Get a building by ID.'
@@ -64,7 +71,10 @@ router.get("/:id", controllers.getBuildingByIdController
 
 router.use(verify_token);
 
-router.post("/", verify_admin, controllers.createBuildingController
+router.post(
+    "/",
+    verify_admin,
+    controllers.createBuildingController
     /*
         #swagger.description = 'Endpoint to create a new building.'
         #swagger.summary = 'Create a new building.'
@@ -74,6 +84,7 @@ router.post("/", verify_admin, controllers.createBuildingController
                 "application/json": {
                     schema: {
                         type: 'object',
+                        required: ['building_name', 'location', 'address', 'google_address', 'images'],
                         properties: {
                             building_name: {
                                 type: 'string',
@@ -87,6 +98,10 @@ router.post("/", verify_admin, controllers.createBuildingController
                                 type: 'string',
                                 example: 'Building address.'
                             },
+                            google_address: {
+                                type: 'string',
+                                example: 'https://goo.gl/maps/1234abcd'
+                            },
                             description: {
                                 type: 'string',
                                 example: 'Building description.'
@@ -98,6 +113,13 @@ router.post("/", verify_admin, controllers.createBuildingController
                             status: {
                                 type: 'string',
                                 example: 'active|inactive'
+                            },
+                            images: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    example: 'Image URL'
+                                }
                             }
                         }
                     }
@@ -119,7 +141,10 @@ router.post("/", verify_admin, controllers.createBuildingController
      */
 );
 
-router.put("/:id", verify_admin_or_manager, controllers.updateBuildingController
+router.put(
+    "/:id",
+    verify_admin_or_manager,
+    controllers.updateBuildingController
     /*
         #swagger.description = 'Endpoint to update a building.'
         #swagger.summary = 'Update a building.'
@@ -143,6 +168,10 @@ router.put("/:id", verify_admin_or_manager, controllers.updateBuildingController
                                 type: 'string',
                                 example: 'Building address.'
                             },
+                            google_address: {
+                                type: 'string',
+                                example: 'https://goo.gl/maps/1234abcd'
+                            },
                             description: {
                                 type: 'string',
                                 example: 'Building description.'
@@ -154,9 +183,16 @@ router.put("/:id", verify_admin_or_manager, controllers.updateBuildingController
                             status: {
                                 type: 'string',
                                 example: 'active|inactive'
+                            },
+                            images: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    example: 'Image URL'
+                                }
                             }
                         },
-                        required: ['building_name', 'location', 'address']
+                        required: ['building_name', 'location', 'address', 'google_address', 'images']
                     }
                 }
             }
@@ -179,7 +215,10 @@ router.put("/:id", verify_admin_or_manager, controllers.updateBuildingController
      */
 );
 
-router.put("/:id/status", verify_admin_or_manager, controllers.updateBuildingStatusController
+router.put(
+    "/:id/status",
+    verify_admin_or_manager,
+    controllers.updateBuildingStatusController
     /*
         #swagger.description = 'Endpoint to update status of a building.'
         #swagger.summary = 'Update status of a building.'
@@ -219,7 +258,10 @@ router.put("/:id/status", verify_admin_or_manager, controllers.updateBuildingSta
      */
 );
 
-router.put("/:id/image", verify_admin_or_manager, controllers.updateBuildingImageController
+router.put(
+    "/:id/image",
+    verify_admin_or_manager,
+    controllers.updateBuildingImageController
     /*
         #swagger.description = 'Endpoint to update image of a building.'
         #swagger.summary = 'Update image of a building.'
@@ -259,7 +301,10 @@ router.put("/:id/image", verify_admin_or_manager, controllers.updateBuildingImag
      */
 );
 
-router.put("/:id/manager", verify_admin, controllers.assignManagerController
+router.put(
+    "/:id/manager",
+    verify_admin,
+    controllers.assignManagerController
     /*
         #swagger.description = 'Endpoint to assign a manager to a building.'
         #swagger.summary = 'Assign a manager to a building.'
@@ -272,8 +317,9 @@ router.put("/:id/manager", verify_admin, controllers.assignManagerController
                         type: 'object',
                         properties: {
                             manager_id: {
-                                type: 'integer',
-                                example: 1
+                                type: 'string',
+                                format: 'uuid',
+                                example: '123e4567-e89b-12d3-a456-426614174000'
                             }
                         },
                         required: ['manager_id']
@@ -299,7 +345,10 @@ router.put("/:id/manager", verify_admin, controllers.assignManagerController
      */
 );
 
-router.put("/:id/manager/remove", verify_admin, controllers.removeManagerController
+router.put(
+    "/:id/manager/remove",
+    verify_admin,
+    controllers.removeManagerController
     /*
         #swagger.description = 'Endpoint to remove a manager from a building.'
         #swagger.summary = 'Remove a manager from a building.'
@@ -319,7 +368,10 @@ router.put("/:id/manager/remove", verify_admin, controllers.removeManagerControl
      */
 );
 
-router.delete("/:id", verify_admin, controllers.deleteBuildingController
+router.delete(
+    "/:id",
+    verify_admin,
+    controllers.deleteBuildingController
     /*
         #swagger.description = 'Endpoint to delete a building.'
         #swagger.summary = 'Delete a building.'
