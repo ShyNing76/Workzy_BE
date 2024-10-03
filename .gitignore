@@ -9,3 +9,4 @@ ngrok.exe
 /src/test.js
 .dockerignore
 Dockerfile
+/uploads
