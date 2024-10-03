@@ -58,7 +58,11 @@ function initWebRoutes(app) {
         // #swagger.tags = ['Review']
     );
 
-    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(require('../../config/swagger-output.json')));
+    app.use('/api/v1/search', require('./search')
+        // #swagger.tags = ['Search']
+    );
+
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(require('../config/swagger-output.json')));
     // Import Swagger UI
     app.use(notFound);
 }

@@ -21,12 +21,9 @@ export const createStaffService = ({password, ...data}) => new Promise(async (re
         
         if(isDuplicated){
             const field = isDuplicated.email === data.email ? "Email" : "Phone";
-            return reject({
-                err: 1,
-                message: `${field} is already used`
-            })
+            return reject(`${field} is already used`)
         }
-        
+
         const staff = await db.User.create({
             user_id: v4(),
             password: hashPassword(password),
@@ -63,18 +60,17 @@ export const createStaffService = ({password, ...data}) => new Promise(async (re
 
 export const getAllStaffService = ({page, limit, order, name, ...query}) => new Promise(async (resolve, reject) => {
     try {
-        const queries = { raw: true, nest: true };
-        queries.offset = handleOffset(page, limit);
-        queries.limit = handleLimit(limit);
-        if (order) queries.order = [handleSortOrder(order, "name")];
-        if (name) query.name = { [Op.substring]: name };
+        
+        name = { [Op.substring]: name };
 
         const staffs = await db.User.findAndCountAll({
             where: {
                 role_id: 3,
                 ...query, 
             },
-            ...queries,
+            offset: handleOffset(page, limit),
+            limit: handleLimit(limit),
+            order: [handleSortOrder(order, "name")],
             attributes: {
                 exclude: ["password","google_token","building_id","createdAt", "updatedAt"]
             },
@@ -131,10 +127,11 @@ export const getStaffByIdService = (id) => new Promise(async (resolve, reject) =
             },
             raw: true
         });
+        if(!staff) return reject("No Staff Exist")
         resolve({
-            err: staff ? 0 : 1,
-            message: staff ? "Got" : "No Staff Exist",
-            data: staff ? {
+            err: 0,
+            message: "Got",
+            data: {
                 user_id: staff.user_id,
                 role_id: staff.role_id,
                 name: staff.name,
@@ -146,7 +143,7 @@ export const getStaffByIdService = (id) => new Promise(async (resolve, reject) =
                 status: staff.status,
                 staff_id: staff.Staff.staff_id,
                 building_id: staff.Staff.building_id
-            } : {}
+            }
         });
     } catch (error) {
         reject(error)
@@ -173,10 +170,7 @@ export const updateStaffService = (id, data) => new Promise(async (resolve, reje
 
         if(isDuplicated){
             const field = isDuplicated.email === data.email ? "Email" : "Phone";
-            return resolve({
-                err: 1,
-                message: `${field} is already used`
-            })
+            return reject(`${field} is already used`)
         }
 
         const staff = await db.User.findOne({
@@ -187,10 +181,7 @@ export const updateStaffService = (id, data) => new Promise(async (resolve, reje
             raw: true
         });
 
-        if(!staff) return resolve({
-            err: 1,
-            message: "Staff not found"
-        });
+        if(!staff) return reject("Staff not found");
 
         if(data.password) data.password = hashPassword(data.password);
 
@@ -215,15 +206,8 @@ export const deleteStaffService = (id) => new Promise(async (resolve, reject) =>
             where: {user_id: id, role_id: 3},
             raw: true
         })
-        if(!user) return resolve({
-            err: 1,
-            message: "User not found"
-        })
-        if(user.status === "inactive") return resolve({
-            err: 1,
-            message: "Staff is already deleted"
-        })
-        user.status = "inactive";
+        if(!user) return reject("User not found");
+        if(user.status === "inactive") return reject("Staff is already deleted");
         await user.save();
 
         resolve({
@@ -235,7 +219,7 @@ export const deleteStaffService = (id) => new Promise(async (resolve, reject) =>
     }
 })
 
-export const assignStaffToBuildingService = async (id, building_id) => new Promise(async (resolve, reject) => {
+export const assignStaffToBuildingService = (id, building_id) => new Promise(async (resolve, reject) => {
     try {
 
         const [staff, isBuildingExist] = await Promise.all([
@@ -256,14 +240,8 @@ export const assignStaffToBuildingService = async (id, building_id) => new Promi
                 raw: true
             })
         ])
-        if(!staff || staff.status == "inactive") return resolve({
-            err: 1,
-            message: "Staff is not exist"
-        })
-        if(!isBuildingExist) return resolve({
-            err: 1,
-            message: "Building is not exist"
-        })
+        if(!staff || staff.status == "inactive") return reject("Staff is not exist");
+        if(!isBuildingExist) return reject("Building is not exist");
         staff.Staff.building_id = building_id;
         await staff.Staff.save();
         

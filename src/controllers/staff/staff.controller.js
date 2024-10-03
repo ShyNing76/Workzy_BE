@@ -1,6 +1,6 @@
 import Joi from "joi";
-import {email, password, name, phone, date_of_birth, gender} from "../../helper/joi_schema";
-import {badRequest} from "../../middlewares/handle_error";
+import {name, email, password, phone} from "../../helper/joi_schema";
+import {badRequest , created, internalServerError, ok} from "../../middlewares/handle_error";
 import * as services from "../../services";
 
 export const createStaffController = async (req, res) => {
@@ -15,6 +15,8 @@ export const createStaffController = async (req, res) => {
         const response = await services.createStaffService(req.body);
         return created(res, response);
     } catch (error) {
+        if(error === "Email is already used"
+            || error === "Phone is already used") return badRequest(res, error);
         internalServerError(res, error)
     }
 }
@@ -24,6 +26,7 @@ export const getStaffByIdController = async (req, res) => {
         const response = await services.getStaffByIdService(req.params.id);
         return ok(res, response)
     } catch (error) {
+        if(error === "No Staff Exist") return badRequest(res, error);
         internalServerError(res, error)
     }
 }
@@ -47,6 +50,9 @@ export const updateStaffController = async (req, res) => {
         const response = await services.updateStaffService(req.params.id, req.body);
         return ok(res, response)    
     } catch (error) {
+        if(error === "Email is already used"
+            || error === "Phone is already used"
+            || error === "Staff not found") return badRequest(res, error);
         internalServerError(res, error)
     }
 }
@@ -56,6 +62,8 @@ export const deleteStaffController = async (req, res) => {
         const response = await services.deleteStaffService(req.params.id);
         return ok(res, response)    
     } catch (error) {
+        if(error === "Staff not found"
+            || error === "Building is not exist") return badRequest(res, error);
         internalServerError(res, error)
     }
 }
@@ -73,6 +81,8 @@ export const assignStaffToBuildingController = async (req, res) => {
         const response = await services.assignStaffToBuildingService(req.params.id, req.body.building_id);
         return ok(res, response)    
     } catch (error) {
+        if(error === "Staff not found"
+            || error === "Building is not exist") return badRequest(res, error);
         internalServerError(res, error)
     }
 }

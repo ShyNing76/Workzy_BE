@@ -3,14 +3,10 @@ import { Op } from 'sequelize';
 import {v4} from "uuid";
 import { handleLimit, handleOffset, handleSortOrder } from "../../utils/handleFilter";
 
-export const createAmenityService = async (data) => new Promise(async (resolve, reject) => {
+export const createAmenityService = (data) => new Promise(async (resolve, reject) => {
     try {
         data.depreciation_price = data.original_price * 0.7;
         if(data.type == "service") data.depreciation_price = 0;
-        console.log(data.image)
-        console.log(data.original_price)
-        console.log(data.depreciation_price)
-
 
         const amenity = await db.Amenity.findOrCreate({
             where: {
@@ -26,10 +22,11 @@ export const createAmenityService = async (data) => new Promise(async (resolve, 
                 status: "active"
             }
         })
+        if(amenity[1]) return reject("Amenity already exists")
         resolve({
-            err: amenity[1] ? 0 : 1,
-            message: amenity[1] ? 'Amenity created successfully!' : 'Amenity already exists',
-            data: amenity[0] ? amenity : null,
+            err: 0,
+            message: 'Amenity created successfully!',
+            data: amenity[0],
         })
 
     } catch (error) {
@@ -48,10 +45,7 @@ export const updateAmenityService = (amenity_id, data) => new Promise(async (res
         });
 
         if(isDuplicated)
-            return reject({
-                err: 1,
-                message: `Amenity is already used`
-            })
+            return reject(`Amenity is already used`)
         
         data.depreciation_price = data.original_price * 0.7;
         if(data.type == "service") data.depreciation_price = 0;
@@ -66,9 +60,10 @@ export const updateAmenityService = (amenity_id, data) => new Promise(async (res
                 },
             raw: true
         });        
+        if(updatedRowsCount === 0) return reject("Cannot find any amenity to update")
         resolve({
-            err: updatedRowsCount > 0 ? 0 : 1,
-            message: updatedRowsCount > 0 ? "Update Successfully" : "Cannot find any amenity to update",
+            err: 0,
+            message: "Update Successfully",
         })
 
     } catch (error) {
@@ -77,7 +72,7 @@ export const updateAmenityService = (amenity_id, data) => new Promise(async (res
     }
 })
 
-export const deleteAmenityService = async ({amenity_ids}) => new Promise(async (resolve, reject) => {
+export const deleteAmenityService = ({amenity_ids}) => new Promise(async (resolve, reject) => {
     try {
         const [updatedRowsCount] = await db.Amenity.update({
             status: "inactive"
@@ -87,9 +82,10 @@ export const deleteAmenityService = async ({amenity_ids}) => new Promise(async (
                 status: "active"
             }
         }) 
+        if(updatedRowsCount === 0) return reject("Cannot find any amenity to delete")
         resolve({
-            err: updatedRowsCount > 0 ? 0 : 1,
-            message: updatedRowsCount > 0 ? `${updatedRowsCount} Amenity (s) deleted successfully!` : "Cannot find any amenity to delete",
+            err: 0,
+            message: `${updatedRowsCount} Amenity (s) deleted successfully!`,
         })
         
     } catch (error) {
@@ -99,25 +95,26 @@ export const deleteAmenityService = async ({amenity_ids}) => new Promise(async (
 
 export const getAllAmenityService = ({page, limit, order, amenity_name, ...query}) => new Promise(async (resolve, reject) => {
     try {
-        const queries = { raw: true, nest: true };
-        queries.offset = handleOffset(page, limit);
-        queries.limit = handleLimit(limit);
-        if (order) queries.order = [handleSortOrder(order, "amenity_name")];
-        if (amenity_name) query.amenity_name = amenity_name;
+        
 
         const amenities = await db.Amenity.findAndCountAll({
             where: {
+                amenity_name: {
+                    [Op.substring]: amenity_name || ""
+                },
                 ...query, 
             },
-            ...queries,
+            offset: handleOffset(page, limit),
+            limit: handleLimit(limit),
+            order: [handleSortOrder(order, "amenity_name")],
             attributes: {
                 exclude: ["createdAt", "updatedAt"]
             },
         });
-
+        if(amenities.count === 0) return reject("No Amenity Exist")
         resolve({
-            err: amenities.count > 0 ? 0 : 1,
-            message: amenities.count > 0 ? "Got" : "No Amenity Exist",
+            err: 0,
+            message: "Got",
             data: amenities
         });
     } catch (error) {
@@ -136,9 +133,10 @@ export const getAmenityByIdService = (amenity_id) => new Promise(async (resolve,
             },
             raw: true
         });
+        if(!amenity) return reject("No Amenity Exist")
         resolve({
-            err: amenity ? 0 : 1,
-            message: amenity ? "Got" : "No Amenity Exist",
+            err: 0,
+            message: "Got",
             data: amenity
         });
     } catch (error) {
