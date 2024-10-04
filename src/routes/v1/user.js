@@ -1,10 +1,13 @@
 import * as controller from "../../controllers";
-import {verify_admin, verify_token} from "../../middlewares/verifyToken";
+import { verify_token } from "../../middlewares/verifyToken";
+import { uploadImage } from "../../middlewares/imageGoogleUpload";
 
-const router = require('express').Router();
+const router = require("express").Router();
 
-
-router.get('/profile', verify_token, controller.getUser
+router.get(
+    "/profile",
+    verify_token,
+    controller.getUser
     /*
     #swagger.description = 'Get the current customer profile.'
     #swagger.summary = 'Get the current profile of the customer'
@@ -13,7 +16,10 @@ router.get('/profile', verify_token, controller.getUser
     }] */
 );
 
-router.put('/profile/', verify_token, controller.updateUser
+router.put(
+    "/profile/",
+    verify_token,
+    controller.updateUser
     /*  #swagger.description = 'Update the current customer profile.'
         #swagger.summary = 'Update the current profile of the customer'
         #swagger.requestBody = {
@@ -49,7 +55,10 @@ router.put('/profile/', verify_token, controller.updateUser
         */
 );
 
-router.put('/password', verify_token, controller.updatePassword
+router.put(
+    "/password",
+    verify_token,
+    controller.updatePassword
     /*
     #swagger.requestBody = {
         required: true,
@@ -79,7 +88,10 @@ router.put('/password', verify_token, controller.updatePassword
     }] */
 );
 
-router.put('/phone', verify_token, controller.updatePhone
+router.put(
+    "/phone",
+    verify_token,
+    controller.updatePhone
     /*
     #swagger.requestBody = {
         required: true,
@@ -105,7 +117,10 @@ router.put('/phone', verify_token, controller.updatePhone
     }] */
 );
 
-router.put('/email', verify_token, controller.updateEmail
+router.put(
+    "/email",
+    verify_token,
+    controller.updateEmail
     /*
     #swagger.requestBody = {
         required: true,
@@ -131,7 +146,11 @@ router.put('/email', verify_token, controller.updateEmail
     }] */
 );
 
-router.put('/image', verify_token, controller.updateImage
+router.put(
+    "/image",
+    verify_token,
+    uploadImage,
+    controller.updateImage
     /*
     #swagger.requestBody = {
         required: true,

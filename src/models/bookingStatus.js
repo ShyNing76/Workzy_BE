@@ -30,6 +30,7 @@ module.exports = (sequelize, DataTypes) => {
                     "check-in",
                     "in-process",
                     "check-out",
+                    "check-amenities",
                     "completed",
                     "cancelled"
                 ),

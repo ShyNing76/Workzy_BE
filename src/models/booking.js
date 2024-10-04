@@ -14,11 +14,7 @@ module.exports = (sequelize, DataTypes) => {
                 through: "BookingAmenities",
                 foreignKey: "booking_id",
             });
-            Booking.belongsToMany(models.Workspace, {
-                through: "BookingDetails",
-                foreignKey: "booking_id",
-            });
-            Booking.belongsTo(models.BookingType, {foreignKey: "booking_type_id"});
+            Booking.belongsTo(models.Workspace, {foreignKey: "booking_id"});
             Booking.hasOne(models.Review, {foreignKey: "booking_id"});
             Booking.hasMany(models.BookingStatus, {foreignKey: "booking_id"});
             Booking.hasMany(models.Payment, {foreignKey: "booking_id"});
@@ -36,20 +32,28 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.UUID,
                 allowNull: false,
             },
-            booking_type_id: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-            },
-            service_price: {
+            total_amenities_price: {
                 type: DataTypes.DECIMAL(10, 2),
-                allowNull: true,
+                defaultValue: 0.0,
             },
-            broken_price: {
+            total_workspace_price: {
                 type: DataTypes.DECIMAL(10, 2),
-                allowNull: true,
+                defaultValue: 0.0,
+            },
+            total_broken_price: {
+                type: DataTypes.DECIMAL(10, 2),
+                defaultValue: 0.0,
             },
             total_price: {
                 type: DataTypes.DECIMAL(10, 2),
+                allowNull: false,
+            },
+            start_time_date: {
+                type: DataTypes.DATE,
+                allowNull: false,
+            },
+            end_time_date: {
+                type: DataTypes.DATE,
                 allowNull: false,
             },
         },
