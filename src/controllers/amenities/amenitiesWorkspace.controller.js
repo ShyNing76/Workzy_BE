@@ -1,5 +1,5 @@
 import Joi from "joi";
-import {badRequest , created, internalServerError, ok} from "../../middlewares/handle_error";
+import { badRequest, created, internalServerError, ok } from "../../middlewares/handle_error";
 import * as services from "../../services";
 
 export const createAmenitiesWorkspaceController = async (req, res) => {

@@ -1,6 +1,6 @@
 import Joi from "joi";
-import {email, password, name, phone} from "../../helper/joi_schema";
-import {badRequest, created, internalServerError, ok} from "../../middlewares/handle_error";
+import { email, password, phone } from "../../helper/joi_schema";
+import { badRequest, created, internalServerError, ok } from "../../middlewares/handle_error";
 import * as services from "../../services";
 
 export const createManagerController = async (req, res) => {
@@ -15,7 +15,7 @@ export const createManagerController = async (req, res) => {
         const response = await services.createManagerService(req.body);
         return created(res, response);
     } catch (error) {
-        internalServerError(res, error)
+        internalServerError(res, error);
     }
 }
 

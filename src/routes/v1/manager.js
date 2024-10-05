@@ -1,10 +1,18 @@
 import express from "express";
 import * as controllers from "../../controllers";
-import {verify_admin, verify_admin_or_manager, verify_token} from "../../middlewares/verifyToken";
+import {
+    verify_admin,
+    verify_admin_or_manager,
+    verify_token,
+} from "../../middlewares/verifyToken";
 
 const router = express.Router();
 
-router.get("/", verify_token, verify_admin, controllers.getAllManagersController
+router.get(
+    "/",
+    verify_token,
+    verify_admin,
+    controllers.getAllManagersController
     /*
         #swagger.description = 'Endpoint to get all managers.'
         #swagger.summary = 'Get all managers.'
@@ -40,7 +48,11 @@ router.get("/", verify_token, verify_admin, controllers.getAllManagersController
      */
 );
 
-router.get("/:id", verify_token, verify_admin_or_manager, controllers.getManagerByIdController
+router.get(
+    "/:id",
+    verify_token,
+    verify_admin_or_manager,
+    controllers.getManagerByIdController
     /*
         #swagger.description = 'Get a manager by ID.'
         #swagger.summary = 'Get a manager by ID.'
@@ -60,7 +72,11 @@ router.get("/:id", verify_token, verify_admin_or_manager, controllers.getManager
      */
 );
 
-router.post("/", verify_token, verify_admin, controllers.createManagerController
+router.post(
+    "/",
+    verify_token,
+    verify_admin,
+    controllers.createManagerController
     /*
         #swagger.description = 'Endpoint to create a new manager.'
         #swagger.summary = 'Create a new manager.'
@@ -108,7 +124,11 @@ router.post("/", verify_token, verify_admin, controllers.createManagerController
      */
 );
 
-router.put("/:id", verify_token, verify_admin_or_manager, controllers.updateManagerController
+router.put(
+    "/:id",
+    verify_token,
+    verify_admin_or_manager,
+    controllers.updateManagerController
     /*
         #swagger.description = 'Endpoint to update a manager.'
         #swagger.summary = 'Update a manager.'
@@ -148,7 +168,11 @@ router.put("/:id", verify_token, verify_admin_or_manager, controllers.updateMana
      */
 );
 
-router.delete("/:id", verify_token, verify_admin, controllers.deleteManagerController
+router.delete(
+    "/:id",
+    verify_token,
+    verify_admin,
+    controllers.deleteManagerController
     /*
         #swagger.description = 'Endpoint to delete a manager.'
         #swagger.summary = 'Delete a manager.'
