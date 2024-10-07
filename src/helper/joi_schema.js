@@ -12,28 +12,17 @@ export const gender = Joi.string().pattern(new RegExp('Male|Female|Other')).requ
 
 export const date_of_birth = Joi.date().required()
 
-export const title = Joi.string().required()
-
-export const price = Joi.number().min(0).required()
-
 export const location = Joi.string().pattern(new RegExp('Hanoi|HCM')).required()
 
 export const address = Joi.string().required()
 
-export const available = Joi.number().min(0).required()
-
-export const categoryId = Joi.string().alphanum().required()
-
 export const image = Joi.string().uri().required()
 
-export const bid = Joi.number().required()
-
-export const accessToken = Joi.string().required()
-
-export const refreshToken = Joi.string().required()
-
+export const id = Joi.string().uuid().required()
 
 export const type = Joi.string().valid("booking", "payment", "system").required()
+
+export const booking_type = Joi.string().valid('Hourly', 'Daily', 'Monthly').required()
 
 export const description = Joi.string().required()
 

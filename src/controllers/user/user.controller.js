@@ -23,6 +23,7 @@ export const updateUser = async (req, res) => {
         const response = await services.updateProfile({
             ...req.body,
             ...req.user,
+            image: req.file.firebaseUrl,
         });
 
         // Return the response

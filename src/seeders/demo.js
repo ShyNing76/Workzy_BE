@@ -67,16 +67,19 @@ module.exports = {
                 "BookingType",
                 [
                     {
+                        booking_type_id: v4(),
                         type: "Hourly",
                         created_at: new Date(),
                         updated_at: new Date(),
                     },
                     {
+                        booking_type_id: v4(),
                         type: "Daily",
                         created_at: new Date(),
                         updated_at: new Date(),
                     },
                     {
+                        booking_type_id: v4(),
                         type: "Monthly",
                         created_at: new Date(),
                         updated_at: new Date(),
@@ -93,8 +96,7 @@ module.exports = {
                         "Trường Đại học FPT TP.HCM, Lô E2a-7, Đường D1, Phường Long Thạnh Mỹ, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 71216, Việt Nam",
                     location: "HCM",
                     status: "active",
-                    description:
-                        "Workzy FPTU là một trong những văn phòng chia sẻ đầu tiên tại Việt Nam, được thiết kế theo phong cách hiện đại, tạo nên một môi trường làm việc chuyên nghiệp và sáng tạo.",
+                    description:"Workzy FPTU là một trong những văn phòng chia sẻ tiên phong tại Việt Nam, được thiết kế theo phong cách hiện đại, kết hợp giữa sự tinh tế và sáng tạo trong từng chi tiết. Với vị trí thuận lợi ngay trong khuôn viên của Đại học FPT, Workzy FPTU không chỉ thu hút cộng đồng sinh viên và giảng viên mà còn là điểm đến lý tưởng cho các startup, freelancer, và những doanh nghiệp vừa và nhỏ. Không gian của Workzy FPTU được tối ưu hóa để khuyến khích sự sáng tạo và tinh thần đổi mới, từ các phòng làm việc cá nhân yên tĩnh đến các khu vực sinh hoạt chung, nơi mọi người có thể giao lưu và trao đổi ý tưởng. Đặc biệt, với cơ sở vật chất hiện đại, từ hệ thống máy chiếu, bảng trắng đến kết nối Internet tốc độ cao, Workzy FPTU tạo điều kiện thuận lợi cho các buổi họp, hội thảo và các sự kiện doanh nghiệp.",
                     created_at: new Date(),
                     updated_at: new Date(),
                 },
@@ -105,19 +107,18 @@ module.exports = {
                         "Nhà Văn hóa Sinh viên, Quảng trường sáng tạo, Phường Đông Hoà, Dĩ An, Tỉnh Bình Dương, 00848, Việt Nam",
                     status: "active",
                     location: "HCM",
-                    description:
-                        "Workzy Nhà Văn Hóa là một trong những văn phòng chia sẻ đầu tiên tại Việt Nam, được thiết kế theo phong cách hiện đại, tạo nên một môi trường làm việc chuyên nghiệp và sáng tạo.",
+                    description: "Workzy Nhà văn hóa là một tòa nhà mang đậm chất văn hóa, với kiến trúc pha trộn giữa hiện đại và truyền thống. Nằm ngay cạnh khu vực trung tâm của thành phố, tòa nhà này mang đến một không gian làm việc gần gũi, thân thiện và không kém phần chuyên nghiệp. Với các phòng làm việc được bố trí khoa học, ánh sáng tự nhiên chan hòa và nội thất tinh tế, Workzy Nhà văn hóa không chỉ là nơi làm việc mà còn là một không gian giao lưu văn hóa, nghệ thuật. Tại đây, các thành viên có thể tham gia vào các buổi hội thảo, triển lãm hoặc các sự kiện cộng đồng nhằm mở rộng kiến thức và kết nối. Với mục tiêu thúc đẩy sự phát triển sáng tạo của các cá nhân và doanh nghiệp, Workzy Nhà văn hóa mang đến nhiều dịch vụ hỗ trợ như phòng họp hiện đại, không gian tổ chức sự kiện, và cả các gói dịch vụ ảo giúp khách hàng tối ưu hóa hoạt động kinh doanh của mình.",
                     created_at: new Date(),
                     updated_at: new Date(),
                 },
                 {
                     building_id: v4(),
                     building_name: "Workzy Hòa Lạc",
+                    location: "Hanoi",
                     address:
                         "Trường Đại học FPT, Quốc lộ 21, Thạch Hoà, Huyện Thạch Thất, Hà Nội, Việt Nam",
                     status: "active",
-                    description:
-                        "Workzy Hòa Lạc là một trong những văn phòng chia sẻ đầu tiên tại Việt Nam, được thiết kế theo phong cách hiện đại, tạo nên một môi trường làm việc chuyên nghiệp và sáng tạo.",
+                    description:"Workzy Hòa Lạc là một biểu tượng của sự kết hợp hoàn hảo giữa thiên nhiên và công nghệ. Nằm trong khu công nghệ cao Hòa Lạc, tòa nhà này được bao quanh bởi không gian xanh mát, mang lại cảm giác yên bình và thư giãn, rất phù hợp cho những ai muốn tìm kiếm sự tĩnh lặng để tập trung vào công việc. Workzy Hòa Lạc không chỉ nổi bật với các phòng làm việc hiện đại và đầy đủ tiện nghi, mà còn có những khu vực ngoài trời được thiết kế tinh tế để các thành viên có thể làm việc hoặc thư giãn giữa không gian thiên nhiên. Tòa nhà này cũng là nơi lý tưởng cho các công ty công nghệ, các tổ chức nghiên cứu phát triển sản phẩm, với các dịch vụ hỗ trợ đặc thù như không gian làm việc linh hoạt, phòng thí nghiệm nhỏ và phòng họp chuyên dụng. Hơn nữa, với sự gần gũi với các trường đại học và viện nghiên cứu trong khu vực, Workzy Hòa Lạc mang đến cơ hội kết nối, hợp tác giữa các nhà nghiên cứu, doanh nghiệp và các chuyên gia trong ngành.",
                     created_at: new Date(),
                     updated_at: new Date(),
                 },
