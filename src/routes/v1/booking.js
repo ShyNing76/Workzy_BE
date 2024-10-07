@@ -86,4 +86,37 @@ router.post(
     */
 );
 
+router.get('/get', verify_customer, controllers.getBookingController
+    /*
+        #swagger.description = 'Get all bookings for the authenticated customer.'
+        #swagger.summary = 'Get bookings'
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.responses[200] = {
+            description: 'Bookings retrieved successfully',
+            schema: {
+                err: 0,
+                message: 'Bookings retrieved successfully',
+                data: [
+                    {
+                        booking_id: '123e4567-e89b-12d3-a456-426614174000',
+                        workspace_id: '123e4567-e89b-12d3-a456-426614174000',
+                        start_time: '2023-10-01T14:00:00Z',
+                        end_time: '2023-10-01T16:00:00Z',
+                        total_price: 50.00
+                    }
+                ]
+            }
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error',
+            schema: {
+                err: 1,
+                message: 'An error occurred while processing your request'
+            }
+        }
+    */
+);
+
 module.exports = router;
