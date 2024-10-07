@@ -1,6 +1,7 @@
 import initWebRoutes from "./routes/v1";
 import express from 'express';
 import cors from 'cors';
+import job from "./config/checkBookingStatus";
 
 require('dotenv').config();
 require('./config/passport');
