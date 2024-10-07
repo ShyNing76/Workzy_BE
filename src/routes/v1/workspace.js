@@ -172,7 +172,7 @@ router.delete("/delete/", verify_token, verify_admin, controllers.deleteWorkspac
      */
 );
 
-router.get("/", verify_token, controllers.getAllWorkspaceController
+router.get("/", controllers.getAllWorkspaceController
     /*
         #swagger.description = 'Endpoint to get all workspaces.'
         #swagger.summary = 'Get all workspaces.'
@@ -191,7 +191,7 @@ router.get("/", verify_token, controllers.getAllWorkspaceController
         }]
      */
 );
-router.get("/:id", verify_token, controllers.getWorkspaceByIdController
+router.get("/:id", controllers.getWorkspaceByIdController
     /*
         #swagger.description = 'Endpoint to get a workspace by ID.'
         #swagger.summary = 'Get a workspace by ID.'

@@ -44,25 +44,6 @@ router.get("/:id", verify_token, verify_admin_or_manager, controllers.getStaffBy
      */
 );
 
-// router.get("/profile", verify_token, verify_staff, controllers.getStaffProfileController
-//     /*
-//         #swagger.description = 'Get a profile staff.'
-//         #swagger.summary = 'Get a profile staff.'
-//         #swagger.responses[200] = {
-//             description: 'Staff found.'
-//         }
-//         #swagger.responses[404] = {
-//             description: 'Staff not found.'
-//         }
-//         #swagger.responses[500] = {
-//             description: 'Internal server error.'
-//         }
-//         #swagger.security = [{
-//             "apiKeyAuth": []
-//         }]
-//      */
-// );
-
 router.post("/", verify_token, verify_admin, controllers.createStaffController
     /*
         #swagger.description = 'Endpoint to create a new staff.'

@@ -59,12 +59,14 @@ export const getAllWorkspaceController = async (req, res) => {
 export const getWorkspaceByIdController = async (req, res) => {
     try {
         const error = Joi.object({
-            id: Joi.required()
+            id: Joi.string().required(),
+            building_id : Joi.string().required()
         }).validate({
-            id: req.params.id
+            id: req.params.id,
+            building_id: req.body.building_id
         }).error;
         if (error) return badRequest(res, error);
-        const response = await services.getWorkspaceByIdService(req.params.id);
+        const response = await services.getWorkspaceByIdService(req.params.id, req.body.building_id);
         return ok(res, response)
     } catch (error) {
         internalServerError(res, error)
