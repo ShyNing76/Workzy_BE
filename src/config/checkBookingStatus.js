@@ -19,6 +19,7 @@ const logger = winston.createLogger({
 });
 
 const checkBookingStatus = async () => {
+    logger.info('---------------------------------');
     logger.info('Starting checkBookingStatus job');
     const tenMinutesAgo = moment().subtract(10, "minutes").toISOString();
     console.log(tenMinutesAgo);
@@ -30,8 +31,6 @@ const checkBookingStatus = async () => {
             },
         },
     });
-
-    console.log(bookingStatus);
 
     logger.info(`Found ${bookingStatus.length} bookings to update`);
 
@@ -48,9 +47,10 @@ const checkBookingStatus = async () => {
     }
 
     logger.info('Finished checkBookingStatus job');
+    logger.info('---------------------------------');
 };
 
-const job = new CronJob("*/8 * * * *", checkBookingStatus, null, true, "UTC");
+const job = new CronJob("*/2 * * * *", checkBookingStatus, null, true, "UTC");
 job.start();
 
 logger.info('CronJob for checkBookingStatus has been started');
