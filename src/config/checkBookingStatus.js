@@ -6,7 +6,12 @@ import path from "path";
 
 const logger = winston.createLogger({
   level: 'info',
-  format: winston.format.simple(),
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.printf(({ timestamp, level, message }) => {
+      return `${timestamp} ${level}: ${message}`;
+    })
+  ),
   transports: [
     new winston.transports.Console(),
     new winston.transports.File({ filename: path.join('./log', 'checkBookingStatus.log') })
@@ -45,7 +50,7 @@ const checkBookingStatus = async () => {
     logger.info('Finished checkBookingStatus job');
 };
 
-const job = new CronJob("*/5 * * * * *", checkBookingStatus, null, true, "UTC");
+const job = new CronJob("*/8 * * * *", checkBookingStatus, null, true, "UTC");
 job.start();
 
 logger.info('CronJob for checkBookingStatus has been started');
