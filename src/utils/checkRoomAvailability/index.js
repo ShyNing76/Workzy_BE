@@ -1,68 +1,39 @@
 import db from "../../models";
 
-export const checkRoomAvailability = (data) => new Promise(async (resolve, reject) => {
+export const checkRoomAvailability = async ({
+    workspace_id,
+    start_time,
+    end_time,
+}) => {
     try {
-        const {building_id, room_id, date, start_time, end_time} = data;
-
-        const isAvailable = await db.BookingDetail.findOne({
+        const checkBookingStatus = await db.Booking.findOne({
             where: {
-                building_id,
-                room_id,
-                start_time_date: date,
-                end_time_date: date,
-                [db.Sequelize.Op.or]: [
-                    {
-                        [db.Sequelize.Op.and]: [
-                            {
-                                start_time: {
-                                    [db.Sequelize.Op.lte]: start_time
-                                }
-                            },
-                            {
-                                end_time: {
-                                    [db.Sequelize.Op.gte]: start_time
-                                }
-                            }
-                        ]
+                workspace_id,
+                start_time_date: {
+                    [db.Sequelize.Op.lt]: end_time,
+                },
+                end_time_date: {
+                    [db.Sequelize.Op.gt]: start_time,
+                },
+            },
+            include: [
+                {
+                    model: db.BookingStatus,
+                    as: "BookingStatuses",
+                    where: {
+                        status: "confirmed",
                     },
-                    {
-                        [db.Sequelize.Op.and]: [
-                            {
-                                start_time: {
-                                    [db.Sequelize.Op.lte]: end_time
-                                }
-                            },
-                            {
-                                end_time: {
-                                    [db.Sequelize.Op.gte]: end_time
-                                }
-                            }
-                        ]
-                    },
-                    {
-                        [db.Sequelize.Op.and]: [
-                            {
-                                start_time: {
-                                    [db.Sequelize.Op.gte]: start_time
-                                }
-                            },
-                            {
-                                end_time: {
-                                    [db.Sequelize.Op.lte]: end_time
-                                }
-                            }
-                        ]
-                    }
-                ]
-            }
+                },
+            ],
+            raw: true,
         });
 
-        if (isAvailable) {
-            return resolve("Room is not available");
+        if (checkBookingStatus) {
+            return false; // Room is not available
         }
-
-        resolve("Room is available");
+        return true; // Room is available
     } catch (error) {
-        reject(error);
+        console.error(error);
+        return false; // Return false in case of error
     }
-});
+};

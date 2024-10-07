@@ -11,3 +11,5 @@ ngrok.exe
 Dockerfile
 /uploads
 /.vscode
+/certs/*.pem
+/log

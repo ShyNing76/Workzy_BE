@@ -1,7 +1,7 @@
-import db from '../../models'
 import moment from "moment";
+import db from '../../models';
+import { isDuplicate } from '../../utils/checkDuplicate';
 import * as hashPassword from '../../utils/hashPassword';
-import {isDuplicate} from '../../utils/checkDuplicate';
 
 
 export const getProfile = (tokenUser) => new Promise(async (resolve, reject) => {

@@ -1,6 +1,6 @@
 import * as controller from "../../controllers";
-import { verify_token } from "../../middlewares/verifyToken";
 import { uploadImage } from "../../middlewares/imageGoogleUpload";
+import { verify_token } from "../../middlewares/verifyToken";
 
 const router = require("express").Router();
 
@@ -19,6 +19,7 @@ router.get(
 router.put(
     "/profile/",
     verify_token,
+    uploadImage,
     controller.updateUser
     /*  #swagger.description = 'Update the current customer profile.'
         #swagger.summary = 'Update the current profile of the customer'

@@ -1,22 +1,22 @@
 # Table of Contents
 
-- [Technologies](#Technologies)
-- [How to run](#How-to-run)
-- [Documentation](#Documentation)
+-   [Technologies](#Technologies)
+-   [How to run](#How-to-run)
+-   [Documentation](#Documentation)
 
 ## Technologies
 
-- [Node.js](https://nodejs.org/en/)
-- [React](https://reactjs.org/)
-- [MySQL](https://www.mysql.com/)
+-   [Node.js](https://nodejs.org/en/)
+-   [React](https://reactjs.org/)
+-   [MySQL](https://www.mysql.com/)
 
 ## How to run
 
 ```bash
-# Run the application 
-npm start 
+# Run the application
+npm start
 
-# Run the application in development mode 
+# Run the application in development mode
 npm run dev
 ```
 
@@ -49,19 +49,26 @@ npx sequelize-cli db:seed:all
 
 # Undo the seeds
 npx sequelize-cli db:seed:undo:all
+
+# Create private pem
+openssl genrsa -out private.pem 3072
+
+# Create public  pem
+openssl rsa -in private.pem -pubout -out public.pem
+
 ```
 
 ## Documentation
 
-- [Sequelize](https://sequelize.org/master/manual/getting-started.html)
-- [Sequelize CLI](https://sequelize.org/master/manual/migrations.html)
-- [MySQL](https://sidorares.github.io/node-mysql2/docs/documentation)
-- [Express](https://expressjs.com/en/starter/installing.html)
-- [Nodemon](https://nodemon.io/)
-- [dotenv](https://www.npmjs.com/package/dotenv)
-- [bcrypt](https://www.npmjs.com/package/bcrypt)
-- [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken)
-- [morgan](https://www.npmjs.com/package/morgan)
-- [helmet](https://www.npmjs.com/package/helmet)
-- [cors](https://www.npmjs.com/package/cors)
-- [joi](https://www.npmjs.com/package/joi)
+-   [Sequelize](https://sequelize.org/master/manual/getting-started.html)
+-   [Sequelize CLI](https://sequelize.org/master/manual/migrations.html)
+-   [MySQL](https://sidorares.github.io/node-mysql2/docs/documentation)
+-   [Express](https://expressjs.com/en/starter/installing.html)
+-   [Nodemon](https://nodemon.io/)
+-   [dotenv](https://www.npmjs.com/package/dotenv)
+-   [bcrypt](https://www.npmjs.com/package/bcrypt)
+-   [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken)
+-   [morgan](https://www.npmjs.com/package/morgan)
+-   [helmet](https://www.npmjs.com/package/helmet)
+-   [cors](https://www.npmjs.com/package/cors)
+-   [joi](https://www.npmjs.com/package/joi)

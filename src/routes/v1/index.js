@@ -7,6 +7,10 @@ function initWebRoutes(app) {
         // #swagger.tags = ['Auth']
     );
 
+    app.use('/api/v1/booking', require('./booking')
+        // #swagger.tags = ['Booking']
+    );
+
     app.use('/api/v1/user', require('./user')
         // #swagger.tags = ['User']
     );

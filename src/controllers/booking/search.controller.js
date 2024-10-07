@@ -1,8 +1,17 @@
 import {badRequest, internalServerError, ok} from "../../middlewares/handle_error";
+import {location} from "../../helper/joi_schema";
 import * as services from "../../services";
+import Joi from "joi";
 
 export const searchBuildingController = async (req, res) => {
     try {
+        const error = Joi.object(
+            {
+                location,
+                workspace_type_name: Joi.string().required(),
+            }).validate({location: req.query.location, workspace_type_name: req.query.workspace_type_name});
+
+        if (error) return badRequest(res, error);
         const response = await services.searchBuildingService(req.query);
         return ok(res, response);
     } catch (error) {

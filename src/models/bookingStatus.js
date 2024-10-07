@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
             },
             status: {
                 type: DataTypes.ENUM(
+                    "confirmed",
                     "paid",
                     "check-in",
                     "in-process",
@@ -34,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
                     "completed",
                     "cancelled"
                 ),
-                defaultValue: "paid",
+                defaultValue: "confirmed",
             },
         },
         {
