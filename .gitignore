@@ -12,4 +12,4 @@ Dockerfile
 /uploads
 /.vscode
 /certs/*.pem
-/logs
+/log
