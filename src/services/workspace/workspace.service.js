@@ -154,14 +154,16 @@ export const getAllWorkspaceService = ({page, limit, order, workspaceName, offic
                 default:
                     break;
         }
-        const workspaces = await db.Workspace.findAndCountAll({
+        const price = {};
+        if (minPrice && maxPrice) {
+            price.price_per_hour = {[Op.between]: [minPrice, maxPrice]}
+        }
+        const workspaces = await db.Workspace.findAll({
             where: {
                 workspace_name: {
                     [Op.substring]: workspaceName || ""
                 },
-                price_per_hour: {
-                    [Op.between]: [minPrice, maxPrice]
-                },
+                ...price,
                 ...capacity,
                 ...query
             },
@@ -181,13 +183,14 @@ export const getAllWorkspaceService = ({page, limit, order, workspaceName, offic
                     model: db.WorkspaceType,
                     attributes: ["workspace_type_name"],
                     where: {
-                        workspace_type_name: workspace_type_name
+                        workspace_type_name: workspace_type_name ? workspace_type_name : {[Op.substring]: ""}
                     },
                     required: true,
                 }, 
             ],
             raw: true, 
-            nest: true
+            nest: true,
+            distinct: true,
         });
 
         resolve({
