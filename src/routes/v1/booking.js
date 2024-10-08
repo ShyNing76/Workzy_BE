@@ -1,6 +1,6 @@
 import express from "express";
 import * as controllers from "../../controllers/booking";
-import {verify_customer, verify_token} from "../../middlewares/verifyToken";
+import { verify_customer, verify_token } from "../../middlewares/verifyToken";
 
 const router = express.Router();
 
@@ -86,7 +86,10 @@ router.post(
     */
 );
 
-router.get('/get', verify_customer, controllers.getBookingController
+router.get(
+    "/",
+    verify_customer,
+    controllers.getBookingController
     /*
         #swagger.description = 'Get all bookings for the authenticated customer.'
         #swagger.summary = 'Get bookings'
@@ -107,6 +110,54 @@ router.get('/get', verify_customer, controllers.getBookingController
                         total_price: 50.00
                     }
                 ]
+            }
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error',
+            schema: {
+                err: 1,
+                message: 'An error occurred while processing your request'
+            }
+        }
+    */
+);
+
+router.get(
+    "/get/:id",
+    verify_customer,
+    controllers.getBookingByIdController
+    /*
+        #swagger.description = 'Get booking by ID for the authenticated customer.'
+        #swagger.summary = 'Get booking by ID'
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['id'] = {
+            in: 'path',
+            required: true,
+            type: 'string',
+            format: 'uuid',
+            description: 'Booking ID'
+        }
+        #swagger.responses[200] = {
+            description: 'Booking retrieved successfully',
+            schema: {
+                err: 0,
+                message: 'Booking retrieved successfully',
+                data: {
+                    booking_id: '123e4567-e89b-12d3-a456-426614174000',
+                    workspace_id: '123e4567-e89b-12d3-a456-426614174000',
+                    start_time: '2023-10-01T14:00:00Z',
+                    end_time: '2023-10-01T16:00:00Z',
+                    total_price: 50.00
+                }
+            }
+        }
+        #swagger.responses[404] = {
+            description: 'Booking not found',
+            schema: {
+                err: 1,
+                message: 'Booking not found'
             }
         }
         #swagger.responses[500] = {
