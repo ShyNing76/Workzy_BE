@@ -131,34 +131,15 @@ router.put("/:id", verify_token, verify_admin, controllers.updateWorkspaceContro
         }]
      */
 );
-router.delete("/delete/", verify_token, verify_admin, controllers.deleteWorkspaceController
+router.delete("/delete/:id", verify_token, verify_admin, controllers.deleteWorkspaceController
     /*
         #swagger.description = 'Endpoint to remove a workspace.'
         #swagger.summary = 'Remove a workspace.'
-        #swagger.requestBody = {
-            required: true,
-            content: {
-                "application/json": {
-                    schema: {
-                        type: 'object',
-                        properties: {
-                            workspace_ids: {
-                                type: 'array',
-                                items: {
-                                    type: 'string',
-                                    format: 'uuid'
-                                }
-                            }
-                        }
-                    }
-                }
+        #swagger.parameters['id'] = { description: 'Workspace ID.' }
             }
         }
         #swagger.responses[200] = {
-            description: 'Workspace updated successfully.'
-        }
-        #swagger.responses[400] = {
-            description: 'Invalid data.'
+            description: 'Workspace deleted successfully.'
         }
         #swagger.responses[404] = {
             description: 'Workspace not found.'
@@ -179,9 +160,16 @@ router.get("/", controllers.getAllWorkspaceController
         #swagger.parameters['order'] = { description: 'Order by name, status.' }
         #swagger.parameters['page'] = { description: 'Page number.' }
         #swagger.parameters['limit'] = { description: 'Number of items per page.' }
-        #swagger.parameters['workspace_name'] = { description: 'Workspace name.' }
+        #swagger.parameters['workspace_name'] = { description: 'Workspace name.' }  
+        #swagger.parameters['office_size'] = { description: 'Office size.' }
+        #swagger.parameters['min_price'] = { description: 'Minimum price.' }
+        #swagger.parameters['max_price'] = { description: 'Maximum price.' }
+        #swagger.parameters['workspace_type_name'] = { description: 'Workspace type name.' }
         #swagger.responses[200] = {
             description: 'Workspace found.'
+        }
+        #swagger.responses[404] = {
+            description: 'Workspace not found.'
         }
         #swagger.responses[500] = {
             description: 'Internal server error.'

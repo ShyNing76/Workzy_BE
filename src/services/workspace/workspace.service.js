@@ -108,15 +108,13 @@ export const updateWorkspaceService = async (id, {workspace_name, building_id, w
     }
 })
 
-export const deleteWorkspaceService = async ({workspace_ids}) => new Promise(async (resolve, reject) => {
+export const deleteWorkspaceService = async (id) => new Promise(async (resolve, reject) => {
     try {
         const [updatedRowsCount] = await db.Workspace.update({
             status: "inactive"
         }, {
             where: {
-                workspace_id: {
-                    [Op.in]: workspace_ids
-                },
+                workspace_id: id,
                 status: "active"
             },
         });
@@ -130,13 +128,41 @@ export const deleteWorkspaceService = async ({workspace_ids}) => new Promise(asy
     }
 })
 
-export const getAllWorkspaceService = ({page, limit, order, workspaceName, ...query}) => new Promise(async (resolve, reject) => {
+export const getAllWorkspaceService = ({page, limit, order, workspaceName, officeSize, minPrice, maxPrice, workspace_type_name, ...query}) => new Promise(async (resolve, reject) => {
     try {
+        const capacity = {};
+        if (officeSize)
+            switch (officeSize) {
+                case 1:
+                    capacity.capacity = {[Op.lte]: 10}
+                    break;
+                case 2:
+                    capacity.capacity = {[Op.between]: [10,20]}
+                    break;
+                case 3:
+                    capacity.capacity = {[Op.between]: [20,30]}
+                    break;
+                case 4:
+                    capacity.capacity = {[Op.between]: [30,40]}
+                    break;
+                case 5:
+                    capacity.capacity = {[Op.between]: [40,50]}
+                    break;
+                case 6:
+                    capacity.capacity = {[Op.gte]: 50}
+                    break;
+                default:
+                    break;
+        }
         const workspaces = await db.Workspace.findAndCountAll({
             where: {
                 workspace_name: {
                     [Op.substring]: workspaceName || ""
                 },
+                price_per_hour: {
+                    [Op.between]: [minPrice, maxPrice]
+                },
+                ...capacity,
                 ...query
             },
             offset: handleOffset(page, limit),
@@ -148,7 +174,16 @@ export const getAllWorkspaceService = ({page, limit, order, workspaceName, ...qu
             include: [
                 {
                     model: db.Building,
-                    attributes: {exclude : ["createdAt", "updatedAt"]},
+                    attributes: ["building_id"],
+                    required: true,
+                }, 
+                {
+                    model: db.WorkspaceType,
+                    attributes: ["workspace_type_name"],
+                    where: {
+                        workspace_type_name: workspace_type_name
+                    },
+                    required: true,
                 }, 
             ],
             raw: true, 
