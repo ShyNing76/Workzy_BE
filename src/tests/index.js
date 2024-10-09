@@ -1,37 +1,44 @@
-const { where } = require("sequelize");
 const db = require("../models");
+const { Op } = require("sequelize");
+const Sequelize = require("sequelize");
+const moment = require("moment");
 
 const amenityWorkspace = () =>
     new Promise(async (resolve, reject) => {
         try {
-            const amenitiesWorkspace = await db.AmenitiesWorkspace.findAll({
-                // where: {
-                //     workspace_id: "639b7e0e-e586-4206-bb7f-0a34a6d8f35b",
-                // },
-                attributes: ["amenity_id"],
-                include: [
-                    {
-                        model: db.Amenity,
-                        as: "Amenities",
-                        attributes: ["amenity_id", "amenity_name"],
-                        required: true,
-                    },
-                    {
-                        model: db.Workspace,
-                        as: "Workspaces",
-                        attributes: ["workspace_id", "workspace_name"],
-                        where: {
-                            workspace_id:
-                                "639b7e0e-e586-4206-bb7f-0a34a6d8f35b",
-                        },
-                        required: true,
-                    },
+            const bookingStatus = await db.BookingStatus.findAll({
+                attributes: [
+                    "booking_id",
+                    [
+                        Sequelize.fn("ARRAY_AGG", Sequelize.col("status")),
+                        "statusArray",
+                    ],
+                    [
+                        Sequelize.fn("MAX", Sequelize.col("created_at")),
+                        "lastCreatedAt",
+                    ],
                 ],
+                group: ["booking_id"],
                 raw: true,
                 nest: true,
             });
 
-            resolve(amenitiesWorkspace);
+            console.log(bookingStatus);
+
+            const tenMinutesAgo = moment().subtract(10, "minutes").toISOString();
+
+            bookingStatus.forEach(async (booking) => {
+                if (
+                    booking.statusArray.length === 1 &&
+                    booking.statusArray.includes("confirmed") &&
+                    booking.lastCreatedAt < tenMinutesAgo
+                ) {
+                    await db.BookingStatus.create({
+                        booking_id: booking.booking_id,
+                        status: "cancelled",
+                    });
+                }
+            });
         } catch (error) {
             console.log(error);
             reject(error);
