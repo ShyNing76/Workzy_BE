@@ -1,8 +1,13 @@
 import moment from "moment";
 import db from "../../models";
-import { handleLimit, handleSortOrder } from "../../utils/handleFilter";
+import {
+    handleLimit,
+    handleOffset,
+    handleSortOrder,
+} from "../../utils/handleFilter";
+import { where } from "sequelize";
 
-export const getBookingService = ({ page, limit, order, ...data }) =>
+export const getBookingService = ({ page, limit, order, status, ...data }) =>
     new Promise(async (resolve, reject) => {
         try {
             const customer = await db.Customer.findOne({
@@ -11,38 +16,56 @@ export const getBookingService = ({ page, limit, order, ...data }) =>
                 },
             });
 
+            if (!customer) return reject("Customer not found");
+
+            const tabStatus = {
+                Current: ["check-in", "in-process"],
+                Upcoming: ["paid", "confirmed"],
+                "Check-out": ["check-out", "check-amenities"],
+                Completed: ["completed"],
+                Cancelled: ["cancelled"],
+            };
+
+            const statusCondition = status
+                ? {
+                      status: {
+                          [db.Sequelize.Op.in]: tabStatus[status] || [],
+                      },
+                  }
+                : {};
+
             const bookings = await db.Booking.findAll({
                 where: {
                     customer_id: customer.customer_id,
                 },
                 include: [
                     {
-                        model: db.Workspace,
-                        as: "Workspace",
-                    },
-                    {
-                        model: db.BookingType,
-                        as: "BookingType",
-                    },
-                    {
                         model: db.BookingStatus,
                         as: "BookingStatuses",
+                        where: statusCondition,
+                        order: [["createdAt", "DESC"]],
+                        limit: 1,
+                        required: false, // Change to false to include bookings without statuses
                     },
                 ],
-                order: handleSortOrder(order, "start_time_date"),
+                order: [handleSortOrder(order, "start_time_date")],
                 limit: handleLimit(limit),
-                offset: handleLimit(page, limit),
+                offset: handleOffset(page, limit),
                 attributes: {
                     exclude: ["createdAt", "updatedAt"],
                 },
             });
 
-            if (!bookings) return reject("No bookings found");
+            // Filter out bookings that do not have any BookingStatuses
+            const filteredBookings = bookings.filter(booking => booking.BookingStatuses && booking.BookingStatuses.length > 0);
+
+            if (!filteredBookings || filteredBookings.length === 0)
+                return reject("No bookings found");
 
             return resolve({
-                err: 1,
+                err: 0,
                 message: "Bookings found",
-                data: bookings,
+                data: filteredBookings,
             });
         } catch (error) {
             console.error(error);
@@ -54,6 +77,9 @@ export const getAllBookingsService = ({ page, limit, order, ...data }) =>
     new Promise(async (resolve, reject) => {
         try {
             const bookings = await db.Booking.findAndCountAll({
+                where: {
+                    ...data,
+                },
                 include: [
                     {
                         model: db.Workspace,
@@ -161,7 +187,7 @@ export const getBookingByIdService = ({ booking_id, user_id }) =>
             };
 
             return resolve({
-                err: 1,
+                err: 0,
                 message: "Booking found",
                 data: formatBookings,
             });

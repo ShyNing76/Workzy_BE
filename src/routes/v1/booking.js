@@ -147,6 +147,27 @@ router.get(
         #swagger.security = [{
             "apiKeyAuth": []
         }]
+        #swagger.parameters['page'] = { description: 'Page number' }
+        #swagger.parameters['limit'] = { description: 'Number of items per page' }
+        #swagger.parameters['order'] = {
+            description: 'Order by start_time, end_time, total_price',
+            '@schema': {
+                type: 'array',
+                items: {
+                    type: 'string',
+                    pattern: '^(start_time|end_time|total_price|asc|desc)$',
+                    example: 'start_time'
+                }
+            },
+            required: false,
+            explode: true
+        }
+        #swagger.parameters['status'] = {
+            description: 'Filter by booking status (Current, Upcoming, Check-out, Completed, Cancelled)',
+            type: 'string',
+            pattern: '^(Current|Upcoming|Check-out|Completed|Cancelled)$',
+            required: false
+        }
         #swagger.responses[200] = {
             description: 'Bookings retrieved successfully',
             schema: {

@@ -28,12 +28,14 @@ export const getBookingController = async (req, res) => {
         if (error) return badRequest(res, error.details[0].message);
 
         const bookings = await services.getBookingService({
-            ...req.body,
+            ...req.query,
             ...req.user,
         });
         return ok(res, bookings);
     } catch (err) {
-        console.error(err);
+        const knownErrors = ["No bookings found"];
+        if (knownErrors.includes(err)) return badRequest(res, err);
+
         internalServerError(res);
     }
 };
