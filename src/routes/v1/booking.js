@@ -88,7 +88,7 @@ router.post(
 
 router.post(
     "/addAmenities",
-    verify_customer,
+    verify_role(["customer"]),
     controllers.createAmenitiesBookingController
     /*
         #swagger.description = 'Create amenities booking.'
@@ -178,7 +178,10 @@ router.post(
     */
 );
 
-router.get('/get', verify_customer, controllers.getBookingController
+router.get(
+    "/get",
+    verify_role(["customer"]),
+    controllers.getBookingController
     /*
         #swagger.description = 'Get all bookings for the authenticated customer.'
         #swagger.summary = 'Get bookings'
