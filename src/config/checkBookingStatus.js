@@ -60,15 +60,6 @@ const checkBookingStatus = async () => {
     logger.info("---------------------------------");
 };
 
-const job = new CronJob(
-    "*/30 * * * * *",
-    checkBookingStatus,
-    null,
-    true,
-    "UTC"
-);
-job.start();
-
-logger.info("CronJob for checkBookingStatus has been started");
+const job = new CronJob("*/2 * * * *", checkBookingStatus, null, true, "UTC");
 
 export default job;
