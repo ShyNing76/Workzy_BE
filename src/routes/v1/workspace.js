@@ -179,29 +179,11 @@ router.get("/", controllers.getAllWorkspaceController
         }]
      */
 );
-router.post("/:id", controllers.getWorkspaceByIdController
+router.get("/:id", controllers.getWorkspaceByIdController
     /*
         #swagger.description = 'Endpoint to get a workspace by ID.'
         #swagger.summary = 'Get a workspace by ID.'
         #swagger.parameters['id'] = { description: 'Workspace ID.' }
-        #swagger.requestBody = {
-            required: true,
-            content: {
-                "application/json": {
-                    schema: {
-                        type: 'object',
-                        properties: {
-                            building_id: {
-                                type: 'string',
-                                format: 'uuid',
-                                example: '621ca0c8-e3ad-4bd8-9df5-eafe998b5b04'
-                            },
-                        },
-                        required: ['building_id']
-                    }
-                }
-            }
-        }
         #swagger.responses[200] = {
             description: 'Workspace found.'
         }

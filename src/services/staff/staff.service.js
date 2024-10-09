@@ -223,15 +223,11 @@ export const assignStaffToBuildingService = (id, building_id) => new Promise(asy
                     },
                     required: true,
                 }],
-                raw: true,
-                nest: true
             }), 
             db.Building.findOne({
                 where: {
                     building_id: building_id
                 },
-                raw: true,
-                nest: true
             })
         ])
         if(!staff || staff.status == "inactive") return reject("Staff is not exist");

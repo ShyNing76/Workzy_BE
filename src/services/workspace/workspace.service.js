@@ -204,12 +204,11 @@ export const getAllWorkspaceService = ({page, limit, order, workspace_name, offi
     }
 })
 
-export const getWorkspaceByIdService = (workspace_id, building_id) => new Promise(async (resolve, reject) => {
+export const getWorkspaceByIdService = (workspace_id) => new Promise(async (resolve, reject) => {
     try {
         const workspace = await db.Workspace.findOne({
             where: {
                 workspace_id: workspace_id,
-                building_id: building_id
             },
             attributes: {
                 exclude: ["createdAt", "updatedAt"]
