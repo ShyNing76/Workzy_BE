@@ -1,5 +1,5 @@
 import Joi from "joi";
-import {badRequest} from "../../middlewares/handle_error";
+import {badRequest, internalServerError} from "../../middlewares/handle_error";
 import * as services from "../../services";
 
 export const createAmenityController = async (req, res) => {
@@ -12,6 +12,7 @@ export const createAmenityController = async (req, res) => {
         const response = await services.createAmenityService(req.body);
         return created(res, response);
     } catch (error) {
+        console.log(error)
         if(error === "Amenity already exists") return badRequest(res, error);
         internalServerError(res, error)
     }

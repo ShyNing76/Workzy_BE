@@ -4,6 +4,7 @@ import moment from "moment";
 import {v4} from "uuid"; 
 import {hashPassword} from "../../utils/hashPassword";
 import { handleLimit, handleOffset, handleSortOrder } from "../../utils/handleFilter";
+import { raw } from "body-parser";
 
 export const createStaffService = ({password, ...data}) => new Promise(async (resolve, reject) => {
     try {
@@ -60,9 +61,6 @@ export const createStaffService = ({password, ...data}) => new Promise(async (re
 
 export const getAllStaffService = ({page, limit, order, name, ...query}) => new Promise(async (resolve, reject) => {
     try {
-        
-        name = { [Op.substring]: name };
-
         const staffs = await db.User.findAndCountAll({
             where: {
                 role_id: 3,
@@ -77,16 +75,17 @@ export const getAllStaffService = ({page, limit, order, name, ...query}) => new 
             include: [
                 {
                     model: db.Staff,
-                    attributes: {exclude: ["building_id","createdAt", "updatedAt"]},
+                    attributes: ["staff_id"],
                     include: [
                         {
                             model: db.Building,
-                            attributes: {exclude : ["manager_id","status","createdAt", "updatedAt"]},
+                            attributes: ["building_id"],
                         },
                     ]
                 }, 
             ],
-            raw: true
+            raw: true,
+            nest: true
         });
         staffs.rows.forEach(staff => {
             if (staff.date_of_birth) {
@@ -113,37 +112,27 @@ export const getStaffByIdService = (id) => new Promise(async (resolve, reject) =
             attributes: {
                 exclude: ["password","google_token","createdAt", "updatedAt"]
             },
-            include: {
-                model: db.Staff,
-                attributes: {
-                   exclude: ["user_id","createdAt","updatedAt"]
-                },
-                include: {
-                    model: db.Building,
-                    attributes: {
-                        exclude: ["building_id","manager_id","status","createdAt","updatedAt"]
-                    },
+            include: [
+                {
+                    model: db.Staff,
+                    attributes: ["staff_id"],
+                    include: [
+                        {
+                            model: db.Building,
+                            attributes: ["building_id"],
+                        }
+                    ]
                 }
-            },
-            raw: true
+            ],
+            raw: true,
+            nest: true
         });
         if(!staff) return reject("No Staff Exist")
+        staff.date_of_birth = moment(staff.date_of_birth).format("MM/DD/YYYY");
         resolve({
             err: 0,
             message: "Got",
-            data: {
-                user_id: staff.user_id,
-                role_id: staff.role_id,
-                name: staff.name,
-                email: staff.email,
-                phone: staff.phone,
-                gender: staff.gender,
-                date_of_birth: moment(staff.date_of_birth).format("MM/DD/YYYY"),
-                image: staff.image,
-                status: staff.status,
-                staff_id: staff.Staff.staff_id,
-                building_id: staff.Staff.building_id
-            }
+            data: staff
         });
     } catch (error) {
         reject(error)
@@ -172,22 +161,19 @@ export const updateStaffService = (id, data) => new Promise(async (resolve, reje
             const field = isDuplicated.email === data.email ? "Email" : "Phone";
             return reject(`${field} is already used`)
         }
-
-        const staff = await db.User.findOne({
+        if(data.password) data.password = hashPassword(data.password);
+        const staff = await db.User.update({
+            ...data
+        },
+        {
             where: {
                 user_id: id,
                 role_id: 3
             },
-            raw: true
+            raw: true,
+            nest: true
         });
-
         if(!staff) return reject("Staff not found");
-
-        if(data.password) data.password = hashPassword(data.password);
-
-        await staff.update({
-            ...data
-        })
         resolve({
             err: 0,
             message: "Update Successfully"
@@ -204,7 +190,8 @@ export const deleteStaffService = (id) => new Promise(async (resolve, reject) =>
 
         const user = await db.User.findOne({
             where: {user_id: id, role_id: 3},
-            raw: true
+            raw: true,
+            nest: true
         })
         if(!user) return reject("User not found");
         if(user.status === "inactive") return reject("Staff is already deleted");
@@ -226,25 +213,31 @@ export const assignStaffToBuildingService = (id, building_id) => new Promise(asy
             db.User.findOne({
                 where: {
                     user_id: id,
-                    role_id: 3
+                    role_id: 3,
+                    status: "active"
                 },
                 include: [{
                     model: db.Staff,
+                    attributes: {
+                        exclude: ["user_id","createdAt","updatedAt"]
+                    },
+                    required: true,
                 }],
-                raw: true
+                raw: true,
+                nest: true
             }), 
             db.Building.findOne({
                 where: {
                     building_id: building_id
                 },
-                raw: true
+                raw: true,
+                nest: true
             })
         ])
         if(!staff || staff.status == "inactive") return reject("Staff is not exist");
         if(!isBuildingExist) return reject("Building is not exist");
         staff.Staff.building_id = building_id;
         await staff.Staff.save();
-        
         resolve({
             err: 0,
             message: 'Staff updated successfully!',

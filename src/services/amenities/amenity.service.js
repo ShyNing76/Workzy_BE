@@ -6,7 +6,11 @@ import { handleLimit, handleOffset, handleSortOrder } from "../../utils/handleFi
 export const createAmenityService = (data) => new Promise(async (resolve, reject) => {
     try {
         data.depreciation_price = data.original_price * 0.7;
-        if(data.type == "service") data.depreciation_price = 0;
+        data.rent_price = data.original_price * 0.3;
+        if(data.type == "service"){
+            data.depreciation_price = 0; 
+            data.rent_price = 0;
+        } 
 
         const amenity = await db.Amenity.findOrCreate({
             where: {
@@ -18,6 +22,7 @@ export const createAmenityService = (data) => new Promise(async (resolve, reject
                 image: data.image,
                 original_price: data.original_price,
                 depreciation_price: data.depreciation_price,
+                rent_price: data.rent_price,
                 ...data,
                 status: "active"
             }
