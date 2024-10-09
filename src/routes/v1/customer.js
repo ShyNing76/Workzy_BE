@@ -1,9 +1,13 @@
 import * as controller from "../../controllers";
-import {verify_admin, verify_token} from "../../middlewares/verifyToken";
+import { verify_role, verify_token } from "../../middlewares/verifyToken";
 
-const router = require('express').Router();
+const router = require("express").Router();
 
-router.get('/', verify_token, verify_admin, controller.getAllUsersController
+router.get(
+    "/",
+    verify_token,
+    verify_role(["admin"]),
+    controller.getAllUsersController
     /* #swagger.description = 'Endpoint to get all customers.'
     #swagger.summary = 'Get all customers.'
     #swagger.parameters['order'] = {
@@ -34,7 +38,11 @@ router.get('/', verify_token, verify_admin, controller.getAllUsersController
      */
 );
 
-router.put('/remove/:id', verify_token, verify_admin, controller.removeUserController
+router.put(
+    "/remove/:id",
+    verify_token,
+    verify_role(["admin"]),
+    controller.removeUserController
     /*
     #swagger.description = 'Remove a customer.'
     #swagger.summary = 'Remove a customer'

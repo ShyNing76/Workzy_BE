@@ -1,9 +1,10 @@
 import moment from "moment";
 import db from "../../models";
-export const getBookingService = (data) =>
+import { handleLimit, handleSortOrder } from "../../utils/handleFilter";
+
+export const getBookingService = ({ page, limit, order, ...data }) =>
     new Promise(async (resolve, reject) => {
         try {
-            console.log(data);
             const customer = await db.Customer.findOne({
                 where: {
                     user_id: data.user_id,
@@ -28,12 +29,57 @@ export const getBookingService = (data) =>
                         as: "BookingStatuses",
                     },
                 ],
+                order: handleSortOrder(order, "start_time_date"),
+                limit: handleLimit(limit),
+                offset: handleLimit(page, limit),
+                attributes: {
+                    exclude: ["createdAt", "updatedAt"],
+                },
             });
 
             if (!bookings) return reject("No bookings found");
 
             return resolve({
                 err: 1,
+                message: "Bookings found",
+                data: bookings,
+            });
+        } catch (error) {
+            console.error(error);
+            return reject(error);
+        }
+    });
+
+export const getAllBookingsService = ({ page, limit, order, ...data }) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const bookings = await db.Booking.findAndCountAll({
+                include: [
+                    {
+                        model: db.Workspace,
+                        as: "Workspace",
+                    },
+                    {
+                        model: db.BookingType,
+                        as: "BookingType",
+                    },
+                    {
+                        model: db.BookingStatus,
+                        as: "BookingStatuses",
+                    },
+                ],
+                order: handleSortOrder(order, "start_time_date"),
+                limit: handleLimit(limit),
+                offset: handleLimit(page, limit),
+                attributes: {
+                    exclude: ["createdAt", "updatedAt"],
+                },
+            });
+
+            if (!bookings) return reject("No bookings found");
+
+            return resolve({
+                err: 0,
                 message: "Bookings found",
                 data: bookings,
             });

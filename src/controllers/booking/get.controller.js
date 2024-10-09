@@ -6,6 +6,18 @@ import {
 } from "../../middlewares/handle_error";
 import * as services from "../../services/booking";
 
+export const getAllBookingsController = async (req, res) => {
+    try {
+        const bookings = await services.getAllBookingsService({
+            ...req.params,
+        });
+        return ok(res, bookings);
+    } catch (err) {
+        console.error(err);
+        internalServerError(res);
+    }
+};
+
 export const getBookingController = async (req, res) => {
     try {
         const error = Joi.object({

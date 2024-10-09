@@ -1,10 +1,14 @@
 import express from "express";
 import * as controllers from "../../controllers";
-import {verify_admin, verify_token} from "../../middlewares/verifyToken";
+import { verify_role, verify_token } from "../../middlewares/verifyToken";
 
 const router = express.Router();
 
-router.post("/", verify_token, verify_admin, controllers.createAmenityController
+router.post(
+    "/",
+    verify_token,
+    verify_role(["admin"]),
+    controllers.createAmenityController
     /*
         #swagger.description = 'Endpoint to create a new amenity.'
         #swagger.summary = 'Create a new amenity.'
@@ -64,7 +68,11 @@ router.post("/", verify_token, verify_admin, controllers.createAmenityController
         }]
     */
 );
-router.put("/:id", verify_token, verify_admin, controllers.updateAmenityController
+router.put(
+    "/:id",
+    verify_token,
+    verify_role(["admin"]),
+    controllers.updateAmenityController
     /*
         #swagger.description = 'Endpoint to update an amenity.'
         #swagger.summary = 'Update an amenity.'
@@ -132,7 +140,11 @@ router.put("/:id", verify_token, verify_admin, controllers.updateAmenityControll
         }]
      */
 );
-router.delete("/", verify_token, verify_admin, controllers.deleteAmenityController
+router.delete(
+    "/",
+    verify_token,
+    verify_role(["admin"]),
+    controllers.deleteAmenityController
     /*
         #swagger.description = 'Endpoint to delete an amenity.'
         #swagger.summary = 'Delete an amenity.'
@@ -187,7 +199,11 @@ router.delete("/", verify_token, verify_admin, controllers.deleteAmenityControll
      */
 );
 
-router.get("/", verify_token, verify_admin, controllers.getAllAmenityController
+router.get(
+    "/",
+    verify_token,
+    verify_role(["admin"]),
+    controllers.getAllAmenityController
     /*
         #swagger.description = 'Endpoint to get all amenities.'
         #swagger.summary = 'Get all amenities.'
@@ -249,7 +265,11 @@ router.get("/", verify_token, verify_admin, controllers.getAllAmenityController
         }]
      */
 );
-router.get("/:id", verify_token, verify_admin, controllers.getAmenityByIdController
+router.get(
+    "/:id",
+    verify_token,
+    verify_role(["admin"]),
+    controllers.getAmenityByIdController
     /*
         #swagger.description = 'Endpoint to get an amenity by ID.'
         #swagger.summary = 'Get an amenity by ID.'

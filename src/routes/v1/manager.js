@@ -1,17 +1,13 @@
 import express from "express";
 import * as controllers from "../../controllers";
-import {
-    verify_admin,
-    verify_admin_or_manager,
-    verify_token,
-} from "../../middlewares/verifyToken";
+import { verify_role, verify_token } from "../../middlewares/verifyToken";
 
 const router = express.Router();
 
 router.get(
     "/",
     verify_token,
-    verify_admin,
+    verify_role(["admin"]),
     controllers.getAllManagersController
     /*
         #swagger.description = 'Endpoint to get all managers.'
@@ -51,7 +47,7 @@ router.get(
 router.get(
     "/:id",
     verify_token,
-    verify_admin_or_manager,
+    verify_role(["admin", "manager"]),
     controllers.getManagerByIdController
     /*
         #swagger.description = 'Get a manager by ID.'
@@ -75,7 +71,7 @@ router.get(
 router.post(
     "/",
     verify_token,
-    verify_admin,
+    verify_role(["admin"]),
     controllers.createManagerController
     /*
         #swagger.description = 'Endpoint to create a new manager.'
@@ -127,7 +123,7 @@ router.post(
 router.put(
     "/:id",
     verify_token,
-    verify_admin_or_manager,
+    verify_role(["admin", "manager"]),
     controllers.updateManagerController
     /*
         #swagger.description = 'Endpoint to update a manager.'
@@ -171,7 +167,7 @@ router.put(
 router.delete(
     "/:id",
     verify_token,
-    verify_admin,
+    verify_role(["admin"]),
     controllers.deleteManagerController
     /*
         #swagger.description = 'Endpoint to delete a manager.'

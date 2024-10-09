@@ -1,11 +1,15 @@
 import express from "express";
 import * as controllers from "../../controllers";
-import {verify_manager, verify_token} from "../../middlewares/verifyToken";
-import {createWorkspaceController} from "../../controllers";
+import { verify_role, verify_token } from "../../middlewares/verifyToken";
+import { createWorkspaceController } from "../../controllers";
 
 const router = express.Router();
 
-router.post("/", verify_token, verify_manager, controllers.createWorkspaceTypeController
+router.post(
+    "/",
+    verify_token,
+    verify_role(["manager"]),
+    controllers.createWorkspaceTypeController
     /*
         #swagger.description = 'Endpoint to create a workspace type.'
         #swagger.summary = 'Create a workspace type.'
@@ -46,7 +50,9 @@ router.post("/", verify_token, verify_manager, controllers.createWorkspaceTypeCo
      */
 );
 
-router.get("/", controllers.getAllWorkspaceTypeController
+router.get(
+    "/",
+    controllers.getAllWorkspaceTypeController
     /*
         #swagger.description = 'Endpoint to get all workspace types.'
         #swagger.summary = 'Get all workspace types.'
@@ -93,7 +99,9 @@ router.get("/", controllers.getAllWorkspaceTypeController
      */
 );
 
-router.get("/:id", controllers.getWorkspaceTypeByIdController
+router.get(
+    "/:id",
+    controllers.getWorkspaceTypeByIdController
     /*
         #swagger.description = 'Endpoint to get a workspace type by id.'
         #swagger.summary = 'Get a workspace type by id.'
@@ -116,7 +124,11 @@ router.get("/:id", controllers.getWorkspaceTypeByIdController
      */
 );
 
-router.put("/:id", verify_token, verify_manager, controllers.updateWorkspaceTypeController
+router.put(
+    "/:id",
+    verify_token,
+    verify_role(["manager"]),
+    controllers.updateWorkspaceTypeController
     /*
         #swagger.description = 'Endpoint to update a workspace type.'
         #swagger.summary = 'Update a workspace type.'
