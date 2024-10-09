@@ -59,11 +59,14 @@ export const updateStaffController = async (req, res) => {
 
 export const deleteStaffController = async (req, res) => {
     try {
+        const error = Joi.object({
+            id: Joi.string().uuid().required()
+        }).validate({id: req.params.id}).error;
+        if (error) return badRequest(res, error);
         const response = await services.deleteStaffService(req.params.id);
         return ok(res, response)    
     } catch (error) {
-        if(error === "Staff not found"
-            || error === "Building is not exist") return badRequest(res, error);
+        if(error === "No Staff Exist") return badRequest(res, error);
         internalServerError(res, error)
     }
 }
@@ -81,8 +84,9 @@ export const assignStaffToBuildingController = async (req, res) => {
         const response = await services.assignStaffToBuildingService(req.params.id, req.body.building_id);
         return ok(res, response)    
     } catch (error) {
-        if(error === "Staff not found"
-            || error === "Building is not exist") return badRequest(res, error);
+        if(error === "Staff is not exist"
+            || error === "Building is not exist"
+            || error === "Staff is already assigned to this building") return badRequest(res, error);
         internalServerError(res, error)
     }
 }

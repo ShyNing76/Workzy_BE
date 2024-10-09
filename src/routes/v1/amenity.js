@@ -33,7 +33,7 @@ router.post(
                             },
                             type: {
                                 type: 'string',
-                                example: 'device'
+                                example: 'Device'
                             },
                         },
                         required: ['amenity_name', 'original_price', 'type']
@@ -103,7 +103,7 @@ router.put(
                             },
                             type: {
                                 type: 'string',
-                                example: 'device'
+                                example: 'Device'
                             },
                         }
                     }
@@ -141,7 +141,7 @@ router.put(
      */
 );
 router.delete(
-    "/",
+    "/:id",
     verify_token,
     verify_role(["admin"]),
     controllers.deleteAmenityController
@@ -149,31 +149,24 @@ router.delete(
         #swagger.description = 'Endpoint to delete an amenity.'
         #swagger.summary = 'Delete an amenity.'
         #swagger.tags = ['Amenities']
-        #swagger.requestBody = {
+        #swagger.parameters['id'] = {
+            in: 'path',
+            description: 'Amenity ID.',
             required: true,
+            type: 'string'
+        }
+        #swagger.responses[200] = {
+            description: 'Amenity deleted successfully.',
             content: {
                 "application/json": {
                     schema: {
                         type: 'object',
                         properties: {
-                            amenity_ids: {
-                                type: 'array',
-                                items: {
-                                    type: 'string',
-                                    format: 'uuid'
-                                }
-                            },
+                            message: {
+                                type: 'string',
+                                example: 'Amenity deleted successfully.'
+                            }
                         }
-                    }
-                }
-            }
-        }
-        #swagger.responses[200] = {
-            description: 'Amenity updated successfully.',
-            content: {
-                "application/json": {
-                    schema: {
-                        $ref: "#/components/schemas/Amenity"
                     }
                 }
             }
@@ -222,7 +215,7 @@ router.get(
             description: 'Number of items per page.',
             type: 'integer'
         }
-        #swagger.parameters['name'] = { 
+        #swagger.parameters['amenity_name'] = { 
             in: 'query',
             description: 'Amenity name for filtering.',
             type: 'string'

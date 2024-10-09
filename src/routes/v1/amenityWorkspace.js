@@ -56,35 +56,21 @@ router.post(
 );
 
 router.delete(
-    "/",
+    "/:id",
     verify_token,
     verify_role(["admin"]),
     controllers.deleteAmenitiesWorkspaceController
     /*
         #swagger.description = 'Endpoint to delete an amenity-workspace association.'
         #swagger.summary = 'Delete an amenity-workspace association.'
-        #swagger.requestBody = {
-            required: true,
-            content: {
-                "application/json": {
-                    schema: {
-                        type: 'object',
-                        properties: {
-                            amenities_workspace_ids: {
-                                type: 'array',
-                                items: {
-                                    type: 'string',
-                                    format: 'uuid'
-                                },
-                                example: ['0c2cfee2-d9b7-4215-baaf-f40632e7de2c', '621ca0c8-e3ad-4bd8-9df5-eafe998b5b04']
-                            }
-                        }
-                    }
-                }
-            }
+        #swagger.parameters['id'] = {
+            in: 'path',
+            description: 'Amenity-workspace association ID.',
+            type: 'string',
+            format: 'uuid'
         }
         #swagger.responses[200] = {
-            description: 'Amenity-workspace association(s) deleted successfully.'
+            description: 'Amenity-workspace association deleted successfully.'
         }
         #swagger.responses[400] = {
             description: 'Invalid data.'
@@ -96,7 +82,7 @@ router.delete(
             description: 'Forbidden - User is not an admin.'
         }
         #swagger.responses[404] = {
-            description: 'Amenity-workspace association(s) not found.'
+            description: 'Amenity-workspace association not found.'
         }
         #swagger.responses[500] = {
             description: 'Internal server error.'

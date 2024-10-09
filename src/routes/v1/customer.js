@@ -57,4 +57,21 @@ router.put(
     } */
 );
 
+router.get(
+    "/membership",
+    verify_token,
+    controller.getMembershipController
+    /* #swagger.description = 'Endpoint to get membership.'
+    #swagger.summary = 'Get membership.'
+    #swagger.responses[200] = {
+        description: 'Membership found.'
+    }
+    #swagger.responses[500] = {
+        description: 'Internal server error.'
+    }
+    #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
 module.exports = router;

@@ -38,17 +38,17 @@ export const createAmenitiesWorkspaceService = async ({amenity_ids, workspace_id
     }
 })
 
-export const deleteAmenitiesWorkspaceService = async ({amenities_workspace_ids}) => new Promise(async (resolve, reject) => {
+export const deleteAmenitiesWorkspaceService = async (id) => new Promise(async (resolve, reject) => {
     try {
           const amenitiesWorkspace = await db.AmenitiesWorkspace.destroy({
             where: {
-                amenities_workspace_id: {[Op.in]: amenities_workspace_ids}
+                amenities_workspace_id: id
             }
           });
-          if(amenitiesWorkspace === 0) return reject("No amenities-workspace records found to delete")
+          if(amenitiesWorkspace === 0) return reject("No amenities-workspace record found to delete")
           resolve({
             err: 0,
-            message: `${amenitiesWorkspace} amenities-workspace record(s) deleted successfully!`
+            message: `${amenitiesWorkspace} amenities-workspace record deleted successfully!`
           })
     } catch (error) {
         reject(error)

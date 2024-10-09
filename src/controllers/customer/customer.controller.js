@@ -24,3 +24,14 @@ export const removeUserController = async (req, res) => {
         internalServerError(res, error)
     }
 }
+
+export const getMembershipController = async (req, res) => {
+    try {
+        const response = await services.getMembershipService(req.user);
+        return ok(res, response)
+    } catch (error) {
+        console.log(error)
+        if (error === 'User not found') return badRequest(res, error)
+        internalServerError(res, error)
+    }
+}

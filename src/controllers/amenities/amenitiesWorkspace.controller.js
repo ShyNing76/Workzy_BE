@@ -22,13 +22,13 @@ export const createAmenitiesWorkspaceController = async (req, res) => {
 export const deleteAmenitiesWorkspaceController = async (req, res) => {
     try {
         const error = Joi.object({
-            amenities_workspace_ids: Joi.array().required(),
-        }).validate({amenities_workspace_ids: req.body.amenities_workspace_ids}).error;
+            id: Joi.string().uuid().required(),
+        }).validate({id: req.params.id}).error;
         if(error) return badRequest(res, error);
-        const response = await services.deleteAmenitiesWorkspaceService(req.body);
+        const response = await services.deleteAmenitiesWorkspaceService(req.params.id);
         return ok(res, response)
     } catch (error) {
-        if(error === "No amenities-workspace records found to delete") return badRequest(res, error);
+        if(error === "No amenities-workspace record found to delete") return badRequest(res, error);
         internalServerError(res, error)
     }
 }

@@ -188,15 +188,16 @@ export const updateStaffService = (id, data) => new Promise(async (resolve, reje
 export const deleteStaffService = (id) => new Promise(async (resolve, reject) => {
     try {
 
-        const user = await db.User.findOne({
-            where: {user_id: id, role_id: 3},
-            raw: true,
-            nest: true
-        })
-        if(!user) return reject("User not found");
-        if(user.status === "inactive") return reject("Staff is already deleted");
-        await user.save();
-
+        const [updatedRowsCount] = await db.User.update({
+            status: "inactive"
+        },{
+            where: {
+                user_id: id,
+                role_id: 3,
+                status: "active"
+            }
+        }) 
+        if(updatedRowsCount === 0) return reject("No Staff Exist")
         resolve({
             err: 0,
             message: "Staff deleted"
@@ -209,7 +210,7 @@ export const deleteStaffService = (id) => new Promise(async (resolve, reject) =>
 export const assignStaffToBuildingService = (id, building_id) => new Promise(async (resolve, reject) => {
     try {
 
-        const [staff, isBuildingExist] = await Promise.all([
+        const [staff, isBuildingExist, isStaffAlreadyAssigned] = await Promise.all([
             db.User.findOne({
                 where: {
                     user_id: id,
@@ -228,10 +229,17 @@ export const assignStaffToBuildingService = (id, building_id) => new Promise(asy
                 where: {
                     building_id: building_id
                 },
+            }),
+            db.Staff.findOne({
+                where: {
+                    building_id: building_id
+                }
             })
         ])
         if(!staff || staff.status == "inactive") return reject("Staff is not exist");
         if(!isBuildingExist) return reject("Building is not exist");
+        if(isStaffAlreadyAssigned) return reject("Staff is already assigned to this building");
+        
         staff.Staff.building_id = building_id;
         await staff.Staff.save();
         resolve({

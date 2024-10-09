@@ -39,7 +39,7 @@ router.get(
     /*
         #swagger.description = 'Get a staff by ID.'
         #swagger.summary = 'Get a staff by ID.'
-        #swagger.parameters['id'] = { description: 'Staff ID.' }
+        #swagger.parameters['id'] = { description: 'User ID.' }
         #swagger.responses[200] = {
             description: 'Staff found.'
         }
@@ -115,7 +115,7 @@ router.put(
     /*
         #swagger.description = 'Endpoint to update a staff.'
         #swagger.summary = 'Update a staff.'
-        #swagger.parameters['id'] = { description: 'Staff ID.' }
+        #swagger.parameters['id'] = { description: 'User ID.' }
         #swagger.requestBody = {
             required: true,
             content: {
@@ -163,7 +163,7 @@ router.delete(
     /*
         #swagger.description = 'Endpoint to delete a staff.'
         #swagger.summary = 'Delete a staff.'
-        #swagger.parameters['id'] = { description: 'Staff ID.' }
+        #swagger.parameters['id'] = { description: 'User ID.' }
         #swagger.responses[200] = {
             description: 'Staff deleted successfully.'
         }

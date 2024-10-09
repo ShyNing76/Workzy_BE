@@ -50,7 +50,6 @@ export const getAllUsersService = ({page, limit, order, name, ...query}) => new 
     }
 });
 
-
 export const removeUserService = (userId) => new Promise(async (resolve, reject) => {
     try {
         const user = await db.User.findOne({
@@ -69,6 +68,40 @@ export const removeUserService = (userId) => new Promise(async (resolve, reject)
         resolve({
             err: 0,
             message: 'Remove user successful'
+        })
+    } catch (error) {
+        reject(error)
+    }
+});
+
+export const getMembershipService = (tokenUser) => new Promise(async (resolve, reject) => {
+    try {
+        const user = await db.User.findOne({
+            where: {
+                user_id: tokenUser.user_id
+            },
+            attributes: [],
+            include: [
+                {
+                    model: db.Customer,
+                    attributes: {
+                        exclude: ['customer_id', 'user_id', 'createdAt', 'updatedAt']
+                    },
+                    required: true
+                }
+            ],
+            raw: true,
+            nest: true
+        });
+
+        if(!user) {
+            return reject('User not found')
+        }
+
+        resolve({
+            err: 0,
+            message: 'Get Membership successful',
+            data: user.Customer
         })
     } catch (error) {
         reject(error)
