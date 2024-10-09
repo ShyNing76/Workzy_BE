@@ -54,3 +54,36 @@ export const deleteAmenitiesWorkspaceService = async ({amenities_workspace_ids})
         reject(error)
     }
 })
+
+export const getAmenitiesByWorkspaceIdService = async (workspace_id) => new Promise(async (resolve, reject) => {
+    try {
+        const amenitiesWorkspace = await db.AmenitiesWorkspace.findAll({
+            where: {
+                workspace_id: workspace_id
+            },
+            attributes: [],
+            include: {
+                model: db.Amenity,
+                attributes: ['amenity_name'],
+                required: true
+            },
+            raw: true,
+            nest: true
+        })
+        for(const item of amenitiesWorkspace) {
+            console.log(item.Amenities)
+        }
+        if(amenitiesWorkspace.length === 0) return reject("No amenities found for this workspace")
+        const amenities = []
+        for(const item of amenitiesWorkspace) {
+            amenities.push(item.Amenities.amenity_name)
+        }
+        resolve({
+            err: 0,
+            message: "Got",
+            data: amenities
+        })
+    } catch (error) {
+        reject(error)
+    }
+})

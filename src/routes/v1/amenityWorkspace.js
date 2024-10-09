@@ -99,4 +99,44 @@ router.delete("/", verify_token, verify_admin, controllers.deleteAmenitiesWorksp
      */
 );
 
+router.get("/:workspace_id", controllers.getAmenitiesByWorkspaceIdController
+    /*
+        #swagger.description = 'Endpoint to get amenities by workspace ID.'
+        #swagger.summary = 'Get amenities by workspace ID.'
+        #swagger.parameters['workspace_id'] = {
+            in: 'path',
+            description: 'Workspace ID.',
+            type: 'string',
+            format: 'uuid'  
+        }
+        #swagger.responses[200] = {
+            description: 'Amenities found.',
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            amenities: {
+                                type: 'array',
+                                items: {
+                                    $ref: "#/components/schemas/Amenity"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        #swagger.responses[400] = {
+            description: 'Invalid data.'
+        }
+        #swagger.responses[404] = {
+            description: 'Workspace not found.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
 module.exports = router;

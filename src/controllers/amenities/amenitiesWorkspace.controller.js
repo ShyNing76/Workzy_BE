@@ -32,3 +32,19 @@ export const deleteAmenitiesWorkspaceController = async (req, res) => {
         internalServerError(res, error)
     }
 }
+
+export const getAmenitiesByWorkspaceIdController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            workspace_id: Joi.string().uuid().required(),
+        }).validate({workspace_id: req.params.workspace_id}).error;
+        if(error) return badRequest(res, error);
+        console.log(req.params.workspace_id)
+        const response = await services.getAmenitiesByWorkspaceIdService(req.params.workspace_id);
+        return ok(res, response);
+    } catch (error) {
+        console.log(error)
+        if(error === "No amenities found for this workspace") return badRequest(res, error);
+        internalServerError(res, error)
+    }
+}
