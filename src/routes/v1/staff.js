@@ -1,10 +1,17 @@
 import express from "express";
 import * as controllers from "../../controllers";
-import {verify_admin, verify_admin_or_manager, verify_staff, verify_token} from "../../middlewares/verifyToken";
+import {
+    verify_role,
+    verify_token,
+} from "../../middlewares/verifyToken";
 
 const router = express.Router();
 
-router.get("/", verify_token, verify_admin_or_manager, controllers.getAllStaffController
+router.get(
+    "/",
+    verify_token,
+    verify_role(["admin", "manager"]),
+    controllers.getAllStaffController
     /*
         #swagger.description = 'Endpoint to get all staffs.'
         #swagger.summary = 'Get all staffs.'
@@ -24,7 +31,11 @@ router.get("/", verify_token, verify_admin_or_manager, controllers.getAllStaffCo
      */
 );
 
-router.get("/:id", verify_token, verify_admin_or_manager, controllers.getStaffByIdController
+router.get(
+    "/:id",
+    verify_token,
+    verify_role(["admin", "manager"]),
+    controllers.getStaffByIdController
     /*
         #swagger.description = 'Get a staff by ID.'
         #swagger.summary = 'Get a staff by ID.'
@@ -44,7 +55,11 @@ router.get("/:id", verify_token, verify_admin_or_manager, controllers.getStaffBy
      */
 );
 
-router.post("/", verify_token, verify_admin, controllers.createStaffController
+router.post(
+    "/",
+    verify_token,
+    verify_role(["admin", "manager"]),
+    controllers.createStaffController
     /*
         #swagger.description = 'Endpoint to create a new staff.'
         #swagger.summary = 'Create a new staff.'
@@ -92,7 +107,11 @@ router.post("/", verify_token, verify_admin, controllers.createStaffController
      */
 );
 
-router.put("/:id", verify_token, verify_admin, controllers.updateStaffController
+router.put(
+    "/:id",
+    verify_token,
+    verify_role(["admin", "manager"]),
+    controllers.updateStaffController
     /*
         #swagger.description = 'Endpoint to update a staff.'
         #swagger.summary = 'Update a staff.'
@@ -136,7 +155,11 @@ router.put("/:id", verify_token, verify_admin, controllers.updateStaffController
      */
 );
 
-router.delete("/:id", verify_token, verify_admin, controllers.deleteStaffController
+router.delete(
+    "/:id",
+    verify_token,
+    verify_role(["admin"]),
+    controllers.deleteStaffController
     /*
         #swagger.description = 'Endpoint to delete a staff.'
         #swagger.summary = 'Delete a staff.'
@@ -156,7 +179,11 @@ router.delete("/:id", verify_token, verify_admin, controllers.deleteStaffControl
      */
 );
 
-router.put("/assign/:id", verify_token, verify_admin_or_manager, controllers.assignStaffToBuildingController
+router.put(
+    "/assign/:id",
+    verify_token,
+    verify_role(["admin", "manager"]),
+    controllers.assignStaffToBuildingController
     /*
         #swagger.description = 'Endpoint to assign a staff to a building.'
         #swagger.summary = 'Assign a staff to a building.'

@@ -1,6 +1,6 @@
 import express from "express";
 import * as controllers from "../../controllers";
-import {verify_admin, verify_token} from "../../middlewares/verifyToken";
+import {verify_token} from "../../middlewares/verifyToken";
 
 const router = express.Router();
 

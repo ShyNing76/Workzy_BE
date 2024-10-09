@@ -1,10 +1,14 @@
 import express from "express";
 import * as controllers from "../../controllers";
-import {verify_admin, verify_token} from "../../middlewares/verifyToken";
+import { verify_role, verify_token } from "../../middlewares/verifyToken";
 
 const router = express.Router();
 
-router.post("/", verify_token, verify_admin, controllers.createAmenitiesWorkspaceController
+router.post(
+    "/",
+    verify_token,
+    verify_role(["admin"]),
+    controllers.createAmenitiesWorkspaceController
     /*
         #swagger.description = 'Endpoint to create a new amenity-workspace association.'
         #swagger.summary = 'Create a new amenity-workspace association.'
@@ -51,7 +55,11 @@ router.post("/", verify_token, verify_admin, controllers.createAmenitiesWorkspac
     */
 );
 
-router.delete("/", verify_token, verify_admin, controllers.deleteAmenitiesWorkspaceController
+router.delete(
+    "/",
+    verify_token,
+    verify_role(["admin"]),
+    controllers.deleteAmenitiesWorkspaceController
     /*
         #swagger.description = 'Endpoint to delete an amenity-workspace association.'
         #swagger.summary = 'Delete an amenity-workspace association.'

@@ -40,8 +40,7 @@ export const createBookingController = async (req, res) => {
             "Booking type not found",
         ]);
 
-        if (knownErrors.has(err.message)) return badRequest(res, err.message);
+        if (knownErrors.has(err)) return badRequest(res, err);
         internalServerError(res);
     }
 };
-

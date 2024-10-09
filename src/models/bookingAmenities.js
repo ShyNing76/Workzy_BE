@@ -37,7 +37,7 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.INTEGER,
                 defaultValue: 1,
             },
-            amenitiy_price: {
+            price: {
                 type: DataTypes.DECIMAL(10, 2),
                 defaultValue: 0.0,
             },

@@ -1,29 +1,47 @@
+const { where } = require("sequelize");
+const db = require("../models");
 
+const amenityWorkspace = () =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const amenitiesWorkspace = await db.AmenitiesWorkspace.findAll({
+                // where: {
+                //     workspace_id: "639b7e0e-e586-4206-bb7f-0a34a6d8f35b",
+                // },
+                attributes: ["amenity_id"],
+                include: [
+                    {
+                        model: db.Amenity,
+                        as: "Amenities",
+                        attributes: ["amenity_id", "amenity_name"],
+                        required: true,
+                    },
+                    {
+                        model: db.Workspace,
+                        as: "Workspaces",
+                        attributes: ["workspace_id", "workspace_name"],
+                        where: {
+                            workspace_id:
+                                "639b7e0e-e586-4206-bb7f-0a34a6d8f35b",
+                        },
+                        required: true,
+                    },
+                ],
+                raw: true,
+                nest: true,
+            });
 
-const existingSlots = [
-  { start: '2023-10-01T10:00:00', end: '2023-10-01T11:00:00' },
-  { start: '2023-10-01T12:00:00', end: '2023-10-01T13:00:00' },
-];
+            resolve(amenitiesWorkspace);
+        } catch (error) {
+            console.log(error);
+            reject(error);
+        }
+    });
 
-const newSlot = { start: '2023-10-01T10:30:00', end: '2023-10-01T11:30:00' };
-
-function isTimeSlotDuplicate(existingSlots, newSlot) {
-  const newStart = new Date(newSlot.start);
-  const newEnd = new Date(newSlot.end);
-
-  for (const slot of existingSlots) {
-    const existingStart = new Date(slot.start);
-    const existingEnd = new Date(slot.end);
-
-    if (
-      (newStart >= existingStart && newStart < existingEnd) ||
-      (newEnd > existingStart && newEnd <= existingEnd) ||
-      (newStart <= existingStart && newEnd >= existingEnd)
-    ) {
-      return true;
-    }
-  }
-
-  return false;
-}
-console.log(isTimeSlotDuplicate(existingSlots, newSlot)); // Expected: true
+amenityWorkspace()
+    .then((result) => {
+        console.log(result);
+    })
+    .catch((error) => {
+        console.error(error);
+    });

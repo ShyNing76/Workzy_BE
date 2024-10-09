@@ -1,14 +1,14 @@
 import jwt from "jsonwebtoken";
-import {notAuthorized} from "./handle_error";
+import { notAuthorized } from "./handle_error";
 
-require('dotenv').config();
+require("dotenv").config();
 
 export const verify_token = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
+    const authHeader = req.headers["authorization"];
     if (!authHeader) {
         return notAuthorized("No access token provided", res, false);
     }
-    const accessToken = authHeader.split(' ')[1];
+    const accessToken = authHeader.split(" ")[1];
 
     jwt.verify(accessToken, process.env.JWT_SECRET, (err, user) => {
         if (err) {
@@ -23,40 +23,20 @@ export const verify_token = (req, res, next) => {
         req.user = user;
         next();
     });
-}
+};
 
-export const verify_admin = (req, res, next) => {
-    if (req.user.role_id !== 1) { // Admin role_id is 1
-        return notAuthorized("Unauthorized", res, false);
-    }
-    next();
-}
+export const verify_role = (roles) => {
+    return (req, res, next) => {
+        const role_id = {
+            1: "admin",
+            2: "manager",
+            3: "staff",
+            4: "customer",
+        };
 
-export const verify_admin_or_manager = (req, res, next) => {
-    if (req.user.role_id !== 1 && req.user.role_id !== 2) { // Admin role_id is 1, Manager role_id is 2
-        return notAuthorized("Unauthorized", res, false);
-    }
-    next();
-}
+        if (!roles.includes(role_id[req.user.role_id]))
+            return notAuthorized("Unauthorized", res, false);
 
-export const verify_manager = (req, res, next) => {
-    if (req.user.role_id !== 2) { // Manager role_id is 2
-        return notAuthorized("Unauthorized", res, false);
-    }
-    next();
-}
-
-export const verify_staff = (req, res, next) => {
-    if (req.user.role_id !== 3) { // Staff role_id is 3
-        return notAuthorized("Unauthorized", res, false);
-    }
-    next();
-}
-
-export const verify_customer = (req, res, next) => {
-    if (req.user.role_id !== 4) { // Customer role_id is 4
-        return notAuthorized("Unauthorized", res, false);
-    }
-    next();
-}
-
+        next();
+    };
+};

@@ -48,8 +48,8 @@ module.exports = (sequelize, DataTypes) => {
                 defaultValue: 0.0,
             },
             type: {
-                type: DataTypes.ENUM("amenity", "service"),
-                defaultValue: "amenity",
+                type: DataTypes.ENUM("Device", "Food"),
+                defaultValue: "Device",
             },
             status: {
                 type: DataTypes.ENUM("active", "inactive"),

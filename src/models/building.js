@@ -1,5 +1,5 @@
 "use strict";
-const {Model} = require("sequelize");
+const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
     class Building extends Model {
@@ -9,10 +9,12 @@ module.exports = (sequelize, DataTypes) => {
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            Building.hasOne(models.Staff, {foreignKey: "building_id"});
-            Building.hasMany(models.Workspace, {foreignKey: "building_id"});
-            Building.belongsTo(models.Manager, {foreignKey: "manager_id"});
-            Building.hasMany(models.BuildingImage, {foreignKey: "building_id"});
+            Building.hasOne(models.Staff, { foreignKey: "building_id" });
+            Building.hasMany(models.Workspace, { foreignKey: "building_id" });
+            Building.belongsTo(models.Manager, { foreignKey: "manager_id" });
+            Building.hasMany(models.BuildingImage, {
+                foreignKey: "building_id",
+            });
         }
     }
 
@@ -31,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
                         value = null;
                     }
                     this.setDataValue("manager_id", value);
-                }
+                },
             },
             building_name: {
                 type: DataTypes.STRING(200),
@@ -46,7 +48,7 @@ module.exports = (sequelize, DataTypes) => {
                 defaultValue: null,
             },
             google_address: {
-                type: DataTypes.STRING(200),
+                type: DataTypes.TEXT,
                 defaultValue: null,
             },
             description: {
