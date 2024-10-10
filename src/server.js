@@ -1,11 +1,10 @@
-import initWebRoutes from "./routes/v1";
-import express from "express";
 import cors from "cors";
+import express from "express";
 import job from "./config/checkBookingStatus";
+import initWebRoutes from "./routes/v1";
 
 require("dotenv").config();
 require("./config/passport");
-// require('./config/connection').connectionServer(); // test connection
 
 const app = express();
 app.use(
