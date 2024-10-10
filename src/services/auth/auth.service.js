@@ -157,6 +157,7 @@ export const loginGoogleService = (profile) =>
                 {
                     email: user[0].email,
                     user_id: user[0].user_id,
+                    role_id: user[0].role_id,
                 },
                 process.env.JWT_SECRET,
                 {

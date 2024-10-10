@@ -115,6 +115,7 @@ export const paypalCheckoutService = ({ booking_id, user_id }) =>
                 intent: "CAPTURE",
                 application_context: {
                     shipping_preference: "NO_SHIPPING",
+                    return_url: "http://localhost:5500/frontend/",
                 },
                 purchase_units: [
                     {
