@@ -1,3 +1,6 @@
+import db from "../../models";
+import { Sequelize } from "sequelize";
+
 export const checkRoomAvailability = async ({
     workspace_id,
     start_time,
@@ -50,9 +53,10 @@ export const checkRoomAvailability = async ({
         }
 
         // Nếu tất cả các trạng thái trong statusArray đều là "cancelled" thì trả về true | Nghĩa là phòng đang trống
-        const isAvailable = bookingStatues.every((bookingStatus) =>
-            bookingStatus.BookingStatuses?.statusArray?.includes("cancelled")
+        const isAvailable = bookingStatues.every((booking) =>
+            booking["BookingStatuses.statusArray"].includes("cancelled")
         );
+
         return isAvailable;
     } catch (error) {
         console.error(error);

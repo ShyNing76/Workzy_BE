@@ -115,14 +115,18 @@ export const paypalCheckoutService = ({ booking_id, user_id }) =>
                 intent: "CAPTURE",
                 application_context: {
                     shipping_preference: "NO_SHIPPING",
-                    return_url:
-                        "http://localhost:5000/api/v1/booking/checkout/paypal/success",
                 },
                 purchase_units: [
                     {
                         amount: {
                             currency_code: "USD",
                             value: amount,
+                            breakdown: {
+                                item_total: {
+                                    currency_code: "USD",
+                                    value: amount,
+                                },
+                            },
                         },
                         reference_id: booking.booking_id,
                         description: `Booking ID: ${booking.booking_id}`,

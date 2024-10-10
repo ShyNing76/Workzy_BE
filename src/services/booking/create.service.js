@@ -77,6 +77,7 @@ export const createBookingService = (data) =>
                 },
             });
         } catch (error) {
+            await t.rollback();
             console.log(error);
             reject(error);
         }
