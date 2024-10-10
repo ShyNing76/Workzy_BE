@@ -57,7 +57,11 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
             });
 
             // Filter out bookings that do not have any BookingStatuses
-            const filteredBookings = bookings.filter(booking => booking.BookingStatuses && booking.BookingStatuses.length > 0);
+            const filteredBookings = bookings.filter(
+                (booking) =>
+                    booking.BookingStatuses &&
+                    booking.BookingStatuses.length > 0
+            );
 
             if (!filteredBookings || filteredBookings.length === 0)
                 return reject("No bookings found");
@@ -73,25 +77,40 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
         }
     });
 
-export const getAllBookingsService = ({ page, limit, order, ...data }) =>
+export const getAllBookingsService = ({
+    page,
+    limit,
+    order,
+    status,
+    ...data
+}) =>
     new Promise(async (resolve, reject) => {
         try {
+            const tabStatus = {
+                Current: ["check-in", "in-process"],
+                Upcoming: ["paid", "confirmed"],
+                "Check-out": ["check-out", "check-amenities"],
+                Completed: ["completed"],
+                Cancelled: ["cancelled"],
+            };
+
+            const statusCondition = status
+                ? {
+                      status: {
+                          [db.Sequelize.Op.in]: tabStatus[status] || [],
+                      },
+                  }
+                : {};
+
             const bookings = await db.Booking.findAndCountAll({
                 where: {
                     ...data,
                 },
                 include: [
                     {
-                        model: db.Workspace,
-                        as: "Workspace",
-                    },
-                    {
-                        model: db.BookingType,
-                        as: "BookingType",
-                    },
-                    {
                         model: db.BookingStatus,
                         as: "BookingStatuses",
+                        where: statusCondition,
                     },
                 ],
                 order: handleSortOrder(order, "start_time_date"),

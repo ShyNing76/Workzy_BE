@@ -1,5 +1,5 @@
 "use strict";
-const {Model} = require("sequelize");
+const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
     class Payment extends Model {
@@ -9,8 +9,8 @@ module.exports = (sequelize, DataTypes) => {
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            Payment.belongsTo(models.Booking, {foreignKey: "booking_id"});
-            Payment.hasMany(models.Transaction, {foreignKey: "payment_id"});
+            Payment.belongsTo(models.Booking, { foreignKey: "booking_id" });
+            Payment.hasMany(models.Transaction, { foreignKey: "payment_id" });
         }
     }
 
@@ -36,6 +36,10 @@ module.exports = (sequelize, DataTypes) => {
             payment_type: {
                 type: DataTypes.ENUM("Workspace-Price", "Full", "Refund"),
                 defaultValue: "Workspace-Price",
+            },
+            paypal_order_id: {
+                type: DataTypes.STRING,
+                allowNull: true,
             },
             amount: {
                 type: DataTypes.DECIMAL(10, 2),

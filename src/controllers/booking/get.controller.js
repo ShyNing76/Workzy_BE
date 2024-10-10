@@ -58,7 +58,7 @@ export const getBookingByIdController = async (req, res) => {
         return ok(res, booking);
     } catch (err) {
         console.error(err);
-        const knownErrors = ["No bookings found", "Customer not found"];
+        const knownErrors = ["No booking found", "Customer not found"];
         if (knownErrors.includes(err)) return badRequest(res, err);
         internalServerError(res);
     }
