@@ -115,7 +115,8 @@ export const paypalCheckoutService = ({ booking_id, user_id }) =>
                 intent: "CAPTURE",
                 application_context: {
                     shipping_preference: "NO_SHIPPING",
-                    return_url: "http://localhost:5500/frontend/",
+                    return_url: "http://localhost:5500/frontend",
+                    cancel_url: "http://localhost:5500/frontend",
                 },
                 purchase_units: [
                     {
@@ -186,10 +187,45 @@ export const paypalSuccessService = ({ booking_id, order_id }) =>
         const t = await db.sequelize.transaction();
         try {
             const booking = await db.Booking.findOne({
-                where: { booking_id: booking_id },
+                where: { booking_id },
+                include: [
+                    {
+                        model: db.BookingStatus,
+                        as: "BookingStatuses",
+                        order: [["createdAt", "DESC"]],
+                        limit: 1,
+                    },
+                ],
             });
 
-            if (!booking) return reject("Booking not found");
+            if (!booking) {
+                return reject("Booking not found");
+            }
+
+            if (
+                !booking.BookingStatuses ||
+                booking.BookingStatuses.length === 0
+            ) {
+                return reject("Booking status not found");
+            }
+
+            const latestStatus = booking.BookingStatuses[0].status;
+
+            if (!["confirmed", "cancelled", "paid"].includes(latestStatus)) {
+                return reject(`Invalid booking status: ${latestStatus}`);
+            }
+
+            if (latestStatus === "cancelled") {
+                return reject("Booking has been cancelled");
+            }
+
+            if (latestStatus === "paid") {
+                return reject("Booking has already been paid");
+            }
+
+            if (latestStatus !== "confirmed") {
+                return reject(`Unexpected booking status: ${latestStatus}`);
+            }
 
             const amount = await convertVNDToUSD(booking.workspace_price);
             const request = new paypal.orders.OrdersCaptureRequest(order_id);
@@ -201,8 +237,6 @@ export const paypalSuccessService = ({ booking_id, order_id }) =>
             });
 
             const response = await client.execute(request);
-
-            console.log(response);
 
             if (response.statusCode !== 201) {
                 return reject("Failed to capture PayPal order");

@@ -56,6 +56,15 @@ export const paypalSuccessController = async (req, res) => {
         return ok(res, booking);
     } catch (err) {
         console.error(err);
+        const knownErrors = [
+            "Booking not found",
+            "Booking status not found",
+            "Booking has been cancelled",
+            "Booking has already been paid",
+            "Unexpected booking status",
+            "Invalid booking status",
+        ];
+        if (knownErrors.includes(err)) return badRequest(res, err);
         internalServerError(res, err);
     }
 };
