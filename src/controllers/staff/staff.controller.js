@@ -90,3 +90,18 @@ export const assignStaffToBuildingController = async (req, res) => {
         internalServerError(res, error)
     }
 }
+
+export const getBookingStatusController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            id: Joi.string().uuid().required()
+        }).validate({id: req.params.id}).error;
+        if (error) return badRequest(res, error);
+        const response = await services.getBookingStatusService(req.params.id);
+        return ok(res, response)    
+    } catch (error) {
+        if (error === "Workspace cannot have booking")
+            return badRequest(res, error);
+        internalServerError(res, error)
+    }
+}
