@@ -115,3 +115,20 @@ export const getBookingStatusController = async (req, res) => {
         internalServerError(res, error)
     }
 }
+
+export const changeBookingStatusController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            booking_id: Joi.string().uuid().required(),
+            status: Joi.string().valid("paid", "check-in", "in-process", "check-out", "check-amenities", "completed", "cancelled").required()
+        }).validate({booking_id: req.params.booking_id, status: req.body.status}).error;
+        if (error) return badRequest(res, error);
+        const response = await services.changeBookingStatusService(req.params.booking_id, req.body.status);
+        return ok(res, response)    
+    } catch (error) {
+        if (error === "Booking not found"
+            || error === "Failed to update booking status")
+            return badRequest(res, error);
+        internalServerError(res, error)
+    }
+}
