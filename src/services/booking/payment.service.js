@@ -99,7 +99,7 @@ export const paypalCheckoutService = ({ booking_id, user_id }) =>
                 payment = await db.Payment.create(
                     {
                         booking_id: booking.booking_id,
-                        amount: booking.workspace_price,
+                        amount: booking.total_price,
                         payment_method: "paypal",
                         payment_date: new Date(),
                         payment_type: "Workspace-Price",
@@ -123,7 +123,7 @@ export const paypalCheckoutService = ({ booking_id, user_id }) =>
                 );
 
             const request = new paypal.orders.OrdersCreateRequest();
-            const amount = await convertVNDToUSD(booking.workspace_price);
+            const amount = await convertVNDToUSD(booking.total_price);
 
             request.prefer("return=representation");
             request.requestBody({
@@ -242,7 +242,7 @@ export const paypalSuccessService = ({ booking_id, order_id }) =>
                 return reject(`Unexpected booking status: ${latestStatus}`);
             }
 
-            const amount = await convertVNDToUSD(booking.workspace_price);
+            const amount = await convertVNDToUSD(booking.total_price);
             const request = new paypal.orders.OrdersCaptureRequest(order_id);
             request.requestBody({
                 amount: {
@@ -339,7 +339,7 @@ export const refundBookingService = ({ booking_id, user_id }) =>
             if (transaction.status !== "Completed")
                 return reject("Transaction not completed");
 
-            const amount = await convertVNDToUSD(booking.workspace_price);
+            const amount = await convertVNDToUSD(booking.total_price);
 
             const refundRequest = new paypal.payments.CapturesRefundRequest(
                 payment.paypal_capture_id

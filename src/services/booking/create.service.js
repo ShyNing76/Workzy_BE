@@ -53,6 +53,7 @@ export const createBookingService = (data) =>
                 start_time_date: data.start_time,
                 end_time_date: data.end_time,
             };
+            
             const bookingStatus = {
                 booking_id: booking.booking_id,
                 status: "confirmed",
