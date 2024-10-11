@@ -500,4 +500,46 @@ router.post(
     */
 );
 
+// refund
+router.post(
+    "/refund/:id",
+    verify_role(["customer"]),
+    controllers.refundBookingController
+    /*
+        #swagger.description = 'Refund a booking by ID for the authenticated customer.'
+        #swagger.summary = 'Refund booking'
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['id'] = {
+            in: 'path',
+            required: true,
+            type: 'string',
+            format: 'uuid',
+            description: 'Booking ID'
+        }
+        #swagger.responses[200] = {
+            description: 'Refund successful',
+            schema: {
+                err: 0,
+                message: 'Refund successful'
+            }
+        }
+        #swagger.responses[404] = {
+            description: 'Booking not found',
+            schema: {
+                err: 1,
+                message: 'Booking not found'
+            }
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error',
+            schema: {
+                err: 1,
+                message: 'An error occurred while processing your request'
+            }
+        }
+    */
+);
+
 module.exports = router;

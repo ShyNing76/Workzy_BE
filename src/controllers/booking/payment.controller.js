@@ -68,3 +68,23 @@ export const paypalSuccessController = async (req, res) => {
         internalServerError(res, err);
     }
 };
+
+export const refundBookingController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            booking_id: Joi.string().uuid().required(),
+        }).validate({
+            booking_id: req.params.id,
+        }).error;
+        if (error) return badRequest(res, error.details[0].message);
+
+        const booking = await services.refundBookingService({
+            booking_id: req.params.id,
+            user_id: req.user.user_id,
+        });
+        return ok(res, booking);
+    } catch (err) {
+        console.error(err);
+        internalServerError(res, err);
+    }
+};

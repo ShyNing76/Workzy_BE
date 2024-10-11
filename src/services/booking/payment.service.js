@@ -88,27 +88,42 @@ export const paypalCheckoutService = ({ booking_id, user_id }) =>
             if (booking.BookingStatuses[0].status === "cancelled")
                 return reject("Booking already cancelled");
 
-            const payment = await db.Payment.create(
-                {
+            let payment = await db.Payment.findOne({
+                where: {
                     booking_id: booking.booking_id,
-                    amount: booking.workspace_price,
-                    payment_method: "paypal",
-                    payment_date: new Date(),
                     payment_type: "Workspace-Price",
                 },
-                { transaction: t }
-            );
+            });
 
-            const transaction = await db.Transaction.create(
-                {
+            if (!payment)
+                payment = await db.Payment.create(
+                    {
+                        booking_id: booking.booking_id,
+                        amount: booking.total_price,
+                        payment_method: "paypal",
+                        payment_date: new Date(),
+                        payment_type: "Workspace-Price",
+                    },
+                    { transaction: t }
+                );
+
+            let transaction = await db.Transaction.findOne({
+                where: {
                     payment_id: payment.payment_id,
-                    status: "In-processing",
                 },
-                { transaction: t }
-            );
+            });
+
+            if (!transaction)
+                transaction = await db.Transaction.create(
+                    {
+                        payment_id: payment.payment_id,
+                        status: "In-processing",
+                    },
+                    { transaction: t }
+                );
 
             const request = new paypal.orders.OrdersCreateRequest();
-            const amount = await convertVNDToUSD(booking.workspace_price);
+            const amount = await convertVNDToUSD(booking.total_price);
 
             request.prefer("return=representation");
             request.requestBody({
@@ -227,7 +242,7 @@ export const paypalSuccessService = ({ booking_id, order_id }) =>
                 return reject(`Unexpected booking status: ${latestStatus}`);
             }
 
-            const amount = await convertVNDToUSD(booking.workspace_price);
+            const amount = await convertVNDToUSD(booking.total_price);
             const request = new paypal.orders.OrdersCaptureRequest(order_id);
             request.requestBody({
                 amount: {
@@ -247,6 +262,15 @@ export const paypalSuccessService = ({ booking_id, order_id }) =>
             });
 
             if (!payment) return reject("Payment not found");
+
+            console.log(response.result);
+            const captureId =
+                response.result.purchase_units[0].payments.captures[0].id;
+
+            await db.Payment.update(
+                { paypal_capture_id: captureId },
+                { where: { payment_id: payment.payment_id } }
+            );
 
             const transaction = await db.Transaction.create(
                 {
@@ -271,6 +295,93 @@ export const paypalSuccessService = ({ booking_id, order_id }) =>
             return resolve({
                 err: 0,
                 message: "Payment successful",
+            });
+        } catch (err) {
+            await t.rollback();
+            console.error(err);
+            return reject(err);
+        }
+    });
+
+export const refundBookingService = ({ booking_id, user_id }) =>
+    new Promise(async (resolve, reject) => {
+        const t = await db.sequelize.transaction();
+        try {
+            const customer = await db.Customer.findOne({
+                where: { user_id },
+            });
+
+            if (!customer) return reject("Customer not found");
+
+            const booking = await db.Booking.findOne({
+                where: { booking_id, customer_id: customer.customer_id },
+            });
+
+            if (!booking) return reject("Booking not found");
+
+            const payment = await db.Payment.findOne({
+                where: { booking_id },
+                raw: true,
+            });
+
+            if (!payment) return reject("Payment not found");
+
+            console.log(payment);
+
+            const transaction = await db.Transaction.findOne({
+                where: { payment_id: payment.payment_id },
+                order: [["createdAt", "DESC"]],
+                raw: true,
+            });
+
+            if (!transaction) return reject("Transaction not found");
+
+            if (transaction.status !== "Completed")
+                return reject("Transaction not completed");
+
+            const amount = await convertVNDToUSD(booking.total_price);
+
+            const refundRequest = new paypal.payments.CapturesRefundRequest(
+                payment.paypal_capture_id
+            );
+            refundRequest.requestBody({
+                amount: {
+                    currency_code: "USD",
+                    value: amount.toString(),
+                },
+            });
+
+            const response = await client
+                .execute(refundRequest)
+                .catch((error) => error);
+
+            console.log(response);
+
+            if (response.statusCode !== 201 && response.statusCode !== 422) {
+                return reject("Failed to refund PayPal order");
+            }
+
+            await db.Transaction.create(
+                {
+                    payment_id: payment.payment_id,
+                    status: "Refunded",
+                },
+                { transaction: t }
+            );
+
+            await db.BookingStatus.create(
+                {
+                    booking_id: booking_id,
+                    status: "cancelled",
+                },
+                { transaction: t }
+            );
+
+            await t.commit();
+
+            return resolve({
+                err: 0,
+                message: "Refund successful",
             });
         } catch (err) {
             await t.rollback();

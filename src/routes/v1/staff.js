@@ -1,9 +1,6 @@
 import express from "express";
 import * as controllers from "../../controllers";
-import {
-    verify_role,
-    verify_token,
-} from "../../middlewares/verifyToken";
+import { verify_role, verify_token } from "../../middlewares/verifyToken";
 
 const router = express.Router();
 
@@ -245,6 +242,24 @@ router.put(
         #swagger.security = [{
             "apiKeyAuth": []
         }]
+     */
+);
+
+router.get(
+    "/booking-status/:id",
+    verify_token,
+    verify_role(["admin", "manager", "staff"]),
+    controllers.getBookingStatusController
+    /*
+        #swagger.description = 'Endpoint to get all booking status.'
+        #swagger.summary = 'Get all booking status.'
+        #swagger.parameters['id'] = { description: 'Workspace Id.' }
+        #swagger.responses[200] = {
+            description: 'Booking status found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
      */
 );
 
