@@ -4,51 +4,7 @@ import { verify_role, verify_token } from "../../middlewares/verifyToken";
 import { createWorkspaceController } from "../../controllers";
 
 const router = express.Router();
-
-router.post(
-    "/",
-    verify_token,
-    verify_role(["manager", "admin"]),
-    controllers.createWorkspaceTypeController
-    /*
-        #swagger.description = 'Endpoint to create a workspace type.'
-        #swagger.summary = 'Create a workspace type.'
-        #swagger.requestBody = {
-            required: true,
-            content: {
-                "application/json": {
-                    schema: {
-                        type: 'object',
-                        properties: {
-                            workspace_type_name: {
-                                type: 'string',
-                                example: 'Workspace type name'
-                            },
-                            image: {
-                                type: 'string',
-                                example: 'image.jpg'
-                            },
-                            description: {
-                                type: 'string',
-                                example: 'Workspace type description'
-                            }
-                        },
-                        required: ['workspace_type_name']
-                    }
-                }
-            }
-        }
-        #swagger.responses[200] = {
-            description: 'Workspace type created.'
-        }
-        #swagger.responses[500] = {
-            description: 'Internal server error.'
-        }
-        #swagger.security = [{
-            "apiKeyAuth": []
-        }]
-     */
-);
+router.use(verify_token);
 
 router.get(
     "/",
@@ -124,10 +80,53 @@ router.get(
      */
 );
 
+router.post(
+    "/",
+    verify_role(["admin"]),
+    controllers.createWorkspaceTypeController
+    /*
+        #swagger.description = 'Endpoint to create a workspace type.'
+        #swagger.summary = 'Create a workspace type.'
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            workspace_type_name: {
+                                type: 'string',
+                                example: 'Workspace type name'
+                            },
+                            image: {
+                                type: 'string',
+                                example: 'image.jpg'
+                            },
+                            description: {
+                                type: 'string',
+                                example: 'Workspace type description'
+                            }
+                        },
+                        required: ['workspace_type_name']
+                    }
+                }
+            }
+        }
+        #swagger.responses[200] = {
+            description: 'Workspace type created.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
 router.put(
     "/:id",
-    verify_token,
-    verify_role(["manager"]),
+    verify_role(["admin"]),
     controllers.updateWorkspaceTypeController
     /*
         #swagger.description = 'Endpoint to update a workspace type.'
