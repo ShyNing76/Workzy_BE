@@ -8,7 +8,7 @@ const router = express.Router();
 router.post(
     "/",
     verify_token,
-    verify_role(["manager"]),
+    verify_role(["manager", "admin"]),
     controllers.createWorkspaceTypeController
     /*
         #swagger.description = 'Endpoint to create a workspace type.'

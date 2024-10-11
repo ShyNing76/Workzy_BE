@@ -41,6 +41,8 @@ router.get(
         #swagger.parameters['page'] = { description: 'Page number.' }
         #swagger.parameters['limit'] = { description: 'Number of items per page.' }
         #swagger.parameters['name'] = { description: 'Staff name.' }
+        #swagger.parameters['building_id'] = { description: 'Building ID.' }
+        #swagger.parameters['status'] = { description: 'Status.' }
         #swagger.responses[200] = {
             description: 'Staff found.'
         }

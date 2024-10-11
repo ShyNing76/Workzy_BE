@@ -58,13 +58,12 @@ export const createStaffService = ({password, ...data}) => new Promise(async (re
     }
 })
 
-export const getAllStaffService = ({page, limit, order, name, ...query}) => new Promise(async (resolve, reject) => {
+export const getAllStaffService = ({page, limit, order, name, building_id, status, ...query}) => new Promise(async (resolve, reject) => {
     try {
+        query.status = status ? status : {[Op.or]: [null, "active"]};
+        query.role_id = 3;
         const staffs = await db.User.findAndCountAll({
-            where: {
-                role_id: 3,
-                ...query, 
-            },
+            where: query,
             offset: handleOffset(page, limit),
             limit: handleLimit(limit),
             order: [handleSortOrder(order, "name")],
@@ -74,11 +73,15 @@ export const getAllStaffService = ({page, limit, order, name, ...query}) => new 
             include: [
                 {
                     model: db.Staff,
-                    attributes: ["staff_id"],
+                    attributes: ["staff_id", "building_id"],
+                    where: {
+                        building_id: building_id ? building_id === "null" ? {[Op.is]: null} : building_id : {[Op.or]: [null, {[Op.ne]: null}]}
+                    },
+                    required: true,
                     include: [
                         {
                             model: db.Building,
-                            attributes: ["building_id"],
+                            attributes: ["building_name"],
                         },
                     ]
                 }, 
@@ -97,6 +100,7 @@ export const getAllStaffService = ({page, limit, order, name, ...query}) => new 
             data: staffs
         });
     } catch (error) {
+        console.log(error)
         reject(error)
     }
 })
@@ -114,11 +118,12 @@ export const getStaffByIdService = (id) => new Promise(async (resolve, reject) =
             include: [
                 {
                     model: db.Staff,
-                    attributes: ["staff_id"],
+                    attributes: ["staff_id", "building_id"],
+                    required: true,
                     include: [
                         {
                             model: db.Building,
-                            attributes: ["building_id"],
+                            attributes: ["building_name"],
                         }
                     ]
                 }
