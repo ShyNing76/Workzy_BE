@@ -1,5 +1,5 @@
 "use strict";
-const {Model} = require("sequelize");
+const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
     class BookingAmenities extends Model {
@@ -28,10 +28,12 @@ module.exports = (sequelize, DataTypes) => {
             booking_id: {
                 type: DataTypes.UUID,
                 allowNull: false,
+                unique: false,
             },
             amenity_id: {
                 type: DataTypes.UUID,
                 allowNull: false,
+                unique: false,
             },
             quantity: {
                 type: DataTypes.INTEGER,

@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
             Amenity.belongsToMany(models.Booking, {
                 through: "BookingAmenities",
                 foreignKey: "amenity_id",
+                
             });
         }
     }

@@ -41,6 +41,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: true,
             },
+            paypal_capture_id: {
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
             amount: {
                 type: DataTypes.DECIMAL(10, 2),
                 defaultValue: 0,

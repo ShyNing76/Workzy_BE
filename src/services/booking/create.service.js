@@ -44,9 +44,9 @@ export const createBookingService = (data) =>
                 booking_type_id: bookingType.booking_type_id,
                 workspace_id: workspace.workspace_id,
                 workspace_price:
-                    bookingType.type === "hourly"
+                    bookingType.type === "Hourly"
                         ? workspace.price_per_hour
-                        : bookingType.type === "daily"
+                        : bookingType.type === "Daily"
                         ? workspace.price_per_day
                         : workspace.price_per_month,
                 total_price: data.total_price,
