@@ -88,6 +88,7 @@ router.post(
 
 router.post(
     "/addAmenities",
+    verify_token,
     verify_role(["customer"]),
     controllers.createAmenitiesBookingController
     /*

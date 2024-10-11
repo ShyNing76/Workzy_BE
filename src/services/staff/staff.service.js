@@ -4,7 +4,6 @@ import moment from "moment";
 import {v4} from "uuid"; 
 import {hashPassword} from "../../utils/hashPassword";
 import { handleLimit, handleOffset, handleSortOrder } from "../../utils/handleFilter";
-import { raw } from "body-parser";
 
 export const createStaffService = ({password, ...data}) => new Promise(async (resolve, reject) => {
     try {
@@ -133,6 +132,34 @@ export const getStaffByIdService = (id) => new Promise(async (resolve, reject) =
             err: 0,
             message: "Got",
             data: staff
+        });
+    } catch (error) {
+        reject(error)
+    }
+})
+
+export const getBuildingByStaffIdService = (tokenUser) => new Promise(async (resolve, reject) => {
+    try {
+        const staff = await db.Staff.findOne({
+            where: {
+                user_id: tokenUser.user_id,
+            },
+            attributes: [],
+            include: [
+                {
+                    model: db.Building,
+                    attributes: ["building_id"],
+                    required: true,
+                }
+            ],
+            raw: true,
+            nest: true
+        });
+        if(!staff) return reject("No Building Exist")
+        resolve({
+            err: 0,
+            message: "Got",
+            data: staff.Building
         });
     } catch (error) {
         reject(error)

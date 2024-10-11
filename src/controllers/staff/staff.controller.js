@@ -31,6 +31,16 @@ export const getStaffByIdController = async (req, res) => {
     }
 }
 
+export const getBuildingByStaffIdController = async (req, res) => {
+    try {
+        const response = await services.getBuildingByStaffIdService(req.user);
+        return ok(res, response)
+    } catch (error) {
+        if(error === "No Staff Exist") return badRequest(res, error);
+        internalServerError(res, error)
+    }
+}
+
 export const getAllStaffController = async (req, res) => {
     try {
         const response = await services.getAllStaffService(req.query);

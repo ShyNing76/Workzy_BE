@@ -1,7 +1,7 @@
 import db from '../../models';
 import { createWorkspaceImageService } from './workspaceImage.service';
 import {v4} from "uuid";
-import {Op} from "sequelize";
+import { Op } from "sequelize";
 import { handleLimit, handleOffset, handleSortOrder } from "../../utils/handleFilter";
 
 export const createWorkspaceService = async ({images, workspace_name, workspace_price, ...data}) => new Promise(async (resolve, reject) => {
@@ -130,44 +130,42 @@ export const deleteWorkspaceService = async (id) => new Promise(async (resolve, 
 
 export const getAllWorkspaceService = ({page, limit, order, workspace_name, office_size, min_price, max_price, workspace_type_name, ...query}) => new Promise(async (resolve, reject) => {
     try {
-        const capacity = {};
-        if (office_size)
+        if (office_size){
             switch (office_size) {
                 case 1:
-                    capacity.capacity = {[Op.lte]: 10}
+                    query.capacity = {[Op.lte]: 10}
                     break;
                 case 2:
-                    capacity.capacity = {[Op.between]: [10,20]}
+                    query.capacity = {[Op.between]: [10,20]}
                     break;
                 case 3:
-                    capacity.capacity = {[Op.between]: [20,30]}
+                    query.capacity = {[Op.between]: [20,30]}
                     break;
                 case 4:
-                    capacity.capacity = {[Op.between]: [30,40]}
+                    query.capacity = {[Op.between]: [30,40]}
                     break;
                 case 5:
-                    capacity.capacity = {[Op.between]: [40,50]}
+                    query.capacity = {[Op.between]: [40,50]}
                     break;
                 case 6:
-                    capacity.capacity = {[Op.gte]: 50}
+                    query.capacity = {[Op.gte]: 50}
                     break;
                 default:
                     break;
+            }
         }
-        const price = {};
+        console.log(query.capacity)
         if (min_price && max_price) {
-            price.price_per_hour = {[Op.between]: [min_price, max_price]}
+            query.price_per_hour = {[Op.between]: [min_price, max_price]}
         }
-        console.log(min_price, max_price)
+        if(workspace_type_name) {
+            query.workspace_type_name = {
+                [Op.substring]: workspace_type_name
+            }
+        }
+        query.status = "active";
         const workspaces = await db.Workspace.findAll({
-            where: {
-                workspace_name: {
-                    [Op.substring]: workspace_name || ""
-                },
-                ...price,
-                ...capacity,
-                ...query
-            },
+            where: query,
             offset: handleOffset(page, limit),
             limit: handleLimit(limit),
             order: [handleSortOrder(order, "workspace_name")],
@@ -200,6 +198,7 @@ export const getAllWorkspaceService = ({page, limit, order, workspace_name, offi
             data: workspaces
         });
     } catch (error) {
+        console.log(error)
         reject(error)
     }
 })

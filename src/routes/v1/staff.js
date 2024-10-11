@@ -8,6 +8,28 @@ import {
 const router = express.Router();
 
 router.get(
+    "/building",
+    verify_token,
+    controllers.getBuildingByStaffIdController
+    /*
+        #swagger.description = 'Get a building by staff ID.'
+        #swagger.summary = 'Get a building by staff ID.'
+        #swagger.responses[200] = {
+            description: 'Building found.'
+        }
+        #swagger.responses[404] = {
+            description: 'Building not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
+router.get(
     "/",
     verify_token,
     verify_role(["admin", "manager"]),
@@ -54,6 +76,7 @@ router.get(
         }]
      */
 );
+
 
 router.post(
     "/",

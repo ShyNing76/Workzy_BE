@@ -22,7 +22,8 @@ export const createAmenitiesBookingController = async (req, res) => {
         const quantities = req.body.addAmenities.map(amenity => amenity.quantity);
         console.log(amenity_ids);
         console.log(quantities);
-        const response = await services.createAmenitiesBookingService({ booking_id: req.body.booking_id, amenity_ids, quantities});
+        console.log(req.user.user_id);
+        const response = await services.createAmenitiesBookingService(req.user, { booking_id: req.body.booking_id, amenity_ids, quantities});
         return created(res, response);
     } catch (err) {
         console.log(err);
