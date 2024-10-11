@@ -336,7 +336,7 @@ export const getBookingStatusService = (id) =>
                 ],
             });
 
-            if (!bookingStatus) return reject("Workspace cannot have booking");
+            if (bookingStatus.count === 0) return reject("No bookings found for the specified workspace");
 
             const formattedBookingStatus = bookingStatus.rows.map((booking) => {
                 return {

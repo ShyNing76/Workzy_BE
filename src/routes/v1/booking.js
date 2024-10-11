@@ -47,7 +47,7 @@ router.post(
                             },
                             total_price: {
                                 type: 'number',
-                                example: 50.00
+                                example: 500000
                             }
                         }
                     }

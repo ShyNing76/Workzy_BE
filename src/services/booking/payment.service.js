@@ -130,8 +130,8 @@ export const paypalCheckoutService = ({ booking_id, user_id }) =>
                 intent: "CAPTURE",
                 application_context: {
                     shipping_preference: "NO_SHIPPING",
-                    return_url: "http://localhost:5500/frontend",
-                    cancel_url: "http://localhost:5500/frontend",
+                    return_url: "http://localhost:5173/booking/payment",
+                    cancel_url: "http://localhost:5173/",
                 },
                 purchase_units: [
                     {
