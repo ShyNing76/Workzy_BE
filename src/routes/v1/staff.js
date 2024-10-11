@@ -210,7 +210,7 @@ router.put(
     /*
         #swagger.description = 'Endpoint to assign a staff to a building.'
         #swagger.summary = 'Assign a staff to a building.'
-        #swagger.parameters['id'] = { description: 'Staff ID.' }
+        #swagger.parameters['id'] = { description: 'User ID.' }
         #swagger.requestBody = {
             required: true,
             content: {

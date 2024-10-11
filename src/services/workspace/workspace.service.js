@@ -128,40 +128,34 @@ export const deleteWorkspaceService = async (id) => new Promise(async (resolve, 
     }
 })
 
-export const getAllWorkspaceService = ({page, limit, order, workspace_name, office_size, min_price, max_price, workspace_type_name, ...query}) => new Promise(async (resolve, reject) => {
+export const getAllWorkspaceService = ({page, limit, order, workspace_name, office_size, min_price, max_price, workspace_type_name, building_id, ...query}) => new Promise(async (resolve, reject) => {
     try {
         if (office_size){
             switch (office_size) {
-                case 1:
+                case "1":
                     query.capacity = {[Op.lte]: 10}
                     break;
-                case 2:
+                case "2":
                     query.capacity = {[Op.between]: [10,20]}
                     break;
-                case 3:
+                case "3":
                     query.capacity = {[Op.between]: [20,30]}
                     break;
-                case 4:
+                case "4":
                     query.capacity = {[Op.between]: [30,40]}
                     break;
-                case 5:
+                case "5":
                     query.capacity = {[Op.between]: [40,50]}
                     break;
-                case 6:
+                case "6":
                     query.capacity = {[Op.gte]: 50}
                     break;
                 default:
                     break;
             }
         }
-        console.log(query.capacity)
         if (min_price && max_price) {
             query.price_per_hour = {[Op.between]: [min_price, max_price]}
-        }
-        if(workspace_type_name) {
-            query.workspace_type_name = {
-                [Op.substring]: workspace_type_name
-            }
         }
         query.status = "active";
         const workspaces = await db.Workspace.findAll({
@@ -176,13 +170,16 @@ export const getAllWorkspaceService = ({page, limit, order, workspace_name, offi
                 {
                     model: db.Building,
                     attributes: ["building_id"],
+                    where: {
+                        building_id: building_id ? building_id : {[Op.ne]: null}
+                    },
                     required: true,
                 }, 
                 {
                     model: db.WorkspaceType,
                     attributes: ["workspace_type_name"],
                     where: {
-                        workspace_type_name: workspace_type_name ? workspace_type_name : {[Op.substring]: ""}
+                        workspace_type_name: workspace_type_name ? workspace_type_name : {[Op.ne]: null}
                     },
                     required: true,
                 }, 

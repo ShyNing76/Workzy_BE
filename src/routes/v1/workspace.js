@@ -183,6 +183,7 @@ router.get(
         #swagger.parameters['min_price'] = { description: 'Minimum price.' }
         #swagger.parameters['max_price'] = { description: 'Maximum price.' }
         #swagger.parameters['workspace_type_name'] = { description: 'Workspace type name.' }
+        #swagger.parameters['building_id'] = { description: 'Building ID.' }
         #swagger.responses[200] = {
             description: 'Workspace found.'
         }
