@@ -15,15 +15,13 @@ export const createAmenitiesBookingController = async (req, res) => {
                     amenity_id: Joi.string().uuid().required(),
                     quantity: Joi.number().integer().min(1).required()
                 })
-            ).required()
+            ).required(),
+            total_amenities_price: Joi.number().min(0).required()
         }).validate(req.body).error;
         if (error) return badRequest(res, error.details[0].message);
         const amenity_ids = req.body.addAmenities.map(amenity => amenity.amenity_id);
         const quantities = req.body.addAmenities.map(amenity => amenity.quantity);
-        console.log(amenity_ids);
-        console.log(quantities);
-        console.log(req.user.user_id);
-        const response = await services.createAmenitiesBookingService(req.user, { booking_id: req.body.booking_id, amenity_ids, quantities});
+        const response = await services.createAmenitiesBookingService(req.user, req.body.total_amenities_price, { booking_id: req.body.booking_id, amenity_ids, quantities});
         return created(res, response);
     } catch (err) {
         console.log(err);

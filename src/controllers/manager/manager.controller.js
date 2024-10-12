@@ -57,6 +57,7 @@ export const deleteManagerController = async (req, res) => {
         const response = await services.deleteManagerService(req.params.id);
         return ok(res, response)
     } catch (error) {
+        if(error === "Manager not found" || error === "Building not found") return badRequest(res, error);
         internalServerError(res, error)
     }
 }

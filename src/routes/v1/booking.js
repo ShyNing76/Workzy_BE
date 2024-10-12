@@ -136,6 +136,10 @@ router.post(
                                         quantity: 2
                                     }
                                 ]
+                            },
+                            total_amenities_price: {
+                                type: 'number',
+                                example: 500000
                             }
                         }
                     }

@@ -136,7 +136,7 @@ export const getStaffByIdService = (id) =>
                     {
                         model: db.Staff,
                         attributes: ["staff_id", "building_id"],
-                    required: true,
+                        required: true,
                         include: [
                             {
                                 model: db.Building,
@@ -240,6 +240,7 @@ export const updateStaffService = (id, data) =>
 
 export const deleteStaffService = (id) =>
     new Promise(async (resolve, reject) => {
+        const t = await db.sequelize.transaction();
         try {
             const [updatedRowsCount] = await db.User.update(
                 {
@@ -251,14 +252,25 @@ export const deleteStaffService = (id) =>
                         role_id: 3,
                         status: "active",
                     },
-                }
+                },
+                { transaction: t }
             );
             if (updatedRowsCount === 0) return reject("No Staff Exist");
+            const removeBuilding = await db.Staff.update({
+                building_id: null
+            }, {
+                where: { user_id: id },
+                transaction: t
+            })
+            if(!removeBuilding) return reject("Failed to remove building")
+            await t.commit();
             resolve({
                 err: 0,
                 message: "Staff deleted",
             });
         } catch (error) {
+            console.log(error);
+            await t.rollback();
             reject(error);
         }
     });

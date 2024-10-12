@@ -211,7 +211,7 @@ export const deleteManagerService = (id) => new Promise(async (resolve, reject) 
             return reject("Manager not found");
         }
 
-        manager.setStatus("inactive");
+        manager.status = "inactive";
         const building = await db.Building.update({
             manager_id: null
         }, {
@@ -219,6 +219,9 @@ export const deleteManagerService = (id) => new Promise(async (resolve, reject) 
                 manager_id: manager.Manager.manager_id
             }
         });
+        if(!building) {
+            return reject("Building not found");
+        }
 
         await manager.save();
 

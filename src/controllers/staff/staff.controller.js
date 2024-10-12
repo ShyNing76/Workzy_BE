@@ -76,7 +76,7 @@ export const deleteStaffController = async (req, res) => {
         const response = await services.deleteStaffService(req.params.id);
         return ok(res, response)    
     } catch (error) {
-        if(error === "No Staff Exist") return badRequest(res, error);
+        if(error === "No Staff Exist" || error === "Failed to remove building") return badRequest(res, error);
         internalServerError(res, error)
     }
 }
