@@ -8,3 +8,4 @@ export * from './staff';
 export * from './user';
 export * from './workspace';
 export * from './booking';
+export * from './voucher';

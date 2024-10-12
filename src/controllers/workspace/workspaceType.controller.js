@@ -60,3 +60,15 @@ export const updateWorkspaceTypeController = async (req, res) => {
         internalServerError(res, error);
     }
 };
+
+export const deleteWorkspaceTypeController = async (req, res) => {
+    try {
+        const response = await services.deleteWorkspaceTypeService(req.params.id);
+        return ok(res, response);
+    } catch (error) {
+        if (error === "Workspace type not found") {
+            return badRequest(res, error);
+        }
+        internalServerError(res, error);
+    }
+}

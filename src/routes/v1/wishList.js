@@ -1,13 +1,13 @@
 import express from "express";
 import * as controllers from "../../controllers";
-import {verify_token} from "../../middlewares/verifyToken";
+import {verify_token, verify_role} from "../../middlewares/verifyToken";
 
 const router = express.Router();
 
-router.post("/", verify_token, controllers.createWishListController
+router.post("/", verify_token, verify_role(["customer"]), controllers.createWishListController
     /*
-        #swagger.description = 'Endpoint to add an item to the user\'s wishlist.'
-        #swagger.summary = 'Add an item to wishlist.'
+        #swagger.description = 'Endpoint to create a wishlist.'
+        #swagger.summary = 'Create a wishlist.'
         #swagger.requestBody = {
             required: true,
             content: {
@@ -15,18 +15,15 @@ router.post("/", verify_token, controllers.createWishListController
                     schema: {
                         type: 'object',
                         properties: {
-                            workspace_ids: {
-                                type: 'array',
-                                items: {
-                                    type: 'string',
-                                    format: 'uuid'
-                                },
-                                example: ['0c2cfee2-d9b7-4215-baaf-f40632e7de2c', '621ca0c8-e3ad-4bd8-9df5-eafe998b5b04']
-                            },
-                            customer_id: {
+                            workspace_id: {
                                 type: 'string',
                                 format: 'uuid',
-                                example: 'workspace123'
+                                example: '3e8d0be4-27a1-4496-a306-b66ed86bd8eb'
+                            },
+                            user_id: {
+                                type: 'string',
+                                format: 'uuid',
+                                example: 'b85f4347-9fc8-4722-b14c-7d21d32d50be'
                             },
                         }
                     }
@@ -34,7 +31,7 @@ router.post("/", verify_token, controllers.createWishListController
             }
         }
         #swagger.responses[201] = {
-            description: 'Workspace added to wishlist successfully.'
+            description: 'Wishlist created successfully.'
         }
         #swagger.responses[400] = {
             description: 'Invalid data.'
@@ -48,35 +45,63 @@ router.post("/", verify_token, controllers.createWishListController
     */
 );
 
-router.delete("/", verify_token, controllers.deleteWishListController
+router.delete("/:wishlist_id", verify_token, verify_role(["customer"]), controllers.deleteWishListController
     /*
         #swagger.description = 'Endpoint to remove an item from the user\'s wishlist.'
         #swagger.summary = 'Remove an item from wishlist.'
-        #swagger.requestBody = {
+        #swagger.parameters['wishlist_id'] = {
+            in: 'path',
+            description: 'wishlist_id.',
             required: true,
-            content: {
-                "application/json": {
-                    schema: {
-                        type: 'object',
-                        properties: {
-                            wishlist_id: {
-                                type: 'array',
-                                items: {
-                                    type: 'string',
-                                    format: 'uuid'
-                                },
-                                example: ['0c2cfee2-d9b7-4215-baaf-f40632e7de2c', '621ca0c8-e3ad-4bd8-9df5-eafe998b5b04']
-                            },
-                        }
-                    }
-                }
-            }
+            type: 'string',
+            format: 'uuid'
         }
         #swagger.responses[200] = {
             description: 'Wishlist removed successfully.'
         }
         #swagger.responses[404] = {
             description: 'Item not found in wishlist.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+    */
+);
+
+router.get("/", verify_token, verify_role(["staff", "admin"]), controllers.getAllWishListController
+    /*
+        #swagger.description = 'Endpoint to get all wishlist.'
+        #swagger.summary = 'Get all wishlist.'
+        #swagger.parameters['order'] = { description: 'Order by name, status.' }
+        #swagger.parameters['page'] = { description: 'Page number.' }
+        #swagger.parameters['limit'] = { description: 'Number of items per page.' }
+        #swagger.responses[200] = {
+            description: 'Wishlist fetched successfully.'
+        }
+        #swagger.responses[400] = {
+            description: 'Invalid data.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+    */
+);
+
+router.get("/mywishlist", verify_token, verify_role(["customer"]), controllers.getWishListByUserIdController
+    /*
+        #swagger.description = 'Endpoint to get all wishlist of a customer.'
+        #swagger.summary = 'Get all wishlist of a customer.'
+        #swagger.responses[200] = {
+            description: 'Wishlist fetched successfully.'
+        }
+        #swagger.responses[400] = {
+            description: 'Invalid data.'
         }
         #swagger.responses[500] = {
             description: 'Internal server error.'

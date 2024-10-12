@@ -391,7 +391,7 @@ export const refundBookingService = ({ booking_id, user_id }) =>
     });
 
 // Amenities Booking
-export const paypalAmenitiesCheckoutService = ({ booking_id, user_id }) =>
+export const paypalCheckoutAmenitiesService = ({ booking_id, user_id }) =>
     new Promise(async (resolve, reject) => {
         const t = await db.sequelize.transaction();
         try {
@@ -425,48 +425,49 @@ export const paypalAmenitiesCheckoutService = ({ booking_id, user_id }) =>
                             exclude: [
                                 "createdAt",
                                 "updatedAt",
-                                    "booking_type_id",
-                                ],
-                            },
-                            required: true,
+                                "booking_type_id",
+                            ],
+                        },
+                        required: true,
                     },
                     {
-                            model: db.BookingStatus,
-                            as: "BookingStatuses",
-                            attributes: {
-                                exclude: [
+                        model: db.BookingStatus,
+                        as: "BookingStatuses",
+                        attributes: {
+                            exclude: [
                                 "createdAt",
                                 "updatedAt",
                                 "booking_status_id",
                                 "booking_id",
-                                ],
-                            },
-                            required: true,
+                            ],
                         },
+                        required: true,
+                    },
                     ],
                 })
             ]);
             if (!customer || !booking) return reject(!customer ? "Customer not found" : "Booking not found");
 
-            if (booking.BookingStatuses[0].status !== "in-processing")
-                return reject("Booking must be in-processing");
+            if (booking.BookingStatuses[0].status !== "in-process")
+                return reject("Booking must be in-process");
             if (booking.BookingStatuses[0].status === "cancelled")
                 return reject("Booking already cancelled");
 
             const [payment, created] = await db.Payment.findOrCreate({
                 where: {
                     booking_id: booking.booking_id,
-                    payment_type: "Workspace-Price",
+                    payment_type: "Amenities-Price",
                 },
                 defaults: {
                     booking_id: booking.booking_id,
-                    amount: booking.total_price,
+                    amount: booking.total_amenities_price,
                     payment_method: "paypal",
                     payment_date: new Date(),
-                    payment_type: "Workspace-Price",
+                    payment_type: "Amenities-Price",
                 }, 
                 transaction: t
             });
+            if(!created) return reject("Payment already exists");
 
             const [transaction, createdTransaction] = await db.Transaction.findOrCreate({
                 where: {
@@ -479,11 +480,11 @@ export const paypalAmenitiesCheckoutService = ({ booking_id, user_id }) =>
                 transaction: t
             });
 
-            if(!transaction || !createdTransaction) return reject("Transaction not found");
+            if(!createdTransaction) return reject("Transaction not found");
 
 
             const request = new paypal.orders.OrdersCreateRequest();
-            const amount = await convertVNDToUSD(booking.total_amenities_booking_price);
+            const amount = await convertVNDToUSD(booking.total_amenities_price);
 
             request.prefer("return=representation");
             request.requestBody({
@@ -507,16 +508,14 @@ export const paypalAmenitiesCheckoutService = ({ booking_id, user_id }) =>
                         },
                         reference_id: booking.booking_id,
                         description: `Booking ID: ${booking.booking_id}`,
-                        items: [
-                            {
-                                name: booking.Workspace.workspace_name,
-                                quantity: 1,
+                        items: booking.BookingAmenities.map(amenity => ({
+                                name: amenity.amenity_name,
+                                quantity: amenity.quantity,
                                 unit_amount: {
                                     currency_code: "USD",
-                                    value: amount,
+                                    value: convertVNDToUSD(amenity.price),
                                 },
-                            },
-                        ],
+                        })),
                     },
                 ],
             });
@@ -584,25 +583,11 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
                 return reject("Booking status not found");
             }
 
-            const latestStatus = booking.BookingStatuses[0].status;
+            if(booking.BookingStatuses[0].status !== "in-process") return reject("Booking must be in-process");
 
-            if (!["confirmed", "cancelled", "paid"].includes(latestStatus)) {
-                return reject(`Invalid booking status: ${latestStatus}`);
-            }
+            if(booking.BookingStatuses[0].status === "cancelled") return reject("Booking already cancelled");
 
-            if (latestStatus === "cancelled") {
-                return reject("Booking has been cancelled");
-            }
-
-            if (latestStatus === "paid") {
-                return reject("Booking has already been paid");
-            }
-
-            if (latestStatus !== "confirmed") {
-                return reject(`Unexpected booking status: ${latestStatus}`);
-            }
-
-            const amount = await convertVNDToUSD(booking.total_price);
+            const amount = await convertVNDToUSD(booking.total_amenities_price);
             const request = new paypal.orders.OrdersCaptureRequest(order_id);
             request.requestBody({
                 amount: {
@@ -629,7 +614,7 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
 
             await db.Payment.update(
                 { paypal_capture_id: captureId },
-                { where: { payment_id: payment.payment_id } }
+                { where: { payment_id: payment.payment_id }, transaction: t }
             );
 
             const transaction = await db.Transaction.create(
@@ -640,15 +625,7 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
                 { transaction: t }
             );
 
-            if (!transaction) return reject("Transaction not found");
-
-            await db.BookingStatus.create(
-                {
-                    booking_id: booking_id,
-                    status: "paid",
-                },
-                { transaction: t }
-            );
+            if (!transaction) return reject("Transaction created failed");
 
             await t.commit();
 

@@ -9,7 +9,7 @@ export const createBookingService = (data) =>
             const [customer, workspace, bookingType] = await Promise.all([
                 db.Customer.findOne({ where: { user_id: data.user_id } }),
                 db.Workspace.findOne({
-                    where: { workspace_id: data.workspace_id },
+                    where: { workspace_id: data.workspace_id, status: "active" },
                 }),
                 db.BookingType.findOne({ where: { type: data.type } }),
             ]);

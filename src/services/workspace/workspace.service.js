@@ -128,7 +128,7 @@ export const deleteWorkspaceService = async (id) => new Promise(async (resolve, 
     }
 })
 
-export const getAllWorkspaceService = ({page, limit, order, workspace_name, office_size, min_price, max_price, workspace_type_name, building_id, ...query}) => new Promise(async (resolve, reject) => {
+export const getAllWorkspaceService = ({page, limit, order, workspace_name, office_size, min_price, max_price, workspace_type_name, building_id, status, ...query}) => new Promise(async (resolve, reject) => {
     try {
         if (office_size){
             switch (office_size) {
@@ -157,7 +157,7 @@ export const getAllWorkspaceService = ({page, limit, order, workspace_name, offi
         if (min_price && max_price) {
             query.price_per_hour = {[Op.between]: [min_price, max_price]}
         }
-        query.status = "active";
+        query.status = status ? status : {[Op.ne]: null};
         const workspaces = await db.Workspace.findAll({
             where: query,
             offset: handleOffset(page, limit),
@@ -188,10 +188,10 @@ export const getAllWorkspaceService = ({page, limit, order, workspace_name, offi
             nest: true,
             distinct: true,
         });
-
+        if(workspaces.length === 0) return reject("No Workspace Exist")
         resolve({
-            err: workspaces.length > 0 ? 0 : 1,
-            message: workspaces.length > 0 ? "Got" : "No Workspace Exist",
+            err: 0,
+            message: "Got Workspace successfully",
             data: workspaces
         });
     } catch (error) {

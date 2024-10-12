@@ -545,5 +545,122 @@ router.post(
         }
     */
 );
+// amenities payment
+router.post(
+    "/checkout-amenities/paypal",
+    verify_role(["customer"]),
+    controllers.paypalCheckoutAmenitiesController
+    /*
+        #swagger.description = 'Initiate PayPal checkout for amenities booking.'
+        #swagger.summary = 'PayPal Checkout Amenities'
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            booking_id: {
+                                type: 'string',
+                                format: 'uuid',
+                                example: '123e4567-e89b-12d3-a456-426614174000',
+                                description: 'Booking ID'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        #swagger.responses[200] = {
+            description: 'PayPal checkout initiated successfully',
+            schema: {
+                err: 0,
+                message: 'PayPal checkout initiated successfully',
+                data: {
+                    approval_url: 'https://www.paypal.com/checkoutnow?token=EC-1234567890'
+                }
+            }
+        }
+        #swagger.responses[400] = {
+            description: 'Bad request',
+            schema: {
+                err: 1,
+                message: 'Invalid input data'
+            }
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error',
+            schema: {
+                err: 1,
+                message: 'An error occurred while processing your request'
+            }
+        }
+    */
+);
 
+router.post(
+    "/checkout-amenities/paypal/success",
+    verify_role(["customer"]),
+    controllers.paypalAmenitiesSuccessController
+    /*
+        #swagger.description = 'Handle PayPal success payment for amenities booking.'
+        #swagger.summary = 'PayPal Success Payment Amenities'
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            booking_id: {
+                                type: 'string',
+                                format: 'uuid',
+                                example: '123e4567-e89b-12d3-a456-426614174000',
+                                description: 'Booking ID'
+                            },
+                            order_id: {
+                                type: 'string',
+                                format: 'uuid',
+                                example: '123e4567-e89b-12d3-a456-426614174000',
+                                description: 'Order ID'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        #swagger.responses[200] = {
+            description: 'Payment successful',
+            schema: {
+                err: 0,
+                message: 'Payment successful',
+                data: {
+                    booking_id: '123e4567-e89b-12d3-a456-426614174000',
+                    payment_id: '123e4567-e89b-12d3-a456-426614174000',
+                    payment_status: 'COMPLETED'
+                }
+            }
+        }
+        #swagger.responses[400] = {
+            description: 'Bad request',
+            schema: {
+                err: 1,
+                message: 'Invalid input data'
+            }
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error',
+            schema: {
+                err: 1,
+                message: 'An error occurred while processing your request'
+            }
+        }
+    */
+);
 module.exports = router;

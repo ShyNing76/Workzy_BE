@@ -12,7 +12,8 @@ export const createAmenitiesBookingService = (tokenUser, total_amenities_price, 
             where: {
                  amenity_id: {
                     [Op.in]: amenity_ids
-                }
+                },
+                status: "active"
             }
         }),
         db.Booking.findOne({ 

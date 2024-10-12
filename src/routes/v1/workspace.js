@@ -1,7 +1,6 @@
 import express from "express";
 import * as controllers from "../../controllers";
 import {
-    verify_admin,
     verify_role,
     verify_token,
 } from "../../middlewares/verifyToken";
@@ -184,6 +183,7 @@ router.get(
         #swagger.parameters['max_price'] = { description: 'Maximum price.' }
         #swagger.parameters['workspace_type_name'] = { description: 'Workspace type name.' }
         #swagger.parameters['building_id'] = { description: 'Building ID.' }
+        #swagger.parameters['status'] = { description: 'Status.' }
         #swagger.responses[200] = {
             description: 'Workspace found.'
         }

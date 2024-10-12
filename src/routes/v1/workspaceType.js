@@ -179,4 +179,31 @@ router.put(
      */
 );
 
+router.delete(
+    "/:id",
+    verify_token,
+    verify_role(["admin"]),
+    controllers.deleteWorkspaceTypeController
+    /*
+        #swagger.description = 'Endpoint to delete a workspace type.'
+        #swagger.summary = 'Delete a workspace type.'
+        #swagger.parameters['id'] = {
+            description: 'Workspace type id',
+            required: true
+        }
+        #swagger.responses[200] = {
+            description: 'Workspace type deleted.'
+        }
+        #swagger.responses[404] = {
+            description: 'Workspace type not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
 module.exports = router;

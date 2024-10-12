@@ -122,3 +122,42 @@ export const updateWorkspaceTypeService = async ({id}, data) => new Promise(asyn
         reject(error);
     }
 });
+
+export const deleteWorkspaceTypeService = async (id) => new Promise(async (resolve, reject) => {
+    const t = await db.sequelize.transaction();
+    try {
+        const workspaceType = await db.WorkspaceType.update({
+                status: "inactive"
+            }, {
+                where: {
+                    workspace_type_id: id
+                },
+                transaction: t
+            }
+        ); 
+        const workspace = await db.Workspace.update({
+            status: "inactive"
+        }, {
+            where: {
+                workspace_type_id: id
+            },
+            transaction: t
+        });
+
+        if (!workspaceType) {
+            return reject("Workspace type not found");
+        }
+        if(!workspace) {
+            return reject("Workspace not found");
+        }
+        await t.commit();
+
+        resolve({
+            err: 0,
+            message: "Workspace type deleted successfully"
+        });
+    } catch (error) {
+        await t.rollback();
+        reject(error);
+    }
+});
