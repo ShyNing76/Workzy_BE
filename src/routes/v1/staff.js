@@ -263,4 +263,43 @@ router.get(
      */
 );
 
+router.put(
+    "/change-status/:booking_id",
+    verify_token,
+    verify_role(["staff"]),
+    controllers.changeBookingStatusController
+    /*
+        #swagger.description = 'Endpoint to change booking status.'
+        #swagger.summary = 'Change booking status.'
+        #swagger.parameters['booking_id'] = { description: 'Booking Id.' }
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            status: {
+                                type: 'string',
+                                enum: ['paid', 'check-in', 'in-process', 'check-out', 'check-amenities', 'completed', 'cancelled'],
+                                example: 'paid'
+                            }
+                        },
+                        required: ['status']
+                    }
+                }
+            }
+        }
+        #swagger.responses[200] = {
+            description: 'Booking status changed successfully.'
+        }
+        #swagger.responses[400] = {
+            description: 'Bad request.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+     */
+);
+
 module.exports = router;

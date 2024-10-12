@@ -359,3 +359,46 @@ export const getBookingStatusService = (id) =>
             reject(error);
         }
     });
+
+export const changeBookingStatusService = (bookingId, status) => new Promise(async (resolve, reject) => {
+    try {
+        const bookingStatus = await db.BookingStatus.findOne({
+            where: {
+                booking_id: bookingId
+            },
+            order: [["createdAt", "DESC"]],
+            limit: 1,
+            raw: true,
+            nest: true
+        })
+       
+        if (!bookingStatus) return reject("Booking not found")
+
+        const statusTransitions = {
+            "paid": "check-in",
+            "check-in": "in-process",
+            "in-process": "check-out",
+            "check-out": "check-amenities",
+            "check-amenities": "completed"
+        };
+
+        let changeStatus;
+        if (statusTransitions[bookingStatus.status] === status) {
+            changeStatus = await db.BookingStatus.create({
+                booking_status_id: v4(),
+                booking_id: bookingId,
+                status: statusTransitions[bookingStatus.status]
+            });
+        }
+
+        if(!changeStatus) return reject("Failed to update booking status")
+
+        resolve({
+            err: 0,
+            message: "Booking status updated successfully"
+        })
+    } catch (error) {
+        console.log(error)
+        reject(error)
+    }
+})
