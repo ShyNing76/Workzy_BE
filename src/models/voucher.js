@@ -2,56 +2,61 @@
 const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-    class BookingAmenities extends Model {
+    class Voucher extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            BookingAmenities.hasMany(models.Booking, {
-                foreignKey: "booking_id",
-            });
-            BookingAmenities.hasMany(models.Amenity, {
-                foreignKey: "amenity_id",
-            });
+            Voucher.hasMany(models.Booking, { foreignKey: "voucher_id" });
         }
     }
 
-    BookingAmenities.init(
+    Voucher.init(
         {
-            booking_amenities_id: {
+            voucher_id: {
                 type: DataTypes.UUID,
                 defaultValue: DataTypes.UUIDV4,
                 primaryKey: true,
             },
-            booking_id: {
-                type: DataTypes.UUID,
+            voucher_name: {
+                type: DataTypes.STRING,
                 allowNull: false,
-                unique: false,
             },
-            amenity_id: {
-                type: DataTypes.UUID,
+            voucher_code: {
+                type: DataTypes.STRING,
                 allowNull: false,
-                unique: false,
+            },
+            decription: {
+                type: DataTypes.STRING,
+                defaultValue: "",
+            },
+            discount: {
+                type: DataTypes.FLOAT,
+                defaultValue: 0.1,
             },
             quantity: {
                 type: DataTypes.INTEGER,
                 defaultValue: 1,
             },
-            price: {
-                type: DataTypes.DECIMAL(10, 2),
-                defaultValue: 0.0,
+            expired_date: {
+                type: DataTypes.DATE,
+                defaultValue: new Date(),
+            },
+            status: {
+                type: DataTypes.ENUM("active", "inactive"),
+                defaultValue: "inactive",
             },
         },
         {
             sequelize,
-            modelName: "BookingAmenities",
-            tableName: "BookingAmenities",
+            modelName: "Voucher",
+            tableName: "Voucher",
             timestamps: true,
             underscored: true,
         }
     );
 
-    return BookingAmenities;
+    return Voucher;
 };

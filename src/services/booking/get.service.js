@@ -113,7 +113,7 @@ export const getAllBookingsService = ({
                         where: statusCondition,
                     },
                 ],
-                order: handleSortOrder(order, "start_time_date"),
+                order: [handleSortOrder(order, "start_time_date")],
                 limit: handleLimit(limit),
                 offset: handleLimit(page, limit),
                 attributes: {
