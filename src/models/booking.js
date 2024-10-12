@@ -48,11 +48,15 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.UUID,
                 allowNull: true,
             },
-            total_amenities_price: {
+            workspace_price: {
                 type: DataTypes.DECIMAL(10, 2),
                 defaultValue: 0.0,
             },
-            workspace_price: {
+            total_workspace_price: {
+                type: DataTypes.DECIMAL(10, 2),
+                defaultValue: 0.0,
+            },
+            total_amenities_price: {
                 type: DataTypes.DECIMAL(10, 2),
                 defaultValue: 0.0,
             },

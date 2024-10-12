@@ -34,7 +34,12 @@ module.exports = (sequelize, DataTypes) => {
                 defaultValue: DataTypes.NOW,
             },
             payment_type: {
-                type: DataTypes.ENUM("Workspace-Price", "Full", "Refund"),
+                type: DataTypes.ENUM(
+                    "Workspace-Price",
+                    "Amenities-Price",
+                    "Broken-Price",
+                    "Refund"
+                ),
                 defaultValue: "Workspace-Price",
             },
             paypal_order_id: {

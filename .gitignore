@@ -13,3 +13,7 @@ Dockerfile
 /.vscode
 /certs/*.pem
 /log
+/dist
+.dockerignore
+Dockerfile
+docker-compose.yml
