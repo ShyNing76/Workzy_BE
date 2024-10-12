@@ -115,7 +115,7 @@ export const getAllBookingsService = ({
                 ],
                 order: [handleSortOrder(order, "start_time_date")],
                 limit: handleLimit(limit),
-                offset: handleLimit(page, limit),
+                offset: handleOffset(page, limit),
                 attributes: {
                     exclude: ["createdAt", "updatedAt"],
                 },
