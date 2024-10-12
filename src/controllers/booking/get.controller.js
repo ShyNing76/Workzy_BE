@@ -13,6 +13,8 @@ export const getAllBookingsController = async (req, res) => {
         });
         return ok(res, bookings);
     } catch (err) {
+        const knownErrors = ["No bookings found"];
+        if (knownErrors.includes(err)) return badRequest(res, err);
         console.error(err);
         internalServerError(res);
     }

@@ -121,7 +121,8 @@ export const getAllBookingsService = ({
                 },
             });
 
-            if (!bookings) return reject("No bookings found");
+            if (!bookings || bookings.count === 0)
+                return reject("No bookings found");
 
             return resolve({
                 err: 0,
