@@ -413,9 +413,8 @@ export const changeBookingStatusService = (bookingId, status) => new Promise(asy
        
         if (!bookingStatus) return reject("Booking not found")
 
-        const statusTransitions = {
-            "paid": "check-in",
-            "check-in": "in-process",
+        let statusTransitions = {
+            "paid": "in-process",
             "in-process": "check-out",
             "check-out": "check-amenities",
             "check-amenities": "completed"

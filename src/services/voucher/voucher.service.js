@@ -5,6 +5,10 @@ import { Op } from "sequelize";
 
 export const createVoucherService = ({voucher_name, voucher_code, description, discount, quantity, expired_date}) => new Promise(async (resolve, reject) => {
     try {
+        const voucherCodeAlreadyExists = await db.Voucher.findOne({where: {voucher_code: voucher_code}});
+        if(voucherCodeAlreadyExists) return reject("Voucher code already exists");
+        const voucherNameAlreadyExists = await db.Voucher.findOne({where: {voucher_name: voucher_name}});
+        if(voucherNameAlreadyExists) return reject("Voucher name already exists");
         const [voucher, created] = await db.Voucher.findOrCreate({
             where: {
                 voucher_code : voucher_code
@@ -80,6 +84,12 @@ export const updateVoucherService = (voucher_id, {voucher_name, voucher_code, de
         if(quantity) updatedColumns.quantity = quantity;
         if(expired_date) updatedColumns.expired_date = expired_date;
         if(status) updatedColumns.status = status;
+
+        const voucherNameAlreadyExists = await db.Voucher.findOne({where: {voucher_name: voucher_name, voucher_id: {[Op.ne]: voucher_id}}});
+        if(voucherNameAlreadyExists) return reject("Voucher name already exists");
+        const voucherCodeAlreadyExists = await db.Voucher.findOne({where: {voucher_code: voucher_code, voucher_id: {[Op.ne]: voucher_id}}});
+        if(voucherCodeAlreadyExists) return reject("Voucher code already exists");
+
         const [updated, data] = await db.Voucher.update(updatedColumns, {where: {voucher_id}, returning: true});
         if(!updated) return reject("Update voucher failed");
         resolve({

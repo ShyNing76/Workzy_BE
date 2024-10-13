@@ -47,6 +47,8 @@ export const createAmenitiesBookingService = (tokenUser, total_amenities_price, 
         return db.BookingAmenities.create(bookingAmenity, {transaction: t});
       });
       await Promise.all(bookingAmenities);
+      const totalAmenitiesPrice = await db.BookingAmenities.sum("price", {where: {booking_id: booking.booking_id}});
+      if(total_amenities_price !== totalAmenitiesPrice) return reject("Total amenities price mismatch");
       booking.total_amenities_price = parseInt(total_amenities_price)
       await booking.save({transaction: t});           
       await t.commit();

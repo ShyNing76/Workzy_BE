@@ -139,7 +139,7 @@ router.put("/:voucher_id", verify_token, verify_role(["admin"]), controllers.upd
                                 type: 'float',
                                 example: '0.1'
                             },
-                            description: {
+                            quantity: {
                                 type: 'number',
                                 example: '10'
                             },

@@ -28,6 +28,7 @@ export const createAmenitiesBookingController = async (req, res) => {
         const knownErrors = new Set([
             "Error associating amenities with booking",
             "No valid amenities found",
+            "Total amenities price mismatch",
             "Booking not found",
         ]);
         if (knownErrors.has(err)) return badRequest(res, err);
