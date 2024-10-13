@@ -71,7 +71,7 @@ export const createStaffService = ({ password, ...data }) =>
 
 export const getAllStaffService = ({page, limit, order, name, building_id, status, ...query}) => new Promise(async (resolve, reject) => {
     try {
-        query.status = status ? status : {[Op.or]: [null, "active"]};
+        query.status = status ? status : {[Op.ne]: null};
         query.role_id = 3;
         const staffs = await db.User.findAndCountAll({
             where: query,
