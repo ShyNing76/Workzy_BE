@@ -101,6 +101,21 @@ export const assignStaffToBuildingController = async (req, res) => {
     }
 }
 
+export const removeStaffFromBuildingController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            id: Joi.string().uuid().required()
+        }).validate({id: req.params.id}).error;
+        if (error) return badRequest(res, error);
+        const response = await services.removeStaffFromBuildingService(req.params.id);
+        return ok(res, response)
+    } catch (error) {
+        if(error === "Staff is not exist"
+            || error === "Failed to remove staff from building") return badRequest(res, error);
+        internalServerError(res, error)
+    }
+}
+
 export const getBookingStatusController = async (req, res) => {
     try {
         const error = Joi.object({

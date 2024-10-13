@@ -218,8 +218,9 @@ router.put(
                         type: 'object',
                         properties: {
                             building_id: {
-                                type: 'integer',
-                                example: 1
+                                type: 'string',
+                                format: 'uuid',
+                                example: '123e4567-e89b-12d3-a456-426614174000'
                             }
                         },
                         required: ['building_id']
@@ -234,6 +235,33 @@ router.put(
             description: 'Invalid data.'
         }
         #swagger.responses[404] = {
+            description: 'Staff not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
+router.put(
+    "/unassign/:id",
+    verify_token,
+    verify_role(["admin", "manager"]),
+    controllers.removeStaffFromBuildingController
+    /*
+        #swagger.description = 'Endpoint to unassign a staff from a building.'
+        #swagger.summary = 'Unassign a staff from a building.'
+        #swagger.parameters['id'] = { description: 'User ID.' }
+        #swagger.responses[200] = {
+            description: 'Staff unassigned successfully.'
+        }
+        #swagger.responses[400] = {
+            description: 'Invalid data.'
+        }
+        #swagger.responses[404] = { 
             description: 'Staff not found.'
         }
         #swagger.responses[500] = {

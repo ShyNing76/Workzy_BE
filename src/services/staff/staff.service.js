@@ -1,5 +1,5 @@
 import db from "../../models";
-import { Op, or } from "sequelize";
+import { Op } from "sequelize";
 import moment from "moment";
 import { v4 } from "uuid";
 import { hashPassword } from "../../utils/hashPassword";
@@ -277,8 +277,9 @@ export const deleteStaffService = (id) =>
 
 export const assignStaffToBuildingService = (id, building_id) =>
     new Promise(async (resolve, reject) => {
+        const t = await db.sequelize.transaction();
         try {
-            const [staff, isBuildingExist, isStaffAlreadyAssigned] =
+            const [staff, isBuildingExist] =
                 await Promise.all([
                     db.User.findOne({
                         where: {
@@ -305,28 +306,54 @@ export const assignStaffToBuildingService = (id, building_id) =>
                             building_id: building_id,
                         },
                     }),
-                    db.Staff.findOne({
-                        where: {
-                            building_id: building_id,
-                        },
-                    }),
+                    
                 ]);
             if (!staff || staff.status == "inactive")
                 return reject("Staff is not exist");
             if (!isBuildingExist) return reject("Building is not exist");
-            if (isStaffAlreadyAssigned)
-                return reject("Staff is already assigned to this building");
 
+            if (staff.Staff.building_id === building_id) return reject("Staff is already assigned to this building");
+
+            if(staff.Staff.building_id) return reject("Building already has a staff")
+            
+            const oldStaffOfBuilding = await db.Staff.update({
+                    building_id: null
+                }, {
+                    where: { building_id: building_id },
+                    transaction: t
+                });
+            if (!oldStaffOfBuilding) return reject("Failed to remove old staff of building")
             staff.Staff.building_id = building_id;
-            await staff.Staff.save();
+            await staff.Staff.save({ transaction: t });
+            await t.commit();
             resolve({
                 err: 0,
                 message: "Staff updated successfully!",
             });
         } catch (error) {
+            await t.rollback();
             reject(error);
         }
     });
+
+export const removeStaffFromBuildingService = (id) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const removedStaff = await db.Staff.update({
+                building_id: null
+            }, {
+                where: { user_id: id , building_id: {[Op.ne]: null}},
+            })
+            if (removedStaff[0] === 0) return reject("Failed to remove staff from building || Staff is not assigned to any building")
+            resolve({
+                err: 0,
+                message: "Staff removed from building successfully"
+            })
+        } catch (error) {
+            console.log(error)
+            reject(error);
+        }
+    })
 
 export const getBookingStatusService = (id) =>
     new Promise(async (resolve, reject) => {
