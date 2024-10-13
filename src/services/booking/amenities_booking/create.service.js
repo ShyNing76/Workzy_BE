@@ -42,9 +42,7 @@ export const createAmenitiesBookingService = (tokenUser, total_amenities_price, 
           booking_id: booking.booking_id,
           amenity_id: amenity.amenity_id,
           quantity: quantity,
-          price: amenity.type === "Device" ? 
-              amenity.rent_price * quantity : 
-              amenity.original_price * quantity
+          price: amenity.rent_price * quantity
         }
         return db.BookingAmenities.create(bookingAmenity, {transaction: t});
       });

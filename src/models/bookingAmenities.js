@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
             });
             BookingAmenities.hasMany(models.Amenity, {
                 foreignKey: "amenity_id",
+                sourceKey: "amenity_id",
             });
         }
     }
