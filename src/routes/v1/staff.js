@@ -180,7 +180,7 @@ router.put(
 router.delete(
     "/:id",
     verify_token,
-    verify_role(["admin"]),
+    verify_role(["admin", "manager"]),
     controllers.deleteStaffController
     /*
         #swagger.description = 'Endpoint to delete a staff.'
