@@ -48,6 +48,12 @@ export const getWorkspaceTypeByIdController = async (req, res) => {
 
 export const updateWorkspaceTypeController = async (req, res) => {
     try {
+        const error = Joi.object({
+            workspace_type_name: name
+        }).validate({
+            workspace_type_name: req.body.workspace_type_name
+        }).error;
+        if (error) return badRequest(res, error);
         const response = await services.updateWorkspaceTypeService(req.params, req.body);
         return ok(res, response);
     } catch (error) {
