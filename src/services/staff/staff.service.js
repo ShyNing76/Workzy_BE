@@ -284,7 +284,7 @@ export const updateStaffService = (id, data) =>
         }
     });
 
-export const deleteStaffService = (id) =>
+export const unactiveStaffService = (id) =>
     new Promise(async (resolve, reject) => {
         const t = await db.sequelize.transaction();
         try {
@@ -320,6 +320,31 @@ export const deleteStaffService = (id) =>
         } catch (error) {
             console.log(error);
             await t.rollback();
+            reject(error);
+        }
+    });
+
+export const activeStaffService = (id) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const staff = await db.User.update(
+                {
+                    status: "active",
+                },
+                {
+                    where: {
+                        user_id: id,
+                        role_id: 3,
+                        status: "inactive",
+                    },
+                }
+            );
+            if (!staff) return reject("Staff not found");
+            resolve({
+                err: 0,
+                message: "Staff active successfully",
+            });
+        } catch (error) {
             reject(error);
         }
     });

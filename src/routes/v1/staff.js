@@ -196,11 +196,11 @@ router.put(
      */
 );
 
-router.delete(
-    "/:id",
+router.put(
+    "/unactive/:id",
     verify_token,
     verify_role(["admin", "manager"]),
-    controllers.deleteStaffController
+    controllers.unactiveStaffController
     /*
         #swagger.description = 'Endpoint to delete a staff.'
         #swagger.summary = 'Delete a staff.'
@@ -218,6 +218,30 @@ router.delete(
             "apiKeyAuth": []
         }]
      */
+);
+
+router.put(
+    "/active/:id",
+    verify_token,
+    verify_role(["admin", "manager"]),
+    controllers.activeStaffController
+    /*
+        #swagger.description = 'Endpoint to unblock a staff.'
+        #swagger.summary = 'Unblock a staff.'
+        #swagger.parameters['id'] = { description: 'User ID.' }
+        #swagger.responses[200] = {
+            description: 'Staff unblocked successfully.'
+        }
+        #swagger.responses[404] = {
+            description: 'Staff not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+    */
 );
 
 router.put(
@@ -310,7 +334,7 @@ router.get(
      */
 );
 
-router.put(
+router.post(
     "/change-status/:booking_id",
     verify_token,
     verify_role(["staff"]),

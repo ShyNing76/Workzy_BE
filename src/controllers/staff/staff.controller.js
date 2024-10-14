@@ -80,19 +80,34 @@ export const updateStaffController = async (req, res) => {
     }
 }
 
-export const deleteStaffController = async (req, res) => {
+export const unactiveStaffController = async (req, res) => {
     try {
         const error = Joi.object({
-            id: Joi.string().uuid().required()
-        }).validate({id: req.params.id}).error;
+            id: Joi.string().uuid().required(),
+        }).validate({ id: req.params.id }).error;
         if (error) return badRequest(res, error);
-        const response = await services.deleteStaffService(req.params.id);
-        return ok(res, response)    
+        const response = await services.unactiveStaffService(req.params.id);
+        return ok(res, response);
     } catch (error) {
-        if(error === "No Staff Exist" || error === "Failed to remove building") return badRequest(res, error);
-        internalServerError(res, error)
+        if (error === "No Staff Exist" || error === "Failed to remove building")
+            return badRequest(res, error);
+        internalServerError(res, error);
     }
-}
+};
+
+export const activeStaffController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            id: Joi.string().uuid().required(),
+        }).validate({ id: req.params.id }).error;
+        if (error) return badRequest(res, error);
+        const response = await services.activeStaffService(req.params.id);
+        return ok(res, response);
+    } catch (error) {
+        if (error === "Staff not found") return badRequest(res, error);
+        internalServerError(res, error);
+    }
+};
 
 export const assignStaffToBuildingController = async (req, res) => {
     try {
