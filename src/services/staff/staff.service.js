@@ -2,7 +2,6 @@ import moment from "moment";
 import { Op } from "sequelize";
 import { v4 } from "uuid";
 import db from "../../models";
-import * as sendMail from "../../utils/sendMail";
 import {
     handleLimit,
     handleOffset,
@@ -305,50 +304,50 @@ export const assignStaffToBuildingService = (id, building_id) =>
     new Promise(async (resolve, reject) => {
         const t = await db.sequelize.transaction();
         try {
-            const [staff, isBuildingExist] =
-                await Promise.all([
-                    db.User.findOne({
-                        where: {
-                            user_id: id,
-                            role_id: 3,
-                            status: "active",
-                        },
-                        include: [
-                            {
-                                model: db.Staff,
-                                attributes: {
-                                    exclude: [
-                                        "user_id",
-                                        "createdAt",
-                                        "updatedAt",
-                                    ],
-                                },
-                                required: true,
+            const [staff, isBuildingExist] = await Promise.all([
+                db.User.findOne({
+                    where: {
+                        user_id: id,
+                        role_id: 3,
+                        status: "active",
+                    },
+                    include: [
+                        {
+                            model: db.Staff,
+                            attributes: {
+                                exclude: ["user_id", "createdAt", "updatedAt"],
                             },
-                        ],
-                    }),
-                    db.Building.findOne({
-                        where: {
-                            building_id: building_id,
+                            required: true,
                         },
-                    }),
-                    
-                ]);
+                    ],
+                }),
+                db.Building.findOne({
+                    where: {
+                        building_id: building_id,
+                    },
+                }),
+            ]);
             if (!staff || staff.status == "inactive")
                 return reject("Staff is not exist");
             if (!isBuildingExist) return reject("Building is not exist");
 
-            if (staff.Staff.building_id === building_id) return reject("Staff is already assigned to this building");
+            if (staff.Staff.building_id === building_id)
+                return reject("Staff is already assigned to this building");
 
-            if(staff.Staff.building_id) return reject("Building already has a staff")
-            
-            const oldStaffOfBuilding = await db.Staff.update({
-                    building_id: null
-                }, {
+            if (staff.Staff.building_id)
+                return reject("Building already has a staff");
+
+            const oldStaffOfBuilding = await db.Staff.update(
+                {
+                    building_id: null,
+                },
+                {
                     where: { building_id: building_id },
-                    transaction: t
-                });
-            if (!oldStaffOfBuilding) return reject("Failed to remove old staff of building")
+                    transaction: t,
+                }
+            );
+            if (!oldStaffOfBuilding)
+                return reject("Failed to remove old staff of building");
             staff.Staff.building_id = building_id;
             await staff.Staff.save({ transaction: t });
             await t.commit();
@@ -365,21 +364,27 @@ export const assignStaffToBuildingService = (id, building_id) =>
 export const removeStaffFromBuildingService = (id) =>
     new Promise(async (resolve, reject) => {
         try {
-            const removedStaff = await db.Staff.update({
-                building_id: null
-            }, {
-                where: { user_id: id , building_id: {[Op.ne]: null}},
-            })
-            if (removedStaff[0] === 0) return reject("Failed to remove staff from building || Staff is not assigned to any building")
+            const removedStaff = await db.Staff.update(
+                {
+                    building_id: null,
+                },
+                {
+                    where: { user_id: id, building_id: { [Op.ne]: null } },
+                }
+            );
+            if (removedStaff[0] === 0)
+                return reject(
+                    "Failed to remove staff from building || Staff is not assigned to any building"
+                );
             resolve({
                 err: 0,
-                message: "Staff removed from building successfully"
-            })
+                message: "Staff removed from building successfully",
+            });
         } catch (error) {
-            console.log(error)
+            console.log(error);
             reject(error);
         }
-    })
+    });
 
 export const getBookingStatusService = (id) =>
     new Promise(async (resolve, reject) => {
@@ -445,7 +450,7 @@ export const changeBookingStatusService = (bookingId, status) =>
                 where: {
                     booking_id: bookingId,
                 },
-                include:[
+                include: [
                     {
                         model: db.Customer,
                         attributes: [],
@@ -455,20 +460,20 @@ export const changeBookingStatusService = (bookingId, status) =>
                                 model: db.User,
                                 attributes: ["email", "name"],
                                 required: true,
-                            }
-                        ]
-                    }
+                            },
+                        ],
+                    },
                 ],
                 raw: true,
                 nest: true,
             });
-            if(!booking) return reject("User not found")
-        let statusTransitions = {
-            "paid": "in-process",
-            "in-process": "check-out",
-            "check-out": "check-amenities",
-            "check-amenities": "completed"
-        };
+            if (!booking) return reject("User not found");
+            let statusTransitions = {
+                paid: "in-process",
+                "in-process": "check-out",
+                "check-out": "check-amenities",
+                "check-amenities": "completed",
+            };
 
             let changeStatus;
             if (statusTransitions[bookingStatus.status] === status) {
@@ -477,7 +482,13 @@ export const changeBookingStatusService = (bookingId, status) =>
                     booking_id: bookingId,
                     status: statusTransitions[bookingStatus.status],
                 });
-                await sendMail.sendMailBookingStatus(booking.Customer.User.email, "Booking Status Updated", 'Your booking status has been updated to <b>' + statusTransitions[bookingStatus.status] + '</b>')
+                await sendMail.sendMailBookingStatus(
+                    booking.Customer.User.email,
+                    "Booking Status Updated",
+                    "Your booking status has been updated to <b>" +
+                        statusTransitions[bookingStatus.status] +
+                        "</b>"
+                );
             }
 
             if (!changeStatus) return reject("Failed to update booking status");
