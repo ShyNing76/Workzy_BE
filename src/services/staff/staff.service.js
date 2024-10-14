@@ -2,6 +2,7 @@ import moment from "moment";
 import { Op } from "sequelize";
 import { v4 } from "uuid";
 import db from "../../models";
+import * as sendMail from "../../utils/sendMail/index.js";
 import {
     handleLimit,
     handleOffset,
@@ -455,12 +456,12 @@ export const getBookingStatusService = (id) =>
         }
     });
 
-export const changeBookingStatusService = (bookingId, status) =>
+export const changeBookingStatusService = (booking_id, status) =>
     new Promise(async (resolve, reject) => {
         try {
             const bookingStatus = await db.BookingStatus.findOne({
                 where: {
-                    booking_id: bookingId,
+                    booking_id: booking_id,
                 },
                 order: [["createdAt", "DESC"]],
                 limit: 1,
@@ -472,7 +473,7 @@ export const changeBookingStatusService = (bookingId, status) =>
 
             const booking = await db.Booking.findOne({
                 where: {
-                    booking_id: bookingId,
+                    booking_id: booking_id,
                 },
                 include: [
                     {
@@ -498,12 +499,11 @@ export const changeBookingStatusService = (bookingId, status) =>
                 "check-out": "check-amenities",
                 "check-amenities": "completed",
             };
-
             let changeStatus;
             if (statusTransitions[bookingStatus.status] === status) {
                 changeStatus = await db.BookingStatus.create({
                     booking_status_id: v4(),
-                    booking_id: bookingId,
+                    booking_id: booking_id,
                     status: statusTransitions[bookingStatus.status],
                 });
                 await sendMail.sendMailBookingStatus(
@@ -514,7 +514,6 @@ export const changeBookingStatusService = (bookingId, status) =>
                         "</b>"
                 );
             }
-
             if (!changeStatus) return reject("Failed to update booking status");
 
             resolve({

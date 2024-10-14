@@ -35,7 +35,7 @@ export const createAmenitiesBookingService = (tokenUser, total_amenities_price, 
       if (amenities.length === 0 || !booking) 
         return reject(!booking ? "Booking not found" : "No valid amenities found")
 
-      const bookingAmenities = amenities.map(async (amenity, index) => {
+      const bookingAmenities = amenities.map((amenity, index) => {
         const quantity = quantities[index];
         const bookingAmenity = {
           booking_amenities_id: v4(),
@@ -45,7 +45,7 @@ export const createAmenitiesBookingService = (tokenUser, total_amenities_price, 
           price: amenity.rent_price,
           total_price: amenity.rent_price * quantity
         }
-        return await db.BookingAmenities.create(bookingAmenity, {transaction: t});
+        return db.BookingAmenities.create(bookingAmenity, {transaction: t});
       });
       await Promise.all(bookingAmenities);
       const totalAmenitiesPrice = await db.BookingAmenities.sum("total_price", {where: {booking_id: booking.booking_id}, transaction: t});

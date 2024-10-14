@@ -3,6 +3,7 @@ import axios from "axios";
 import { Op } from "sequelize";
 import client from "../../config/paypal.config.js";
 import db from "../../models/index.js";
+import { sendMailBookingStatus } from "../../utils/sendMail/index.js";
 const getExchangeRate = async (fromCurrency, toCurrency) => {
     try {
         const response = await axios.get(
@@ -608,6 +609,17 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
                         order: [["createdAt", "DESC"]],
                         limit: 1,
                     },
+                    {
+                        model: db.Customer,
+                        attributes: [],
+                        required: true,
+                        include: [
+                            {
+                                model: db.User,
+                                attributes: ["email"],
+                            },
+                        ],
+                    },
                 ],
             });
 
@@ -667,9 +679,9 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
             );
 
             if (!transaction) return reject("Transaction created failed");
+            await sendMailBookingStatus(booking.Customer.User.email, "Payment successful", "Thank you for your payment. Enjoy your workspace.")
 
             await t.commit();
-
             return resolve({
                 err: 0,
                 message: "Payment successful",
