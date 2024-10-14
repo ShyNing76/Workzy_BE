@@ -1,6 +1,6 @@
 import db from "../../models";
 import { v4 } from "uuid";
-import { isDuplicate } from "../../utils/checkDuplicate";
+import { isDuplicate, isDuplicateExcludeId } from "../../utils/checkDuplicate";
 import {
     handleLimit,
     handleOffset,
@@ -125,6 +125,7 @@ export const updateWorkspaceTypeService = async ({ id }, data) =>
                 db.WorkspaceType,
                 "workspace_type_name",
                 data.workspace_type_name,
+                "workspace_type_id",
                 id
             );
             if (checkDuplicateName) {

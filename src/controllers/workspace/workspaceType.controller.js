@@ -1,14 +1,19 @@
-import {badRequest, created, internalServerError, ok} from "../../middlewares/handle_error";
-import {name} from "../../helper/joi_schema";
+import {
+    badRequest,
+    created,
+    internalServerError,
+    ok,
+} from "../../middlewares/handle_error";
+import { name } from "../../helper/joi_schema";
 import * as services from "../../services";
 import Joi from "joi";
 
 export const createWorkspaceTypeController = async (req, res) => {
     try {
         const error = Joi.object({
-            workspace_type_name: name
+            workspace_type_name: name,
         }).validate({
-            workspace_type_name: req.body.workspace_type_name
+            workspace_type_name: req.body.workspace_type_name,
         }).error;
         if (error) return badRequest(res, error);
 
@@ -49,14 +54,18 @@ export const getWorkspaceTypeByIdController = async (req, res) => {
 export const updateWorkspaceTypeController = async (req, res) => {
     try {
         const error = Joi.object({
-            workspace_type_name: name
+            workspace_type_name: name,
         }).validate({
-            workspace_type_name: req.body.workspace_type_name
+            workspace_type_name: req.body.workspace_type_name,
         }).error;
         if (error) return badRequest(res, error);
-        const response = await services.updateWorkspaceTypeService(req.params, req.body);
+        const response = await services.updateWorkspaceTypeService(
+            req.params,
+            req.body
+        );
         return ok(res, response);
     } catch (error) {
+        console.log(error);
         if (error === "Workspace type not found") {
             return badRequest(res, error);
         }
@@ -69,7 +78,9 @@ export const updateWorkspaceTypeController = async (req, res) => {
 
 export const deleteWorkspaceTypeController = async (req, res) => {
     try {
-        const response = await services.deleteWorkspaceTypeService(req.params.id);
+        const response = await services.deleteWorkspaceTypeService(
+            req.params.id
+        );
         return ok(res, response);
     } catch (error) {
         if (error === "Workspace type not found") {
@@ -77,4 +88,4 @@ export const deleteWorkspaceTypeController = async (req, res) => {
         }
         internalServerError(res, error);
     }
-}
+};
