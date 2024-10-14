@@ -212,6 +212,23 @@ export const paypalSuccessService = ({ booking_id, order_id }) =>
                         order: [["createdAt", "DESC"]],
                         limit: 1,
                     },
+                    {
+                        model: db.Customer,
+                        as: "Customer",
+                        attributes: ["customer_id", "user_id"],
+                        include: [
+                            {
+                                model: db.User,
+                                as: "User",
+                                attributes: ["email", "name"],
+                            },
+                        ],
+                    },
+                    {
+                        model: db.Workspace,
+                        as: "Workspace",
+                        attributes: ["workspace_name"],
+                    },
                 ],
             });
 
@@ -291,7 +308,29 @@ export const paypalSuccessService = ({ booking_id, order_id }) =>
                 },
                 { transaction: t }
             );
+            console.log(booking.Customer.User);
 
+            await sendMail.sendMail(
+                booking.Customer.User.email,
+                "Booking Payment Successful",
+                `
+                    <h1>Booking Payment Successful</h1>
+                    <p>Dear ${booking.Customer.User.name},</p>
+                    <p>Your booking has been confirmed with the following details:</p>
+                    <ul>
+                        <li>Booking ID: ${booking.booking_id}</li>
+                        <li>Workspace: ${booking.Workspace.workspace_name}</li>
+                        <li>Start Time: ${new Date(
+                            booking.start_time
+                        ).toLocaleString()}</li>
+                        <li>End Time: ${new Date(
+                            booking.end_time
+                        ).toLocaleString()}</li>
+                        <li>Total Price: $${booking.total_price}</li>
+                    </ul>
+                    <p>Thank you for choosing our service!</p>
+                `
+            );
             await t.commit();
 
             return resolve({

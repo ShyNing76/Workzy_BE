@@ -117,7 +117,7 @@ export const getAllBookingsService = ({
                         model: db.Workspace,
                         as: "Workspace",
                         where: {
-                            building_id: data.building_id,
+                            building_id: data.building_id || [],
                         },
                     },
                 ],
