@@ -21,15 +21,6 @@ export const sendMail = async (to, subject, html) => {
     })
 }
 
-export const sendMailBookingStatus = async (to, subject, html) => {
-    await transporter.sendMail({
-        from: process.env.MAIL_USER,
-        to,
-        subject,
-        html: html
-    })
-}
-
 
 
 

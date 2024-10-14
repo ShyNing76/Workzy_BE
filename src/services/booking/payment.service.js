@@ -3,7 +3,7 @@ import axios from "axios";
 import { Op } from "sequelize";
 import client from "../../config/paypal.config.js";
 import db from "../../models/index.js";
-import { sendMailBookingStatus } from "../../utils/sendMail/index.js";
+import { sendMail } from "../../utils/sendMail/index.js";
 const getExchangeRate = async (fromCurrency, toCurrency) => {
     try {
         const response = await axios.get(
@@ -605,28 +605,27 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
                 include: [
                     {
                         model: db.BookingStatus,
-                        as: "BookingStatuses",
                         order: [["createdAt", "DESC"]],
                         limit: 1,
+                        required: true
                     },
                     {
                         model: db.Customer,
-                        attributes: [],
+                        attributes: ["user_id"],
                         required: true,
                         include: [
                             {
                                 model: db.User,
                                 attributes: ["email"],
+                                required: true
                             },
                         ],
                     },
                 ],
             });
-
             if (!booking) {
                 return reject("Booking not found");
             }
-
             if (
                 !booking.BookingStatuses ||
                 booking.BookingStatuses.length === 0
@@ -661,7 +660,6 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
 
             if (!payment) return reject("Payment not found");
 
-            console.log(response.result);
             const captureId =
                 response.result.purchase_units[0].payments.captures[0].id;
 
@@ -679,7 +677,7 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
             );
 
             if (!transaction) return reject("Transaction created failed");
-            await sendMailBookingStatus(booking.Customer.User.email, "Payment successful", "Thank you for your payment. Enjoy your workspace.")
+            await sendMail(booking.Customer.User.email, "Payment successful", "Thank you for your payment. Enjoy your workspace.")
 
             await t.commit();
             return resolve({
