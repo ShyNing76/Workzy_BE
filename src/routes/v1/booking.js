@@ -386,6 +386,58 @@ router.delete(
     */
 );
 
+// add to calendar of google
+router.post(
+    "/add-to-calendar",
+    verify_role(["customer"]),
+    controllers.addToCalendarController
+    /*
+        #swagger.description = 'Add to calendar of google for the authenticated customer.'
+        #swagger.summary = 'Add to calendar'
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            booking_id: {
+                                type: 'string',
+                                example: '123e4567-e89b-12d3-a456-426614174000',
+                                description: 'Booking ID'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        #swagger.responses[200] = {
+            description: 'Booking added to calendar successfully',
+            schema: {
+                err: 0,
+                message: 'Booking added to calendar successfully'
+            }
+        }
+        #swagger.responses[400] = {
+            description: 'Bad request',
+            schema: {
+                err: 1,
+                message: 'Invalid input data'
+            }
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error',
+            schema: {
+                err: 1,
+                message: 'An error occurred while processing your request'
+            }
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+    */
+);
+
 router.post(
     "/checkout/paypal",
     verify_role(["customer"]),

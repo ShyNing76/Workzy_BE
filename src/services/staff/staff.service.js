@@ -1,13 +1,13 @@
-import db from "../../models";
-import { Op, or } from "sequelize";
 import moment from "moment";
+import { Op } from "sequelize";
 import { v4 } from "uuid";
-import { hashPassword } from "../../utils/hashPassword";
+import db from "../../models";
 import {
     handleLimit,
     handleOffset,
     handleSortOrder,
 } from "../../utils/handleFilter";
+import { hashPassword } from "../../utils/hashPassword";
 
 export const createStaffService = ({ password, ...data }) =>
     new Promise(async (resolve, reject) => {
@@ -69,52 +69,73 @@ export const createStaffService = ({ password, ...data }) =>
         }
     });
 
-export const getAllStaffService = ({page, limit, order, name, building_id, status, ...query}) => new Promise(async (resolve, reject) => {
-    try {
-        query.status = status ? status : {[Op.ne]: null};
-        query.role_id = 3;
-        const staffs = await db.User.findAndCountAll({
-            where: query,
-            offset: handleOffset(page, limit),
-            limit: handleLimit(limit),
-            order: [handleSortOrder(order, "name")],
-            attributes: {
-                exclude: ["password","google_token","building_id","createdAt", "updatedAt"]
-            },
-            include: [
-                {
-                    model: db.Staff,
-                    attributes: ["staff_id", "building_id"],
-                    where: {
-                        building_id: building_id ? building_id === "null" ? {[Op.is]: null} : building_id : {[Op.or]: [null, {[Op.ne]: null}]}
-                    },
-                    required: true,
-                    include: [
-                        {
-                            model: db.Building,
-                            attributes: ["building_name"],
+export const getAllStaffService = ({
+    page,
+    limit,
+    order,
+    name,
+    building_id,
+    status,
+    ...query
+}) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            query.status = status ? status : { [Op.ne]: null };
+            query.role_id = 3;
+            const staffs = await db.User.findAndCountAll({
+                where: query,
+                offset: handleOffset(page, limit),
+                limit: handleLimit(limit),
+                order: [handleSortOrder(order, "name")],
+                attributes: {
+                    exclude: [
+                        "password",
+                        "google_token",
+                        "building_id",
+                        "createdAt",
+                        "updatedAt",
+                    ],
+                },
+                include: [
+                    {
+                        model: db.Staff,
+                        attributes: ["staff_id", "building_id"],
+                        where: {
+                            building_id: building_id
+                                ? building_id === "null"
+                                    ? { [Op.is]: null }
+                                    : building_id
+                                : { [Op.or]: [null, { [Op.ne]: null }] },
                         },
-                    ]
-                }, 
-            ],
-            raw: true,
-            nest: true
-        });
-        staffs.rows.forEach(staff => {
-            if (staff.date_of_birth) {
-                staff.date_of_birth = moment(staff.date_of_birth).format('MM/DD/YYYY');
-            }
-        });
-        resolve({
-            err: staffs.count > 0 ? 0 : 1,
-            message: staffs.count > 0 ? "Got" : "No Staff Exist",
-            data: staffs
-        });
-    } catch (error) {
-        console.log(error)
-        reject(error)
-    }
-})
+                        required: true,
+                        include: [
+                            {
+                                model: db.Building,
+                                attributes: ["building_name"],
+                            },
+                        ],
+                    },
+                ],
+                raw: true,
+                nest: true,
+            });
+            staffs.rows.forEach((staff) => {
+                if (staff.date_of_birth) {
+                    staff.date_of_birth = moment(staff.date_of_birth).format(
+                        "MM/DD/YYYY"
+                    );
+                }
+            });
+            resolve({
+                err: staffs.count > 0 ? 0 : 1,
+                message: staffs.count > 0 ? "Got" : "No Staff Exist",
+                data: staffs,
+            });
+        } catch (error) {
+            console.log(error);
+            reject(error);
+        }
+    });
 
 export const getStaffByIdService = (id) =>
     new Promise(async (resolve, reject) => {
@@ -162,33 +183,34 @@ export const getStaffByIdService = (id) =>
         }
     });
 
-export const getBuildingByStaffIdService = (tokenUser) => new Promise(async (resolve, reject) => {
-    try {
-        const staff = await db.Staff.findOne({
-            where: {
-                user_id: tokenUser.user_id,
-            },
-            attributes: [],
-            include: [
-                {
-                    model: db.Building,
-                    attributes: ["building_id"],
-                    required: true,
-                }
-            ],
-            raw: true,
-            nest: true
-        });
-        if(!staff) return reject("No Building Exist")
-        resolve({
-            err: 0,
-            message: "Got",
-            data: staff.Building
-        });
-    } catch (error) {
-        reject(error)
-    }
-})
+export const getBuildingByStaffIdService = (tokenUser) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const staff = await db.Staff.findOne({
+                where: {
+                    user_id: tokenUser.user_id,
+                },
+                attributes: [],
+                include: [
+                    {
+                        model: db.Building,
+                        attributes: ["building_id"],
+                        required: true,
+                    },
+                ],
+                raw: true,
+                nest: true,
+            });
+            if (!staff) return reject("No Building Exist");
+            resolve({
+                err: 0,
+                message: "Got",
+                data: staff.Building,
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
 
 export const updateStaffService = (id, data) =>
     new Promise(async (resolve, reject) => {
@@ -256,13 +278,16 @@ export const deleteStaffService = (id) =>
                 { transaction: t }
             );
             if (updatedRowsCount === 0) return reject("No Staff Exist");
-            const removeBuilding = await db.Staff.update({
-                building_id: null
-            }, {
-                where: { user_id: id },
-                transaction: t
-            })
-            if(!removeBuilding) return reject("Failed to remove building")
+            const removeBuilding = await db.Staff.update(
+                {
+                    building_id: null,
+                },
+                {
+                    where: { user_id: id },
+                    transaction: t,
+                }
+            );
+            if (!removeBuilding) return reject("Failed to remove building");
             await t.commit();
             resolve({
                 err: 0,
@@ -348,7 +373,8 @@ export const getBookingStatusService = (id) =>
                 ],
             });
 
-            if (bookingStatus.count === 0) return reject("No bookings found for the specified workspace");
+            if (bookingStatus.count === 0)
+                return reject("No bookings found for the specified workspace");
 
             const formattedBookingStatus = bookingStatus.rows.map((booking) => {
                 return {
@@ -372,45 +398,43 @@ export const getBookingStatusService = (id) =>
         }
     });
 
-export const changeBookingStatusService = (bookingId, status) => new Promise(async (resolve, reject) => {
-    try {
-        const bookingStatus = await db.BookingStatus.findOne({
-            where: {
-                booking_id: bookingId
-            },
-            order: [["createdAt", "DESC"]],
-            limit: 1,
-            raw: true,
-            nest: true
-        })
-       
-        if (!bookingStatus) return reject("Booking not found")
-
-        const statusTransitions = {
-            "paid": "check-in",
-            "check-in": "in-process",
-            "in-process": "check-out",
-            "check-out": "check-amenities",
-            "check-amenities": "completed"
-        };
-
-        let changeStatus;
-        if (statusTransitions[bookingStatus.status] === status) {
-            changeStatus = await db.BookingStatus.create({
-                booking_status_id: v4(),
-                booking_id: bookingId,
-                status: statusTransitions[bookingStatus.status]
+export const changeBookingStatusService = (bookingId, status) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const bookingStatus = await db.BookingStatus.findOne({
+                where: {
+                    booking_id: bookingId,
+                },
+                order: [["createdAt", "DESC"]],
+                limit: 1,
+                raw: true,
+                nest: true,
             });
+
+            if (!bookingStatus) return reject("Booking not found");
+
+            const statusTransitions = {
+                paid: "in-process",
+                "check-out": "check-amenities",
+            };
+
+            let changeStatus;
+            if (statusTransitions[bookingStatus.status] === status) {
+                changeStatus = await db.BookingStatus.create({
+                    booking_status_id: v4(),
+                    booking_id: bookingId,
+                    status: statusTransitions[bookingStatus.status],
+                });
+            }
+
+            if (!changeStatus) return reject("Failed to update booking status");
+
+            resolve({
+                err: 0,
+                message: "Booking status updated successfully",
+            });
+        } catch (error) {
+            console.log(error);
+            reject(error);
         }
-
-        if(!changeStatus) return reject("Failed to update booking status")
-
-        resolve({
-            err: 0,
-            message: "Booking status updated successfully"
-        })
-    } catch (error) {
-        console.log(error)
-        reject(error)
-    }
-})
+    });

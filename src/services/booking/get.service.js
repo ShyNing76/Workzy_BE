@@ -1,11 +1,12 @@
+import { google } from "googleapis";
 import moment from "moment";
+import { oauth2Client } from "../../config/passport";
 import db from "../../models";
 import {
     handleLimit,
     handleOffset,
     handleSortOrder,
 } from "../../utils/handleFilter";
-import { where } from "sequelize";
 
 export const getBookingService = ({ page, limit, order, status, ...data }) =>
     new Promise(async (resolve, reject) => {
@@ -87,9 +88,8 @@ export const getAllBookingsService = ({
     new Promise(async (resolve, reject) => {
         try {
             const tabStatus = {
-                Current: ["check-in", "in-process"],
+                Current: ["in-process", "check-out", "check-amenities"],
                 Upcoming: ["paid", "confirmed"],
-                "Check-out": ["check-out", "check-amenities"],
                 Completed: ["completed"],
                 Cancelled: ["cancelled"],
             };
@@ -211,6 +211,67 @@ export const getBookingByIdService = ({ booking_id, user_id }) =>
                 message: "Booking found",
                 data: formatBookings,
             });
+        } catch (error) {
+            console.error(error);
+            return reject(error);
+        }
+    });
+
+export const addToCalendarService = (booking_id, user_id) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const booking = await getBookingByIdService({
+                booking_id,
+                user_id,
+            });
+
+            if (booking.err) {
+                return reject(booking.message);
+            }
+            const calendar = google.calendar({
+                version: "v3",
+                auth: oauth2Client,
+            });
+
+            const event = {
+                summary: booking.data.workspace_name,
+                description: booking.data.workspace_description,
+                start: {
+                    dateTime: moment(
+                        booking.data.start_time_date,
+                        "DD/MM/YYYY HH:mm:ss"
+                    ).format(),
+                },
+                end: {
+                    dateTime: moment(
+                        booking.data.end_time_date,
+                        "DD/MM/YYYY HH:mm:ss"
+                    ).format(),
+                },
+            };
+
+            console.log(event);
+
+            try {
+                const res = await calendar.events.insert({
+                    calendarId: "primary",
+                    requestBody: event,
+                });
+                return resolve(res.data);
+            } catch (calendarError) {
+                if (
+                    calendarError.errors &&
+                    calendarError.errors[0].reason === "insufficientPermissions"
+                ) {
+                    console.error(
+                        "Insufficient permissions for Google Calendar API"
+                    );
+                    return reject(
+                        "Insufficient permissions to add event to Google Calendar"
+                    );
+                }
+                throw calendarError;
+            }
         } catch (error) {
             console.error(error);
             return reject(error);

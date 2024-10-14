@@ -9,7 +9,10 @@ export const createBookingService = (data) =>
             const [customer, workspace, bookingType] = await Promise.all([
                 db.Customer.findOne({ where: { user_id: data.user_id } }),
                 db.Workspace.findOne({
-                    where: { workspace_id: data.workspace_id, status: "active" },
+                    where: {
+                        workspace_id: data.workspace_id,
+                        status: "active",
+                    },
                 }),
                 db.BookingType.findOne({ where: { type: data.type } }),
             ]);
@@ -49,11 +52,12 @@ export const createBookingService = (data) =>
                         : bookingType.type === "Daily"
                         ? workspace.price_per_day
                         : workspace.price_per_month,
+                total_workspace_price: data.total_price,
                 total_price: data.total_price,
                 start_time_date: data.start_time,
                 end_time_date: data.end_time,
             };
-            
+
             const bookingStatus = {
                 booking_id: booking.booking_id,
                 status: "confirmed",

@@ -1,10 +1,12 @@
 import express from "express";
-import * as controllers from "../../controllers"
 import passport from "passport";
+import * as controllers from "../../controllers";
 
 const router = express.Router();
 
-router.post("/login", controllers.loginController
+router.post(
+    "/login",
+    controllers.loginController
     /*
      #swagger.requestBody = {
         required: true,
@@ -32,8 +34,9 @@ router.post("/login", controllers.loginController
     */
 );
 
-
-router.post("/register", controllers.registerController
+router.post(
+    "/register",
+    controllers.registerController
     /*
      #swagger.requestBody = {
         required: true,
@@ -65,23 +68,37 @@ router.post("/register", controllers.registerController
     */
 );
 
-router.get("/google",
-    passport.authenticate("google", {scope: ["profile", "email"]})
+router.get(
+    "/google",
+    passport.authenticate("google", {
+        scope: [
+            "profile",
+            "email",
+            "https://www.googleapis.com/auth/user.birthday.read",
+            "https://www.googleapis.com/auth/user.phonenumbers.read",
+            "https://www.googleapis.com/auth/contacts.readonly",
+        ],
+    })
     /*
     #swagger.description = 'Redirect to Google login page.'
     #swagger.summary = 'Redirect to Google login'
     */
 );
 
-router.get("/google/callback",
-    passport.authenticate("google", {failureRedirect: "/login", session: false}),
+router.get(
+    "/google/callback",
+    passport.authenticate("google", {
+        failureRedirect: "/login",
+        session: false,
+    }),
     (req, res) => {
         const token = req.user?.token;
         const email = req.user?.emails[0].value;
         if (token && email)
-            res.redirect(`http://localhost:5173/api/v1/auth/google/callback?token=${req.user?.response.accessToken}`)
-        else
-            res.redirect(`http://localhost:5173/login`)
+            res.redirect(
+                `http://localhost:5173/api/v1/auth/google/callback?token=${req.user?.response.accessToken}`
+            );
+        else res.redirect(`http://localhost:5173/login`);
     }
     /*
     #swagger.description = 'Redirect to the client login success page.'
