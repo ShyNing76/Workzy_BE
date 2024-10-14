@@ -261,7 +261,7 @@ router.get(
 router.get(
     "/:id",
     verify_token,
-    verify_role(["admin"]),
+    verify_role(["admin", "manager", "staff"]),
     controllers.getAmenityByIdController
     /*
         #swagger.description = 'Endpoint to get an amenity by ID.'
