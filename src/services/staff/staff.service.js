@@ -1,5 +1,3 @@
-import db from "../../models";
-import { Op } from "sequelize";
 import moment from "moment";
 import { Op } from "sequelize";
 import { v4 } from "uuid";
