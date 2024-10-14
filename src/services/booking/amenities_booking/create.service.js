@@ -35,19 +35,20 @@ export const createAmenitiesBookingService = (tokenUser, total_amenities_price, 
       if (amenities.length === 0 || !booking) 
         return reject(!booking ? "Booking not found" : "No valid amenities found")
 
-      const bookingAmenities = amenities.map((amenity, index) => {
+      const bookingAmenities = amenities.map(async (amenity, index) => {
         const quantity = quantities[index];
         const bookingAmenity = {
           booking_amenities_id: v4(),
           booking_id: booking.booking_id,
           amenity_id: amenity.amenity_id,
           quantity: quantity,
-          price: amenity.rent_price * quantity
+          price: amenity.rent_price,
+          total_price: amenity.rent_price * quantity
         }
-        return db.BookingAmenities.create(bookingAmenity, {transaction: t});
+        return await db.BookingAmenities.create(bookingAmenity, {transaction: t});
       });
       await Promise.all(bookingAmenities);
-      const totalAmenitiesPrice = await db.BookingAmenities.sum("price", {where: {booking_id: booking.booking_id}});
+      const totalAmenitiesPrice = await db.BookingAmenities.sum("total_price", {where: {booking_id: booking.booking_id}, transaction: t});
       if(total_amenities_price !== totalAmenitiesPrice) return reject("Total amenities price mismatch");
       booking.total_amenities_price = parseInt(total_amenities_price)
       await booking.save({transaction: t});           

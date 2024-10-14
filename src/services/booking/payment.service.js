@@ -505,11 +505,12 @@ export const paypalCheckoutAmenitiesService = ({ booking_id, user_id }) =>
 
             const request = new paypal.orders.OrdersCreateRequest();
             const amount = await convertVNDToUSD(booking.total_amenities_price);
+            console.log(booking.total_amenities_price)
             const amenitiesNames = amenities.map(amenity => amenity.amenity_name);
             // Calculate the total amount for all items correctly
             const itemsPromises = bookingAmenities.map(async (amenity, index) => {
                 const convertedValue = await convertVNDToUSD(amenity.price);
-                const convertedTotal = await convertVNDToUSD(amenity.price * amenity.quantity);
+                const convertedTotal = await convertVNDToUSD(amenity.total_price);
                 return {
                     name: amenitiesNames[index],
                     quantity: amenity.quantity,
@@ -517,7 +518,6 @@ export const paypalCheckoutAmenitiesService = ({ booking_id, user_id }) =>
                         currency_code: "USD",
                         value: convertedValue,
                     },
-                    // Calculate the total for each item
                     total: convertedTotal
                 };
             });
