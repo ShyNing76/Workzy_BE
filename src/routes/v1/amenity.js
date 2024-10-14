@@ -195,7 +195,7 @@ router.delete(
 router.get(
     "/",
     verify_token,
-    verify_role(["admin"]),
+    verify_role(["admin", "manager", "staff"]),
     controllers.getAllAmenityController
     /*
         #swagger.description = 'Endpoint to get all amenities.'
