@@ -74,4 +74,32 @@ router.get(
         }]
      */
 );
+
+router.get(
+    "/:id",
+    verify_token,
+    verify_role(["admin", "staff", "manager"]),
+    controller.getUserByIdController
+    /* #swagger.description = 'Endpoint to get customer by ID.'
+    #swagger.summary = 'Get customer by ID.'
+    #swagger.parameters['id'] = {
+        in: 'path',
+        description: 'ID of the customer to get',
+        required: true,
+        type: 'integer'
+    }
+    #swagger.responses[200] = {
+        description: 'Customer found.'
+    }
+    #swagger.responses[404] = {
+        description: 'Customer not found.'
+    }
+    #swagger.responses[500] = {
+        description: 'Internal server error.'
+    }
+    #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
 module.exports = router;
