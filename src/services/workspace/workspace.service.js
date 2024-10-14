@@ -118,9 +118,12 @@ export const deleteWorkspaceService = async (id) => new Promise(async (resolve, 
                 status: "active"
             },
         });
+        if (updatedRowsCount === 0) {
+            return reject("Cannot find any workspace to delete");
+        }
         resolve({
-            err: updatedRowsCount > 0 ? 0 : 1,
-            message: updatedRowsCount > 0 ? `${updatedRowsCount} Workspace deleted successfully!` : 'Cannot find any workspace to delete',
+            err: 0,
+            message: `Workspace deleted successfully!`,
         });
 
     } catch (error) {

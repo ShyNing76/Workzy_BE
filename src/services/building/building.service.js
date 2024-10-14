@@ -304,21 +304,18 @@ export const updateBuildingStatusService = (id, status) =>
 export const deleteBuildingService = (id) =>
     new Promise(async (resolve, reject) => {
         try {
-            const building = await db.Building.findOne({
+            const building = await db.Building.update(
+                {
+                    status: "inactive",
+                },
+                {
                 where: {
                     building_id: id,
                 },
             });
-            if (!building) {
+            if (building[0] === 0) {
                 return reject("Building not found");
             }
-
-            await db.Building.destroy({
-                where: {
-                    building_id: id,
-                },
-            });
-
             resolve({
                 err: 0,
                 message: "Building deleted successfully",
