@@ -284,7 +284,7 @@ export const updateStaffService = (id, data) =>
         }
     });
 
-export const deleteStaffService = (id) =>
+export const unactiveStaffService = (id) =>
     new Promise(async (resolve, reject) => {
         const t = await db.sequelize.transaction();
         try {

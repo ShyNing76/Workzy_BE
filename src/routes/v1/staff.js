@@ -197,10 +197,10 @@ router.put(
 );
 
 router.put(
-    "/block/:id",
+    "/unactive/:id",
     verify_token,
     verify_role(["admin", "manager"]),
-    controllers.deleteStaffController
+    controllers.unactiveStaffController
     /*
         #swagger.description = 'Endpoint to delete a staff.'
         #swagger.summary = 'Delete a staff.'
@@ -221,7 +221,7 @@ router.put(
 );
 
 router.put(
-    "/unblock/:id",
+    "/active/:id",
     verify_token,
     verify_role(["admin", "manager"]),
     controllers.activeStaffController
