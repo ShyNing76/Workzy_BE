@@ -2,6 +2,7 @@ import moment from "moment";
 import { Op } from "sequelize";
 import { v4 } from "uuid";
 import db from "../../models";
+import * as sendMail from "../../utils/sendMail";
 import {
     handleLimit,
     handleOffset,
@@ -440,6 +441,28 @@ export const changeBookingStatusService = (bookingId, status) =>
 
             if (!bookingStatus) return reject("Booking not found");
 
+            const booking = await db.Booking.findOne({
+                where: {
+                    booking_id: bookingId,
+                },
+                include:[
+                    {
+                        model: db.Customer,
+                        attributes: [],
+                        required: true,
+                        include: [
+                            {
+                                model: db.User,
+                                attributes: ["email", "name"],
+                                required: true,
+                            }
+                        ]
+                    }
+                ],
+                raw: true,
+                nest: true,
+            });
+            if(!booking) return reject("User not found")
         let statusTransitions = {
             "paid": "in-process",
             "in-process": "check-out",
@@ -454,6 +477,7 @@ export const changeBookingStatusService = (bookingId, status) =>
                     booking_id: bookingId,
                     status: statusTransitions[bookingStatus.status],
                 });
+                await sendMail.sendMailBookingStatus(booking.Customer.User.email, "Booking Status Updated", 'Your booking status has been updated to <b>' + statusTransitions[bookingStatus.status] + '</b>')
             }
 
             if (!changeStatus) return reject("Failed to update booking status");
