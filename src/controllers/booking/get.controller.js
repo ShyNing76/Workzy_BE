@@ -8,6 +8,13 @@ import * as services from "../../services/booking";
 
 export const getAllBookingsController = async (req, res) => {
     try {
+        const error = Joi.object({
+            building_id: Joi.string().uuid().required(),
+        }).validate({
+            building_id: req.query.building_id,
+        }).error;
+        if (error) return badRequest(res, error.details[0].message);
+
         const bookings = await services.getAllBookingsService({
             ...req.params,
         });

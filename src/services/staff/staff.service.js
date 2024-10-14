@@ -218,7 +218,6 @@ export const getBuildingByStaffIdService = (tokenUser) =>
                 include: [
                     {
                         model: db.Building,
-                        attributes: ["building_id"],
                         required: true,
                     },
                 ],

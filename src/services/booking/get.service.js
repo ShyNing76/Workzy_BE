@@ -83,6 +83,7 @@ export const getAllBookingsService = ({
     limit,
     order,
     status,
+    building_id,
     ...data
 }) =>
     new Promise(async (resolve, reject) => {
@@ -111,6 +112,13 @@ export const getAllBookingsService = ({
                         model: db.BookingStatus,
                         as: "BookingStatuses",
                         where: statusCondition,
+                    },
+                    {
+                        model: db.Workspace,
+                        as: "Workspace",
+                        where: {
+                            building_id: data.building_id,
+                        },
                     },
                 ],
                 order: [handleSortOrder(order, "start_time_date")],
