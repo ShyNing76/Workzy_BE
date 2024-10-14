@@ -1,8 +1,8 @@
 import paypal from "@paypal/checkout-server-sdk";
 import axios from "axios";
+import { Op } from "sequelize";
 import client from "../../config/paypal.config.js";
 import db from "../../models/index.js";
-import { Op } from "sequelize";
 const getExchangeRate = async (fromCurrency, toCurrency) => {
     try {
         const response = await axios.get(
@@ -92,7 +92,8 @@ export const paypalCheckoutService = ({ booking_id, user_id }) =>
                 "completed",
                 "cancelled",
             ];
-            if (!status.includes(booking.BookingStatuses[0].status))
+
+            if (status.includes(booking.BookingStatuses[0].status))
                 return reject("Invalid booking status");
 
             const [payment, created] = await db.Payment.findOrCreate({
@@ -505,23 +506,29 @@ export const paypalCheckoutAmenitiesService = ({ booking_id, user_id }) =>
 
             const request = new paypal.orders.OrdersCreateRequest();
             const amount = await convertVNDToUSD(booking.total_amenities_price);
-            console.log(booking.total_amenities_price)
-            const amenitiesNames = amenities.map(amenity => amenity.amenity_name);
+            console.log(booking.total_amenities_price);
+            const amenitiesNames = amenities.map(
+                (amenity) => amenity.amenity_name
+            );
             // Calculate the total amount for all items correctly
-            const itemsPromises = bookingAmenities.map(async (amenity, index) => {
-                const convertedValue = await convertVNDToUSD(amenity.price);
-                const convertedTotal = await convertVNDToUSD(amenity.total_price);
-                return {
-                    name: amenitiesNames[index],
-                    quantity: amenity.quantity,
-                    unit_amount: {
-                        currency_code: "USD",
-                        value: convertedValue,
-                    },
-                    total: convertedTotal
-                };
-            });
-            
+            const itemsPromises = bookingAmenities.map(
+                async (amenity, index) => {
+                    const convertedValue = await convertVNDToUSD(amenity.price);
+                    const convertedTotal = await convertVNDToUSD(
+                        amenity.total_price
+                    );
+                    return {
+                        name: amenitiesNames[index],
+                        quantity: amenity.quantity,
+                        unit_amount: {
+                            currency_code: "USD",
+                            value: convertedValue,
+                        },
+                        total: convertedTotal,
+                    };
+                }
+            );
+
             const items = await Promise.all(itemsPromises);
             console.log(items);
             console.log(amount);
