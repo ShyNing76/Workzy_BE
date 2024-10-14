@@ -119,11 +119,15 @@ export const loginGoogleService = (profile) =>
                 defaults: {
                     user_id: v4(),
                     email: profile.emails[0].value,
-                    password: hashPassword.hashPassword(profile.id),
+                    password: hashPassword.hashPassword(
+                        profile.emails[0].value
+                    ),
                     name: profile.displayName,
                     role_id: 4,
                     image: profile.photos[0].value,
                     google_token: profile.token,
+                    phone: profile.phoneNumbers[0]?.value || "",
+                    date_of_birth: profile.birthdays || null,
                 },
                 transaction: t,
             });
@@ -141,6 +145,10 @@ export const loginGoogleService = (profile) =>
                 await db.User.update(
                     {
                         google_token: profile.token,
+                        phone: profile.phoneNumbers[0]?.value || "",
+                        date_of_birth: profile.birthdays[0]?.date || null,
+                        name: profile.displayName,
+                        image: profile.photos[0].value,
                     },
                     {
                         where: {
