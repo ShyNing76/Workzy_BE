@@ -94,6 +94,20 @@ export const deleteStaffController = async (req, res) => {
     }
 }
 
+export const activeStaffController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            id: Joi.string().uuid().required(),
+        }).validate({ id: req.params.id }).error;
+        if (error) return badRequest(res, error);
+        const response = await services.unblockStaffService(req.params.id);
+        return ok(res, response);
+    } catch (error) {
+        if (error === "Staff not found") return badRequest(res, error);
+        internalServerError(res, error);
+    }
+};
+
 export const assignStaffToBuildingController = async (req, res) => {
     try {
         const error = Joi.object({

@@ -221,6 +221,30 @@ router.delete(
 );
 
 router.put(
+    "/unblock/:id",
+    verify_token,
+    verify_role(["admin", "manager"]),
+    controllers.activeStaffController
+    /*
+        #swagger.description = 'Endpoint to unblock a staff.'
+        #swagger.summary = 'Unblock a staff.'
+        #swagger.parameters['id'] = { description: 'User ID.' }
+        #swagger.responses[200] = {
+            description: 'Staff unblocked successfully.'
+        }
+        #swagger.responses[404] = {
+            description: 'Staff not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+    */
+);
+
+router.put(
     "/assign/:id",
     verify_token,
     verify_role(["admin", "manager"]),

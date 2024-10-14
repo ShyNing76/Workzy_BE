@@ -324,6 +324,31 @@ export const deleteStaffService = (id) =>
         }
     });
 
+export const activeStaffService = (id) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const staff = await db.User.update(
+                {
+                    status: "active",
+                },
+                {
+                    where: {
+                        user_id: id,
+                        role_id: 3,
+                        status: "inactive",
+                    },
+                }
+            );
+            if (!staff) return reject("Staff not found");
+            resolve({
+                err: 0,
+                message: "Staff active successfully",
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+
 export const assignStaffToBuildingService = (id, building_id) =>
     new Promise(async (resolve, reject) => {
         const t = await db.sequelize.transaction();
