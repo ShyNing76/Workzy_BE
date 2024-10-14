@@ -34,6 +34,7 @@ module.exports = (sequelize, DataTypes) => {
                     "check-out",
                     "check-amenities",
                     "completed",
+                    "final-payment",
                     "cancelled"
                 ),
                 defaultValue: "confirmed",
