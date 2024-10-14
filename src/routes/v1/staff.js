@@ -196,8 +196,8 @@ router.put(
      */
 );
 
-router.delete(
-    "/:id",
+router.put(
+    "/block/:id",
     verify_token,
     verify_role(["admin", "manager"]),
     controllers.deleteStaffController
@@ -334,7 +334,7 @@ router.get(
      */
 );
 
-router.put(
+router.post(
     "/change-status/:booking_id",
     verify_token,
     verify_role(["staff"]),
