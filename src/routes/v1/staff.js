@@ -27,6 +27,26 @@ router.get(
 );
 
 router.get(
+    "/booking-type/:id",
+    verify_token,
+    verify_role(["admin", "manager", "staff"]),
+    controllers.getBookingTypeController
+    /*
+        #swagger.description = 'Get all booking type.'
+        #swagger.summary = 'Get all booking type.'
+        #swagger.responses[200] = {
+            description: 'Booking type found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
+router.get(
     "/",
     verify_token,
     verify_role(["admin", "manager"]),
@@ -75,7 +95,6 @@ router.get(
         }]
      */
 );
-
 
 router.post(
     "/",

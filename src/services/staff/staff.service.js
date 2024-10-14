@@ -69,6 +69,30 @@ export const createStaffService = ({ password, ...data }) =>
         }
     });
 
+export const getBookingTypeService = (id) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const bookingType = await db.BookingType.findOne({
+                where: {
+                    booking_type_id: id,
+                },
+                attributes: {
+                    exclude: ["createdAt", "updatedAt"],
+                },
+                raw: true,
+                nest: true,
+            });
+            if (!bookingType) return reject("Booking type not found");
+            resolve({
+                err: 0,
+                message: "Booking type found",
+                data: bookingType,
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+
 export const getAllStaffService = ({
     page,
     limit,

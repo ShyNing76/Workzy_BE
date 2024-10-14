@@ -21,6 +21,19 @@ export const createStaffController = async (req, res) => {
     }
 }
 
+export const getBookingTypeController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            id: Joi.string().uuid().required()
+        }).validate({id: req.params.id}).error;
+        if (error) return badRequest(res, error);
+        const response = await services.getBookingTypeService(req.params.id);
+        return ok(res, response);
+    } catch (error) {
+        internalServerError(res, error);
+    }
+}
+
 export const getStaffByIdController = async (req, res) => {
     try {
         const response = await services.getStaffByIdService(req.params.id);
