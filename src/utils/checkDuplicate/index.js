@@ -13,7 +13,7 @@ export const isDuplicateExcludeId = async (model, field, value, key, id) => {
     const isDuplicated = await model.findOne({
         where: {
             [field]: value,
-            id: { [Op.ne]: id },
+            [key]: { [Op.ne]: id },
         },
     });
     return !!isDuplicated;
