@@ -518,8 +518,7 @@ export const changeBookingStatusService = (booking_id, status) =>
             });
             if (!booking) return reject("User not found");
             let statusTransitions = {
-                paid: "in-process",
-                "in-process": "check-out",
+                "check-in": "in-process",
                 "check-out": "check-amenities",
                 "check-amenities": "completed",
             };

@@ -30,11 +30,12 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.ENUM(
                     "confirmed",
                     "paid",
+                    "check-in",
                     "in-process",
                     "check-out",
                     "check-amenities",
                     "completed",
-                    "final-payment",
+                    "damaged-payment",
                     "cancelled"
                 ),
                 defaultValue: "confirmed",
