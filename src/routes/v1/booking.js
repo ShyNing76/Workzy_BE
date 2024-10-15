@@ -626,6 +626,37 @@ router.post(
                                 format: 'uuid',
                                 example: '123e4567-e89b-12d3-a456-426614174000',
                                 description: 'Booking ID'
+                            },
+                            addAmenities: {
+                                type: 'array',
+                                items: {
+                                    type: 'object',
+                                    properties: {
+                                        amenity_id: {
+                                            type: 'string',
+                                            format: 'uuid',
+                                            example: '123e4567-e89b-12d3-a456-426614174000'
+                                        },
+                                        quantity: {
+                                            type: 'integer',
+                                            example: 1
+                                        }
+                                    }
+                                },
+                                example: [
+                                    {
+                                        amenity_id: '123e4567-e89b-12d3-a456-426614174000',
+                                        quantity: 1
+                                    },
+                                    {
+                                        amenity_id: '223e4567-e89b-12d3-a456-426614174001',
+                                        quantity: 2
+                                    }
+                                ]
+                            },
+                            total_amenities_price: {
+                                type: 'number',
+                                example: 500000
                             }
                         }
                     }

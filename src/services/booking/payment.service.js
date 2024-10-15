@@ -4,6 +4,8 @@ import { Op } from "sequelize";
 import client from "../../config/paypal.config.js";
 import db from "../../models/index.js";
 import { sendMail } from "../../utils/sendMail/index.js";
+import { v4 } from "uuid";
+
 const getExchangeRate = async (fromCurrency, toCurrency) => {
     try {
         const response = await axios.get(
@@ -215,7 +217,7 @@ export const paypalSuccessService = ({ booking_id, order_id }) =>
                     {
                         model: db.Customer,
                         as: "Customer",
-                        attributes: ["customer_id", "user_id"],
+                        attributes: ["customer_id", "user_id", "point"],
                         include: [
                             {
                                 model: db.User,
@@ -261,7 +263,7 @@ export const paypalSuccessService = ({ booking_id, order_id }) =>
                 return reject(`Unexpected booking status: ${latestStatus}`);
             }
 
-            const amount = await convertVNDToUSD(booking.total_price);
+            const amount = await convertVNDToUSD(booking.total_workspace_price);
             const request = new paypal.orders.OrdersCaptureRequest(order_id);
             request.requestBody({
                 amount: {
@@ -308,9 +310,17 @@ export const paypalSuccessService = ({ booking_id, order_id }) =>
                 },
                 { transaction: t }
             );
-            console.log(booking.Customer.User);
-
-            await sendMail.sendMail(
+            const updatedPoints = await db.Customer.update(
+                {
+                    point: parseInt(booking.Customer.point) + Math.ceil(parseInt(booking.total_workspace_price) / 1000)
+                },{
+                    where:{
+                        customer_id: booking.Customer.customer_id
+                    },
+                    transaction: t
+                });
+            if(updatedPoints[0] === 0) return reject("Failed to update customer points");
+            await sendMail(
                 booking.Customer.User.email,
                 "Booking Payment Successful",
                 `
@@ -335,7 +345,7 @@ export const paypalSuccessService = ({ booking_id, order_id }) =>
 
             return resolve({
                 err: 0,
-                message: "Payment successful",
+                message: "Payment successfully",
             });
         } catch (err) {
             await t.rollback();
@@ -432,16 +442,16 @@ export const refundBookingService = ({ booking_id, user_id }) =>
     });
 
 // Amenities Booking
-export const paypalCheckoutAmenitiesService = ({ booking_id, user_id }) =>
+export const paypalCheckoutAmenitiesService = ({ booking_id, user_id, addAmenities, total_amenities_price}) =>
     new Promise(async (resolve, reject) => {
         const t = await db.sequelize.transaction();
         try {
+            // Check if customer and booking exist
             const customer = await db.Customer.findOne({
                 where: {
                     user_id: user_id,
                 },
             });
-
             const booking = await db.Booking.findOne({
                 where: {
                     booking_id: booking_id,
@@ -480,86 +490,73 @@ export const paypalCheckoutAmenitiesService = ({ booking_id, user_id }) =>
                     },
                 ],
             });
-
-            const bookingAmenities = await db.BookingAmenities.findAll({
-                where: {
-                    booking_id: booking.booking_id,
-                },
-                attributes: ["amenity_id", "quantity", "price"],
-                include: [
-                    {
-                        model: db.Amenity,
-                        attributes: ["amenity_name"],
-                        required: true,
-                    },
-                ],
-            });
-            const amenitiesId = bookingAmenities.map(
-                (amenity) => amenity.amenity_id
-            );
-
-            const amenities = await db.Amenity.findAll({
-                where: {
-                    amenity_id: { [Op.in]: amenitiesId },
-                },
-                attributes: ["amenity_name"],
-            });
-
             if (!customer || !booking)
                 return reject(
                     !customer ? "Customer not found" : "Booking not found"
                 );
+
+            // Check if booking is in-process and not cancelled
             if (booking.BookingStatuses[0].status !== "in-process")
                 return reject("Booking must be in-process");
             if (booking.BookingStatuses[0].status === "cancelled")
                 return reject("Booking already cancelled");
 
-            const [payment, created] = await db.Payment.findOrCreate({
+            const amenitiesId = addAmenities.map(
+                (amenity) => amenity.amenity_id
+            );
+            const quantities = addAmenities.map(
+                (amenity) => amenity.quantity
+            );
+
+            // Check if all amenities are valid
+            const amenities = await db.Amenity.findAll({
                 where: {
-                    booking_id: booking.booking_id,
-                    payment_type: "Amenities-Price",
+                    amenity_id: { [Op.in]: amenitiesId },
+                    status: "active",
                 },
-                defaults: {
-                    booking_id: booking.booking_id,
-                    amount: booking.total_amenities_price,
-                    payment_method: "paypal",
-                    payment_date: new Date(),
-                    payment_type: "Amenities-Price",
-                },
+                attributes: ["amenity_name", "rent_price", "amenity_id"],
+            });
+            if(amenities.length === 0) return reject("No valid amenities found");
+
+            // Calculate the total amount for all items correctly
+            const totalAmenitiesPrice = amenities.reduce((total, amenity, index) => {
+                return total + (amenity.rent_price * quantities[index]);
+            }, 0);
+            if(total_amenities_price !== totalAmenitiesPrice) return reject("Total amenities price mismatch");
+
+            // Create payment
+            const payment = await db.Payment.create({
+                booking_id: booking.booking_id,
+                amount: total_amenities_price,
+                payment_method: "paypal",
+                payment_date: new Date(),
+                payment_type: "Amenities-Price",
+            },{
                 transaction: t,
             });
-            if (!created) return reject("Payment already exists");
+            if (!payment) return reject("Payment created failed");
 
-            const [transaction, createdTransaction] =
-                await db.Transaction.findOrCreate({
-                    where: {
-                        payment_id: payment.payment_id,
-                    },
-                    defaults: {
-                        payment_id: payment.payment_id,
-                        status: "In-processing",
-                    },
+            // Create transaction
+            const transaction =
+                await db.Transaction.create({
+                    payment_id: payment.payment_id,
+                    status: "In-processing",
+                },{
                     transaction: t,
                 });
-
-            if (!createdTransaction) return reject("Transaction not found");
+            if (!transaction) return reject("Transaction created failed");
 
             const request = new paypal.orders.OrdersCreateRequest();
-            const amount = await convertVNDToUSD(booking.total_amenities_price);
-            console.log(booking.total_amenities_price);
-            const amenitiesNames = amenities.map(
-                (amenity) => amenity.amenity_name
-            );
+            const amount = await convertVNDToUSD(total_amenities_price);
+            
             // Calculate the total amount for all items correctly
-            const itemsPromises = bookingAmenities.map(
+            const itemsPromises = amenities.map(
                 async (amenity, index) => {
-                    const convertedValue = await convertVNDToUSD(amenity.price);
-                    const convertedTotal = await convertVNDToUSD(
-                        amenity.total_price
-                    );
+                    const convertedValue = await convertVNDToUSD(amenity.rent_price);
+                    const convertedTotal = await convertVNDToUSD(amenity.rent_price * quantities[index]);
                     return {
-                        name: amenitiesNames[index],
-                        quantity: amenity.quantity,
+                        name: amenity.amenity_name,
+                        quantity: quantities[index],
                         unit_amount: {
                             currency_code: "USD",
                             value: convertedValue,
@@ -568,10 +565,9 @@ export const paypalCheckoutAmenitiesService = ({ booking_id, user_id }) =>
                     };
                 }
             );
-
             const items = await Promise.all(itemsPromises);
-            console.log(items);
-            console.log(amount);
+
+            // Create PayPal order
             request.prefer("return=representation");
             request.requestBody({
                 intent: "CAPTURE",
@@ -599,8 +595,10 @@ export const paypalCheckoutAmenitiesService = ({ booking_id, user_id }) =>
                 ],
             });
 
+            // Execute the request
             const response = await client.execute(request);
 
+            // Check if the request is successful
             if (response.statusCode !== 201) {
                 reject(
                     `Failed to create PayPal order: ${JSON.stringify(
@@ -609,15 +607,32 @@ export const paypalCheckoutAmenitiesService = ({ booking_id, user_id }) =>
                 );
             }
 
+            // Update payment with PayPal order ID
             const order = response.result;
-
             await db.Payment.update(
                 { paypal_order_id: order.id },
                 { where: { payment_id: payment.payment_id }, transaction: t }
             );
+           // Create booking amenities
+            const bookingAmenities = amenities.map((amenity, index) => {
+                const quantity = quantities[index];
+                const bookingAmenity = {
+                  booking_amenities_id: v4(),
+                  booking_id: booking.booking_id,
+                  amenity_id: amenity.amenity_id,
+                  quantity: quantity,
+                  price: amenity.rent_price,
+                  total_price: amenity.rent_price * quantity
+                }
+                return db.BookingAmenities.create(bookingAmenity, {transaction: t});
+              });
+            await Promise.all(bookingAmenities);
+
+            // Update booking with total amenities price
+            booking.total_amenities_price = parseInt(total_amenities_price)
+            await booking.save({transaction: t}); 
 
             await t.commit();
-
             return resolve({
                 err: 0,
                 message: "PayPal checkout initiated successfully",
@@ -650,7 +665,7 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
                     },
                     {
                         model: db.Customer,
-                        attributes: ["user_id"],
+                        attributes: ["user_id", "point", "customer_id"],
                         required: true,
                         include: [
                             {
@@ -716,6 +731,16 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
             );
 
             if (!transaction) return reject("Transaction created failed");
+            const updatedPoints = await db.Customer.update(
+                {
+                    point: parseInt(booking.Customer.point) + Math.ceil(parseInt(booking.total_workspace_price) / 1000)
+                },{
+                    where:{
+                        customer_id: booking.Customer.customer_id
+                    },
+                    transaction: t
+                });
+            if(updatedPoints[0] === 0) return reject("Failed to update customer points");
             await sendMail(booking.Customer.User.email, "Payment successful", "Thank you for your payment. Enjoy your workspace.")
 
             await t.commit();

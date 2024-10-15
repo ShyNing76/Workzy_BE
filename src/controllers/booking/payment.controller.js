@@ -95,15 +95,26 @@ export const paypalCheckoutAmenitiesController = async (req, res) => {
         const error = Joi.object({
             user_id: Joi.required(),
             booking_id: Joi.string().uuid().required(),
+            addAmenities: Joi.array().items(
+                Joi.object({
+                    amenity_id: Joi.string().uuid().required(),
+                    quantity: Joi.number().integer().min(1).required()
+                })
+            ).required(),
+            total_amenities_price: Joi.number().min(0).required()
         }).validate({
             user_id: req.user.user_id,
             booking_id: req.body.booking_id,
+            addAmenities: req.body.addAmenities,
+            total_amenities_price: req.body.total_amenities_price,
         }).error;
         if (error) return badRequest(res, error.details[0].message);
 
         const booking = await services.paypalCheckoutAmenitiesService({
             booking_id: req.body.booking_id,
             user_id: req.user.user_id,
+            addAmenities: req.body.addAmenities,
+            total_amenities_price: req.body.total_amenities_price,
         });
         return ok(res, booking);
     } catch (err) {
@@ -116,6 +127,11 @@ export const paypalCheckoutAmenitiesController = async (req, res) => {
             "Booking status not found",
             "Payment not found",
             "Failed to create PayPal order",
+            "Error associating amenities with booking",
+            "No valid amenities found",
+            "Total amenities price mismatch",
+            "Payment created failed",
+            "Transaction created failed"
         ];
         if (knownErrors.includes(err)) return badRequest(res, err);
         internalServerError(res, err);
