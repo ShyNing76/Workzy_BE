@@ -639,7 +639,7 @@ export const getAmenitiesByBookingIdService = (booking_id) =>
             resolve({
                 err: 0,
                 message: "Get amenities successfully",
-                data: uniqueAmenities,
+                data: {uniqueAmenities, booking_id}
             });
         } catch (error) {
             console.log(error);
