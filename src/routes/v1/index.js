@@ -15,6 +15,10 @@ function initWebRoutes(app) {
         // #swagger.tags = ['Booking']
     );
 
+    app.use('/api/v1/bookingType', require('./bookingType')
+        // #swagger.tags = ['Booking Type']
+    );
+
     app.use('/api/v1/user', require('./user')
         // #swagger.tags = ['User']
     );

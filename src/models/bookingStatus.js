@@ -29,13 +29,13 @@ module.exports = (sequelize, DataTypes) => {
             status: {
                 type: DataTypes.ENUM(
                     "confirmed",
-                    "paid",
-                    "check-in",
-                    "in-process",
-                    "check-out",
-                    "check-amenities",
-                    "completed",
-                    "damaged-payment",
+                    "paid", // customer
+                    "check-in", // staff
+                    "in-process", // customer
+                    "check-out", // staff
+                    "check-amenities", // staff (chọn amenities bị hư thông model)
+                    "completed", // 1
+                    "damaged-payment", // 1 customer
                     "cancelled"
                 ),
                 defaultValue: "confirmed",
