@@ -19,7 +19,6 @@ router.get(
 router.put(
     "/profile/",
     verify_token,
-    uploadImage,
     controller.updateUser
     /*  #swagger.description = 'Update the current customer profile.'
         #swagger.summary = 'Update the current profile of the customer'

@@ -114,6 +114,9 @@ export const getAllBookingsService = ({
                         model: db.BookingStatus,
                         as: "BookingStatuses",
                         where: statusCondition,
+                        order: [["createdAt", "DESC"]],
+                        limit: 1,
+                        required: false,
                     },
                     {
                         model: db.Workspace,
