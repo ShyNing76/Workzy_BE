@@ -44,11 +44,14 @@ export const createBuildingController = async (req, res) => {
             building_name: req.body.building_name,
             location: req.body.location,
             address: req.body.address,
-            images: req.body.images,
+            images: req.images,
         }).error;
         if (error) return badRequest(res, error);
 
-        const response = await services.createBuildingService(req.body);
+        const response = await services.createBuildingService({
+            ...req.body,
+            images: req.images,
+        });
         return created(res, response);
     } catch (error) {
         if (error === "Building name already exists") {
