@@ -19,7 +19,6 @@ router.get(
 router.put(
     "/profile/",
     verify_token,
-    uploadImage,
     controller.updateUser
     /*  #swagger.description = 'Update the current customer profile.'
         #swagger.summary = 'Update the current profile of the customer'
@@ -41,7 +40,7 @@ router.put(
                                     date_of_birth: {
                                         type: 'string',
                                         format: 'date-time',
-                                        example: 'MM/DD/YYYY'
+                                        example: 'YYYY-MM-DD'
                                     }
                                 },
                                 required: []

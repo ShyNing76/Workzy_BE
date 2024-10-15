@@ -1,6 +1,7 @@
 import express from "express";
 import * as controllers from "../../controllers";
 import { verify_role, verify_token } from "../../middlewares/verifyToken";
+import { uploadImages } from "../../middlewares/imageGoogleUpload";
 
 const router = express.Router();
 
@@ -70,6 +71,7 @@ router.use(verify_token);
 router.post(
     "/",
     verify_role(["admin"]),
+    uploadImages,
     controllers.createBuildingController
     /*
         #swagger.description = 'Endpoint to create a new building.'
@@ -77,7 +79,7 @@ router.post(
         #swagger.requestBody = {
             required: true,
             content: {
-                "application/json": {
+                "multipart/form-data": {
                     schema: {
                         type: 'object',
                         required: ['building_name', 'location', 'address', 'google_address', 'images'],
@@ -114,8 +116,9 @@ router.post(
                                 type: 'array',
                                 items: {
                                     type: 'string',
-                                    example: 'Image URL'
-                                }
+                                    format: 'binary'
+                                },
+                                description: 'Array of image files'
                             }
                         }
                     }

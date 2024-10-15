@@ -146,6 +146,7 @@ export const createBuildingService = (data) =>
                 },
             });
         } catch (error) {
+            console.log(error);
             await t.rollback();
             reject(error);
         }
@@ -340,7 +341,7 @@ const createBuildingImages = async (images, building_id, t) => {
     newImages.forEach((image) => {
         db.BuildingImage.create({
             building_id,
-            image,
+            image: image.firebaseUrl,
         });
     });
 };
