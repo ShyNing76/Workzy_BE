@@ -548,3 +548,101 @@ export const changeBookingStatusService = (booking_id, status) =>
             reject(error);
         }
     });
+
+export const getAmenitiesByBookingIdService = (booking_id) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const [booking, amenitiesOfBooking] = await Promise.all([
+                db.Booking.findOne({
+                    where: {
+                        booking_id: booking_id,
+                    }, 
+                    include: [
+                        {
+                            model: db.Workspace,
+                            attributes: ["workspace_id"],
+                            required: true,
+                        },
+                        {
+                            model: db.Customer,
+                            attributes: [],
+                            required: true,
+                            include: [
+                                {
+                                    model: db.User,
+                                    attributes: ["email", "name"],
+                                    required: true,
+                                },
+                            ],
+                        },
+                        {
+                            model: db.BookingStatus,
+                            attributes: ["status"],
+                            order: [["createdAt", "DESC"]],
+                            limit: 1,
+                            required: true,
+                        }
+                    ],
+                }),
+
+                db.BookingAmenities.findAll({
+                    where: {
+                        booking_id: booking_id,
+                    },
+                    attributes: [],
+                    include: [
+                        {
+                            model: db.Amenity,
+                            attributes: ["amenity_name"],
+                            required: true,
+                        },
+                    ],
+                    raw: true,
+                    nest: true,
+                })
+       
+            ]);
+
+            if (!booking) return reject("Booking not found");
+            if (booking.BookingStatuses[0].status !== "check-amenities")
+                return reject("Booking status is not check-amenities");
+            if (booking.BookingStatuses[0].status === "cancelled")
+                return reject("Booking status is cancelled");
+            if(amenitiesOfBooking.length === 0) return reject("No amenities found for the specified booking");
+            console.log(amenitiesOfBooking);
+            const amenitiesWorkspace = await db.AmenitiesWorkspace.findAll({
+                where: {
+                    workspace_id: booking.Workspace.workspace_id,
+                },
+                attributes: [],
+                include: [
+                    {
+                        model: db.Amenity,
+                        attributes: ["amenity_name"],
+                        required: true,
+                    },
+                ],
+                raw: true,
+                nest: true,
+            });
+            if(!amenitiesWorkspace) return reject("No amenities found for the specified workspace");
+
+            const amenitiesOfBookingList = amenitiesOfBooking.map((amenity) => {
+                return amenity.Amenity.amenity_name;
+            });
+            const amenitiesWorkspaceList = amenitiesWorkspace.map((amenity) => {
+                return amenity.Amenities.amenity_name;
+            });
+
+            const uniqueAmenities = [...new Set([...amenitiesOfBookingList, ...amenitiesWorkspaceList])];
+            if(uniqueAmenities.length === 0) return reject("No amenities found for the specified booking");
+            resolve({
+                err: 0,
+                message: "Get amenities successfully",
+                data: uniqueAmenities,
+            });
+        } catch (error) {
+            console.log(error);
+            reject(error);
+        }
+    });

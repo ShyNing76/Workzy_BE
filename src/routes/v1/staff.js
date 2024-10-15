@@ -373,4 +373,25 @@ router.post(
      */
 );
 
+router.get(
+    "/check-amenities/booking/:id",
+    verify_token,
+    verify_role(["staff"]),
+    controllers.getAmenitiesByBookingIdController
+    /*
+        #swagger.description = 'Get all amenities by booking ID.'
+        #swagger.summary = 'Get all amenities by booking ID.'
+        #swagger.parameters['id'] = { description: 'Booking ID.' }
+        #swagger.responses[200] = {
+            description: 'Booking found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
 module.exports = router;

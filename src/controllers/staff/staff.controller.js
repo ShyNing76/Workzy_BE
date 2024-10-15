@@ -175,3 +175,24 @@ export const changeBookingStatusController = async (req, res) => {
         internalServerError(res, error)
     }
 }
+
+export const getAmenitiesByBookingIdController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            id: Joi.string().uuid().required()
+        }).validate({id: req.params.id}).error;
+        if (error) return badRequest(res, error);
+        console.log(req.params.id)
+        const response = await services.getAmenitiesByBookingIdService(req.params.id);
+        return ok(res, response)    
+    } catch (error) {
+        if (error === "Booking status is not check-amenities" 
+            || error === "Booking not found" 
+            || error === "Booking status is cancelled"
+            || error === "No amenities found for the specified booking"
+            || error === "No amenities found for the specified workspace"
+        ) 
+            return badRequest(res, error);
+        internalServerError(res, error)
+    }
+}
