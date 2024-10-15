@@ -55,25 +55,25 @@ router.post(
     */
 );
 
-// router.delete("/", verify_token, controllers.deleteWishListController
-//     /*
-//         #swagger.description = 'Endpoint to remove a manager from a workspace.'
-//         #swagger.summary = 'Remove a manager from a workspace.'
-//         #swagger.parameters['id'] = { description: 'Workspace ID.' }
-//         #swagger.responses[200] = {
-//             description: 'Workspace removed successfully.'
-//         }
-//         #swagger.responses[404] = {
-//             description: 'Workspace not found.'
-//         }
-//         #swagger.responses[500] = {
-//             description: 'Internal server error.'
-//         }
-//         #swagger.security = [{
-//             "apiKeyAuth": []
-//         }]
-//      */
-// );
+router.put("/delete/:review_id", verify_token, verify_role(["admin", "manager"]), controllers.deleteReviewController
+    /*
+        #swagger.description = 'Endpoint to remove a review.'
+        #swagger.summary = 'Remove a review.'
+        #swagger.parameters['review_id'] = { description: 'Review Id.' }
+        #swagger.responses[200] = {
+            description: 'Review removed successfully.'
+        }
+        #swagger.responses[404] = {
+            description: 'Review not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
 
 router.get(
     "/",
