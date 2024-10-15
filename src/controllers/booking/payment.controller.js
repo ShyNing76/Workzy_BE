@@ -176,7 +176,7 @@ export const paypalCheckoutDamageController = async (req, res) => {
         const error = Joi.object({
             user_id: Joi.required(),
             booking_id: Joi.string().uuid().required(),
-            total_damage_price: Joi.number().min(0).required()
+            total_damage_price: Joi.number().min(0).required() // lỗi
         }).validate({
             user_id: req.user.user_id,
             booking_id: req.body.booking_id,

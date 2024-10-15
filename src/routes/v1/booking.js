@@ -254,7 +254,7 @@ router.get(
     */
 );
 
-router.delete(
+router.put(
     "/cancel/:id",
     verify_role(["customer"]),
     controllers.cancelBookingController
@@ -661,7 +661,7 @@ router.post(
     "/checkout/paypal/damage-amenities",
     verify_role(["customer"]),
     controllers.paypalCheckoutDamageController
-        /*
+    /*
         #swagger.description = 'Initiate PayPal checkout for damage amenities.'
         #swagger.summary = 'PayPal Checkout Damage Amenities'
         #swagger.security = [{
@@ -714,13 +714,13 @@ router.post(
             }
         }
     */
-)
+);
 
 router.post(
     "/checkout/paypal/damage-amenities/success",
     verify_role(["customer"]),
     controllers.paypalDamageSuccessController
-        /*
+    /*
         #swagger.description = 'Handle PayPal success payment for damage amenities.'
         #swagger.summary = 'PayPal Success Payment Damage Amenities'
         #swagger.security = [{
@@ -777,5 +777,5 @@ router.post(
             }
         }
     */
-)
+);
 module.exports = router;
