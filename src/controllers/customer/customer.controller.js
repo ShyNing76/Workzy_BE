@@ -55,3 +55,22 @@ export const getUserByIdController = async (req, res) => {
         internalServerError(res, error);
     }
 };
+
+export const changeStatusController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            id: Joi.required(),
+            status: Joi.string().required(),
+        }).validate({ id: req.params.id, status: req.body.status }).error;
+        if (error) return badRequest(res, error.message);
+        const response = await services.changeStatusService({
+            booking_id: req.params.id,
+            user_id: req.user.user_id,
+            status: req.body.status,
+        });
+        return ok(res, response);
+    } catch (error) {
+        console.log(error);
+        internalServerError(res, error);
+    }
+};

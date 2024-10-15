@@ -71,19 +71,21 @@ export const getAllUsersService = ({ page, limit, order, name, ...query }) =>
 export const removeUserService = (user_id) =>
     new Promise(async (resolve, reject) => {
         try {
-            const updateUser = await db.User.update({
-                status: "inactive"
-            },
-            {
-                where: {
-                  user_id: user_id,
-                  status: "active"
+            const updateUser = await db.User.update(
+                {
+                    status: "inactive",
+                },
+                {
+                    where: {
+                        user_id: user_id,
+                        status: "active",
+                    },
                 }
-            })
+            );
             if (!updateUser) {
                 return reject("User not found");
             }
-            if(updateUser[0] === 0) return reject("User is already updated")
+            if (updateUser[0] === 0) return reject("User is already updated");
 
             resolve({
                 err: 0,
@@ -178,6 +180,76 @@ export const getUserByIdService = (customer_id) =>
                 err: 0,
                 message: "User found",
                 data: plainUser,
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+
+export const changeStatusService = ({ booking_id, user_id, status }) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            console.log(booking_id, user_id, status);
+            const customer = await db.Customer.findOne({
+                where: {
+                    user_id,
+                },
+            });
+
+            if (!customer) {
+                return reject("Customer not found");
+            }
+
+            const booking = await db.Booking.findOne({
+                where: {
+                    booking_id,
+                    customer_id: customer.customer_id,
+                },
+                include: [
+                    {
+                        model: db.BookingStatus,
+                        order: [["createdAt", "DESC"]],
+                        limit: 1,
+                        required: true,
+                        attributes: ["status"],
+                    },
+                ],
+            });
+
+            if (!booking) {
+                return reject("Booking not found");
+            }
+
+            const statusTransitions = {
+                paid: "check-in",
+                "in-process": "check-out",
+            };
+
+            const changeStatus = statusTransitions[booking.BookingStatuses[0].status];
+
+            if (changeStatus !== status) {
+                return reject("Invalid status");
+            }
+
+            if (changeStatus === "check-in") {
+                const timeDifference = moment(booking.start_date_time).diff(moment(), "minutes");
+                if (timeDifference < -15) {
+                    return reject("Booking start time has passed more than 15 minutes ago");
+                }
+            }
+
+            const createBookingStatus = await db.BookingStatus.create({
+                booking_id,
+                status: changeStatus,
+            });
+
+            if (!createBookingStatus) {
+                return reject("Create booking status failed");
+            }
+
+            resolve({
+                err: 0,
+                message: `Change status ${changeStatus} successful`,
             });
         } catch (error) {
             reject(error);

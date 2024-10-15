@@ -102,4 +102,54 @@ router.get(
         }]
      */
 );
+
+router.put(
+    "/change-status/:id",
+    verify_token,
+    verify_role(["customer"]),
+    controller.changeStatusController
+    /* #swagger.description = 'Endpoint to change status of a customer.'
+    #swagger.summary = 'Change status of a customer'
+    #swagger.parameters['id'] = {
+        in: 'path',
+        description: 'Id of the booking to change status',
+        required: true,
+        type: 'string'
+    }
+    #swagger.requestBody = {
+        required: true,
+        content: {
+            'application/json': {
+                schema: {
+                    type: 'object',
+                    properties: {
+                        status: {
+                            type: 'string',
+                            enum: ['check-in', 'check-out'],
+                            description: 'Status to change (Check-in, Check-out)'
+                        }
+                    }
+                }
+            }
+        }
+    }
+    #swagger.responses[200] = {
+        description: 'Change status successful.'
+    }
+    #swagger.responses[400] = {
+        description: 'Change status failed.'
+    }
+    #swagger.responses[500] = {
+        description: 'Internal server error.'
+    }
+    #swagger.security = [{
+            "apiKeyAuth": []
+    }]
+    #swagger.parameters['id'] = {
+        in: 'path',
+        description: 'ID of the customer to change status',
+        required: true,
+        type: 'integer'
+    } */
+);
 module.exports = router;
