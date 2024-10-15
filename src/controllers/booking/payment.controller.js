@@ -169,3 +169,72 @@ export const paypalAmenitiesSuccessController = async (req, res) => {
         internalServerError(res, err);
     }
 };
+
+// Amenities damage payment
+export const paypalCheckoutDamageController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            user_id: Joi.required(),
+            booking_id: Joi.string().uuid().required(),
+            total_damage_price: Joi.number().min(0).required()
+        }).validate({
+            user_id: req.user.user_id,
+            booking_id: req.body.booking_id,
+            total_damage_price: req.body.total_damage_price,
+        }).error;
+        if (error) return badRequest(res, error.details[0].message);
+
+        const booking = await services.paypalCheckoutDamageService({
+            booking_id: req.body.booking_id,
+            user_id: req.user.user_id,
+            total_damage_price: req.body.total_damage_price,
+        });
+        return ok(res, booking);
+    } catch (err) {
+        console.error(err);
+        const knownErrors = [
+            "Customer not found",
+            "Booking not found",
+            "Booking is not final-payment",
+            "Booking already cancelled",
+            "Booking status not found",
+            "Failed to create PayPal order",
+            "Payment created failed",
+            "Transaction created failed"
+        ];
+        if (knownErrors.includes(err)) return badRequest(res, err);
+        internalServerError(res, err);
+    }
+}
+
+export const paypalDamageSuccessController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            booking_id: Joi.string().uuid().required(),
+            order_id: Joi.string().required(),
+        }).validate({
+            booking_id: req.body.booking_id,
+            order_id: req.body.order_id,
+        }).error;
+        if (error) return badRequest(res, error.details[0].message);
+
+        const booking = await services.paypalDamageSuccessService({
+            booking_id: req.body.booking_id,
+            order_id: req.body.order_id,
+        });
+        return ok(res, booking);
+    } catch (err) {
+        console.error(err);
+        const knownErrors = [
+            "Booking not found",
+            "Booking status not found",
+            "Booking must be final-payment",
+            "Booking already cancelled",
+            "Failed to capture PayPal order",
+            "Payment not found",
+            "Transaction created failed",
+        ];
+        if (knownErrors.includes(err)) return badRequest(res, err);
+        internalServerError(res, err);
+    }
+}

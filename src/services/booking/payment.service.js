@@ -113,6 +113,7 @@ export const paypalCheckoutService = ({ booking_id, user_id }) =>
                 },
                 transaction: t,
             });
+            if(!created) return reject("Payment created failed");
 
             const [transaction, createdTransaction] =
                 await db.Transaction.findOrCreate({
@@ -124,7 +125,7 @@ export const paypalCheckoutService = ({ booking_id, user_id }) =>
                     transaction: t,
                 });
 
-            // if (!createdTransaction) return rejecst("Transaction not found");
+            if (!createdTransaction) return reject("Transaction not found");
 
             const request = new paypal.orders.OrdersCreateRequest();
             const amount = await convertVNDToUSD(booking.total_price);
@@ -731,6 +732,7 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
             );
 
             if (!transaction) return reject("Transaction created failed");
+
             const updatedPoints = await db.Customer.update(
                 {
                     point: parseInt(booking.Customer.point) + Math.ceil(parseInt(booking.total_workspace_price) / 1000)
@@ -754,3 +756,257 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
             return reject(err);
         }
     });
+
+// Amenities damage payment
+export const paypalCheckoutDamageService = ({ booking_id, user_id, total_damage_price }) =>
+    new Promise(async (resolve, reject) => {
+        const t = await db.sequelize.transaction();
+        try {
+            const customer = await db.Customer.findOne({
+                where: { user_id },
+            });
+
+            if (!customer) return reject("Customer not found");
+
+            const booking = await db.Booking.findOne({
+                where: { booking_id },
+                include: [
+                    {
+                        model: db.BookingStatus,
+                        as: "BookingStatuses",
+                        order: [["createdAt", "DESC"]],
+                        limit: 1,
+                    },
+                    {
+                        model: db.Customer,
+                        as: "Customer",
+                        attributes: ["customer_id", "point"],
+                        include: [
+                            {
+                                model: db.User,
+                                as: "User",
+                                attributes: ["email", "name"],
+                            },
+                        ],
+                    },
+                ],
+            });
+
+            if (!booking) return reject("Booking not found");
+
+            if (booking.BookingStatuses[0].status !== "final-payment")
+                return reject("Booking is not final-payment");
+
+            if (booking.BookingStatuses[0].status === "cancelled")
+                return reject("Booking already cancelled");
+
+            const [payment, created] = await db.Payment.findOrCreate({
+                where: {
+                    booking_id: booking.booking_id,
+                    payment_type: "Broken-Price",
+                },
+                defaults: {
+                    booking_id: booking.booking_id,
+                    amount: booking.total_price,
+                    payment_method: "paypal",
+                    payment_date: new Date(),
+                    payment_type: "Broken-Price",
+                },
+                transaction: t,
+            });
+            if(!created) return reject("Payment created failed");
+
+            const [transaction, createdTransaction] =
+                await db.Transaction.findOrCreate({
+                    where: { payment_id: payment.payment_id },
+                    defaults: {
+                        payment_id: payment.payment_id,
+                        status: "In-processing",
+                    },
+                    transaction: t,
+                });
+
+            if (!createdTransaction) return reject("Transaction created failed");
+            console.log(total_damage_price);
+            const amount = await convertVNDToUSD(total_damage_price);
+            const request = new paypal.orders.OrdersCreateRequest();
+
+            request.prefer("return=representation");
+            request.requestBody({
+                intent: "CAPTURE",
+                application_context: {
+                    shipping_preference: "NO_SHIPPING",
+                    return_url: "http://localhost:5173/booking/payment",
+                    cancel_url: "http://localhost:5173/",
+                },
+                purchase_units: [
+                    {
+                        amount: {
+                            currency_code: "USD",
+                            value: amount,
+                            breakdown: {
+                                item_total: {
+                                    currency_code: "USD",
+                                    value: amount,
+                                },
+                            },
+                        },
+                        reference_id: booking_id,
+                        description: `Booking ID: ${booking_id}`,
+                        items: [
+                            {
+                                name: "Damage Payment",
+                                quantity: 1,
+                                unit_amount: {
+                                    currency_code: "USD",
+                                    value: amount,
+                                },
+                            },
+                        ],
+                    },
+                ],
+            });
+
+            const response = await client.execute(request);
+
+            if (response.statusCode !== 201) {
+                return reject(
+                    `Failed to create PayPal order: ${JSON.stringify(
+                        response.result
+                    )}`
+                );
+            }
+            const order = response.result;
+            await db.Payment.update(
+                { paypal_order_id: order.id },
+                { where: { payment_id: payment.payment_id }, transaction: t }
+            );
+
+            await t.commit();
+            resolve({
+                err: 0,
+                message: "PayPal checkout initiated successfully",
+                data: {
+                    approval_url: response.result.links.find(
+                        (link) => link.rel === "approve"
+                    ).href,
+                    order_id: response.result.id,
+                },
+            });
+        } catch (err) {
+            await t.rollback();
+            console.error(err);
+            return reject(err);
+        }
+    }
+);
+
+export const paypalDamageSuccessService = ({ booking_id, order_id }) =>
+    new Promise(async (resolve, reject) => {
+        const t = await db.sequelize.transaction();
+        try {
+            const booking = await db.Booking.findOne({
+                where: { booking_id },
+                include: [
+                    {
+                        model: db.BookingStatus,
+                        as: "BookingStatuses",
+                        order: [["createdAt", "DESC"]],
+                        limit: 1,
+                        require: true
+                    },
+                    {
+                        model: db.Customer,
+                        as: "Customer",
+                        attributes: ["user_id", "point"],
+                        require: true,
+                        include: [
+                            {
+                                model: db.User,
+                                as: "User",
+                                attributes: ["email", "name"],
+                            },
+                        ],
+                    },
+                ],
+            });
+
+            if (!booking) {
+                return reject("Booking not found");
+            }
+
+            if (
+                !booking.BookingStatuses ||
+                booking.BookingStatuses.length === 0
+            ) {
+                return reject("Booking status not found");
+            }
+
+            if (booking.BookingStatuses[0].status !== "final-payment")
+                return reject("Booking must be final-payment");
+
+            if (booking.BookingStatuses[0].status === "cancelled")
+                return reject("Booking already cancelled");
+
+            const amount = await convertVNDToUSD(booking.total_broken_price);
+            const request = new paypal.orders.OrdersCaptureRequest(order_id);
+            request.requestBody({
+                amount: {
+                    currency_code: "USD",
+                    value: amount,
+                },
+            });
+
+            const response = await client.execute(request);
+
+            if (response.statusCode !== 201) {
+                return reject("Failed to capture PayPal order");
+            }
+
+            const payment = await db.Payment.findOne({
+                where: { paypal_order_id: order_id },
+            });
+
+            if (!payment) return reject("Payment not found");
+
+            const captureId =
+                response.result.purchase_units[0].payments.captures[0].id;
+
+            const updatedPayment = await db.Payment.update(
+                { paypal_capture_id: captureId },
+                { where: { payment_id: payment.payment_id }, transaction: t }
+            );
+            if(updatedPayment[0] === 0) return reject("Payment not found");
+
+            const transaction = await db.Transaction.create(
+                {
+                    payment_id: payment.payment_id,
+                    status: "Completed",
+                },
+                { transaction: t }
+            );
+
+            if (!transaction) return reject("Transaction created failed");
+
+            const changeBookingStatus = await db.BookingStatus.create(
+                {
+                    booking_id: booking_id,
+                    status: "completed",
+                },
+                { transaction: t }
+            );
+            if (!changeBookingStatus) return reject("Booking Status changed failed");
+            await sendMail(booking.Customer.User.email, "Payment successful", "Thank you for using the service at Workzy.")
+
+            await t.commit();
+            resolve({
+                err: 0,
+                message: "Payment successful",
+            })
+        } catch (err) {
+            await t.rollback();
+            console.error(err);
+            return reject(err);
+        }
+    }
+);
