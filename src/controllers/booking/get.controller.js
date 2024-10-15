@@ -16,7 +16,7 @@ export const getAllBookingsController = async (req, res) => {
         if (error) return badRequest(res, error.details[0].message);
 
         const bookings = await services.getAllBookingsService({
-            ...req.params,
+            ...req.query,
         });
         return ok(res, bookings);
     } catch (err) {

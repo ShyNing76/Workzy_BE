@@ -49,3 +49,25 @@ export const uploadImage = (req, res, next) => {
         }
     });
 };
+
+export const uploadImages = (req, res, next) => {
+    upload.array("images", 10)(req, res, async (err) => {
+        if (err) {
+            return next(err);
+        }
+        const images = [];
+        for (const image of req.files) {
+            const dateTime = Date.now();
+            const storageRef = ref(
+                firebaseStorage,
+                `images/${image.originalname + "_" + dateTime}`
+            );
+            const snapshot = await uploadBytes(storageRef, image.buffer);
+            image.firebaseUrl = snapshot.metadata.fullPath;
+            image.firebaseUrl = await getDownloadURL(snapshot.ref);
+            images.push(image);
+        }
+        req.images = images;
+        next();
+    });
+};
