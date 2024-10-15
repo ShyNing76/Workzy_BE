@@ -394,4 +394,47 @@ router.get(
      */
 );
 
+router.post(
+    "/broken-amenities-booking",
+    verify_token,
+    verify_role(["staff"]),
+    controllers.createBrokenAmenitiesBookingController
+    /*
+        #swagger.description = 'Endpoint to create a broken amenities price.'
+        #swagger.summary = 'Create a broken amenities price.'
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            amenitiy_name: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    example: 'Amenity Name'
+                                }
+                            }
+                        },
+                        required: ['amenitiy_name']
+                    }
+                }
+            }
+        }
+        #swagger.responses[201] = {
+            description: 'Booking created successfully.'
+        }
+        #swagger.responses[400] = {
+            description: 'Bad request. Invalid input.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+)
+
 module.exports = router;

@@ -646,3 +646,30 @@ export const getAmenitiesByBookingIdService = (booking_id) =>
             reject(error);
         }
     });
+
+export const createBrokenAmenitiesBookingService = ({amenity_names}) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const amenities = await db.Amenity.findAll({
+                where: {
+                    amenity_name: {[Op.in]: amenity_names},
+                    status: "active"
+                },
+                attributes: ["amenity_id"],
+                raw: true,
+                nest: true,
+            });
+            const total_broken_price = amenities.reduce((total, amenity) => {
+                return total + amenity.price;
+            }, 0);
+            console.log(total_broken_price);
+            resolve({   
+                err: 0,
+                message: "Broken amenities created successfully",
+            });
+        } catch (error) {
+            await t.rollback();
+            reject(error);
+        }
+    });
+
