@@ -201,12 +201,7 @@ export const getBookingByIdService = ({ booking_id, user_id }) =>
                         model: db.BookingStatus,
                         as: "BookingStatuses",
                         attributes: {
-                            exclude: [
-                                "createdAt",
-                                "updatedAt",
-                                "booking_status_id",
-                                "booking_id",
-                            ],
+                            exclude: ["booking_status_id", "booking_id"],
                         },
                     },
                 ],
