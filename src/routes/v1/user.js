@@ -40,7 +40,7 @@ router.put(
                                     date_of_birth: {
                                         type: 'string',
                                         format: 'date-time',
-                                        example: 'MM/DD/YYYY'
+                                        example: 'YYYY-MM-DD'
                                     }
                                 },
                                 required: []

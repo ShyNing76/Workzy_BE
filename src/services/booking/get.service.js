@@ -106,9 +106,7 @@ export const getAllBookingsService = ({
             console.log(building_id);
 
             const bookings = await db.Booking.findAndCountAll({
-                where: {
-                    ...data,
-                },
+                where: { ...data },
                 include: [
                     {
                         model: db.BookingStatus,
@@ -121,17 +119,24 @@ export const getAllBookingsService = ({
                     {
                         model: db.Workspace,
                         as: "Workspace",
-                        where: {
-                            building_id: building_id || [],
+                        where: { building_id: building_id || [] },
+                        attributes: { exclude: ["createdAt", "updatedAt"] },
+                    },
+                    {
+                        model: db.Customer,
+                        as: "Customer",
+                        attributes: { exclude: ["createdAt", "updatedAt"] },
+                        include: {
+                            model: db.User,
+                            as: "User",
+                            attributes: { exclude: ["createdAt", "updatedAt"] },
                         },
                     },
                 ],
                 order: [handleSortOrder(order, "start_time_date")],
                 limit: handleLimit(limit),
                 offset: handleOffset(page, limit),
-                attributes: {
-                    exclude: ["createdAt", "updatedAt"],
-                },
+                attributes: { exclude: ["createdAt", "updatedAt"] },
             });
 
             if (!bookings || bookings.count === 0)
