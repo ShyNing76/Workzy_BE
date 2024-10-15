@@ -73,17 +73,3 @@ export const getAmenityByIdController = async (req, res) => {
         internalServerError(res, error)
     }
 }
-
-export const createBrokenAmenitiesBookingController = async (req, res) => {
-    try {
-        const error = Joi.object({
-            amenity_name: Joi.array().required(),
-        }).validate({amenity_name: req.body.amenity_name}).error;
-        if(error) return badRequest(res, error);
-        const response = await services.createBrokenAmenitiesBookingService(req.body);
-        return created(res, response);
-    } catch (error) {
-        if(error === "Broken amenities created successfully") return badRequest(res, error);
-        internalServerError(res, error)
-    }
-}

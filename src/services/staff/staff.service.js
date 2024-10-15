@@ -647,28 +647,52 @@ export const getAmenitiesByBookingIdService = (booking_id) =>
         }
     });
 
-export const createBrokenAmenitiesBookingService = ({amenity_names}) =>
+export const createBrokenAmenitiesBookingService = (amenity_name, booking_id) =>
     new Promise(async (resolve, reject) => {
         try {
             const amenities = await db.Amenity.findAll({
                 where: {
-                    amenity_name: {[Op.in]: amenity_names},
+                    amenity_name: {[Op.in]: amenity_name},
                     status: "active"
                 },
-                attributes: ["amenity_id"],
+                attributes: ["amenity_id", "depreciation_price"],
                 raw: true,
                 nest: true,
             });
+            if(amenities.length === 0) return reject("Amenities not found");
             const total_broken_price = amenities.reduce((total, amenity) => {
-                return total + amenity.price;
+                return parseInt(total) + parseInt(amenity.depreciation_price);
             }, 0);
             console.log(total_broken_price);
+            const booking = await db.Booking.findOne({
+                where: {
+                    booking_id: booking_id,
+                },
+                include: [
+                    {
+                        model: db.BookingStatus,
+                        attributes: ["status"],
+                        order: [["createdAt", "DESC"]],
+                        limit: 1,
+                        required: true,
+                    }
+                ],
+            });
+            if (!booking) return reject("Booking not found");
+            if (booking.BookingStatuses[0].status !== "check-amenities")
+                return reject("Booking status is not check-amenities");
+            if (booking.BookingStatuses[0].status === "cancelled")
+                return reject("Booking status is cancelled");
+
+            booking.total_broken_price = total_broken_price;
+            await booking.save();            
+
             resolve({   
                 err: 0,
                 message: "Broken amenities created successfully",
             });
         } catch (error) {
-            await t.rollback();
+            console.log(error);
             reject(error);
         }
     });

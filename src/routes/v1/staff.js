@@ -409,15 +409,19 @@ router.post(
                     schema: {
                         type: 'object',
                         properties: {
-                            amenitiy_name: {
+                            amenity_name: {
                                 type: 'array',
                                 items: {
                                     type: 'string',
                                     example: 'Amenity Name'
                                 }
-                            }
-                        },
-                        required: ['amenitiy_name']
+                            },
+                            booking_id: {
+                                type: 'string',
+                                format: 'uuid',
+                                example: '123e4567-e89b-12d3-a456-426614174000'
+                            },
+                        }   
                     }
                 }
             }

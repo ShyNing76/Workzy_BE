@@ -825,7 +825,6 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
 export const paypalCheckoutDamageService = ({
     booking_id,
     user_id,
-    total_damage_price,
 }) =>
     new Promise(async (resolve, reject) => {
         const t = await db.sequelize.transaction();
@@ -862,8 +861,8 @@ export const paypalCheckoutDamageService = ({
 
             if (!booking) return reject("Booking not found");
 
-            if (booking.BookingStatuses[0].status !== "final-payment")
-                return reject("Booking is not final-payment");
+            if (booking.BookingStatuses[0].status !== "damaged-payment")
+                return reject("Booking is not damaged-payment");
 
             if (booking.BookingStatuses[0].status === "cancelled")
                 return reject("Booking already cancelled");
@@ -896,8 +895,7 @@ export const paypalCheckoutDamageService = ({
 
             if (!createdTransaction)
                 return reject("Transaction created failed");
-            console.log(total_damage_price);
-            const amount = await convertVNDToUSD(total_damage_price);
+            const amount = await convertVNDToUSD(booking.total_broken_price);
             const request = new paypal.orders.OrdersCreateRequest();
 
             request.prefer("return=representation");
@@ -1010,8 +1008,8 @@ export const paypalDamageSuccessService = ({ booking_id, order_id }) =>
                 return reject("Booking status not found");
             }
 
-            if (booking.BookingStatuses[0].status !== "final-payment")
-                return reject("Booking must be final-payment");
+            if (booking.BookingStatuses[0].status !== "damaged-payment")
+                return reject("Booking must be damaged-payment");
 
             if (booking.BookingStatuses[0].status === "cancelled")
                 return reject("Booking already cancelled");

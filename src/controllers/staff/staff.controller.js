@@ -196,3 +196,24 @@ export const getAmenitiesByBookingIdController = async (req, res) => {
         internalServerError(res, error)
     }
 }
+
+export const createBrokenAmenitiesBookingController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            amenity_name: Joi.array().required(),
+            booking_id: Joi.string().uuid().required()
+        }).validate({amenity_name: req.body.amenity_name, booking_id: req.body.booking_id}).error;
+        if (error) return badRequest(res, error);
+        console.log(req.body.amenity_name)
+        const response = await services.createBrokenAmenitiesBookingService(req.body.amenity_name, req.body.booking_id);
+        return created(res, response)    
+    } catch (error) {
+        if (error === "Booking not found"
+            || error === "Booking status is not check-amenities"
+            || error === "Amenities not found"
+            || error === "Amenities is already broken"
+        ) 
+            return badRequest(res, error);
+        internalServerError(res, error)
+    }
+}
