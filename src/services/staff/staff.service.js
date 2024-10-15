@@ -2,7 +2,7 @@ import moment from "moment";
 import { Op } from "sequelize";
 import { v4 } from "uuid";
 import db from "../../models";
-import * as sendMail from "../../utils/sendMail/index.js";
+import { sendMail } from "../../utils/sendMail/index.js";
 import {
     handleLimit,
     handleOffset,
@@ -529,7 +529,7 @@ export const changeBookingStatusService = (booking_id, status) =>
                     booking_id: booking_id,
                     status: statusTransitions[bookingStatus.status],
                 });
-                await sendMail.sendMailBookingStatus(
+                await sendMail(
                     booking.Customer.User.email,
                     "Booking Status Updated",
                     "Your booking status has been updated to <b>" +
