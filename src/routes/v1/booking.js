@@ -508,7 +508,7 @@ router.post(
 );
 // amenities payment
 router.post(
-    "/checkout-amenities/paypal",
+    "/checkout/paypal/amenities",
     verify_role(["customer"]),
     controllers.paypalCheckoutAmenitiesController
     /*
@@ -594,7 +594,7 @@ router.post(
 );
 
 router.post(
-    "/checkout-amenities/paypal/success",
+    "/checkout/paypal/amenities/success",
     verify_role(["customer"]),
     controllers.paypalAmenitiesSuccessController
     /*
@@ -655,4 +655,127 @@ router.post(
         }
     */
 );
+
+// damage amenities payment
+router.post(
+    "/checkout/paypal/damage-amenities",
+    verify_role(["customer"]),
+    controllers.paypalCheckoutDamageController
+        /*
+        #swagger.description = 'Initiate PayPal checkout for damage amenities.'
+        #swagger.summary = 'PayPal Checkout Damage Amenities'
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            booking_id: {
+                                type: 'string',
+                                format: 'uuid',
+                                example: '123e4567-e89b-12d3-a456-426614174000',
+                                description: 'Booking ID'
+                            },
+                            total_damage_price: {
+                                type: 'number',
+                                example: 500000
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        #swagger.responses[200] = {
+            description: 'PayPal checkout initiated successfully',
+            schema: {
+                err: 0,
+                message: 'PayPal checkout initiated successfully',
+                data: {
+                    approval_url: 'https://www.paypal.com/checkoutnow?token=EC-1234567890'
+                }
+            }
+        }
+        #swagger.responses[400] = {
+            description: 'Bad request',
+            schema: {
+                err: 1,
+                message: 'Invalid input data'
+            }
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error',
+            schema: {
+                err: 1,
+                message: 'An error occurred while processing your request'
+            }
+        }
+    */
+)
+
+router.post(
+    "/checkout/paypal/damage-amenities/success",
+    verify_role(["customer"]),
+    controllers.paypalDamageSuccessController
+        /*
+        #swagger.description = 'Handle PayPal success payment for damage amenities.'
+        #swagger.summary = 'PayPal Success Payment Damage Amenities'
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            booking_id: {
+                                type: 'string',
+                                format: 'uuid',
+                                example: '123e4567-e89b-12d3-a456-426614174000',
+                                description: 'Booking ID'
+                            },
+                            order_id: {
+                                type: 'string',
+                                format: 'uuid',
+                                example: '123e4567-e89b-12d3-a456-426614174000',
+                                description: 'Order ID'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        #swagger.responses[200] = {
+            description: 'Payment successful',
+            schema: {
+                err: 0,
+                message: 'Payment successful',
+                data: {
+                    booking_id: '123e4567-e89b-12d3-a456-426614174000',
+                    payment_id: '123e4567-e89b-12d3-a456-426614174000',
+                    payment_status: 'COMPLETED'
+                }
+            }
+        }
+        #swagger.responses[400] = {
+            description: 'Bad request',
+            schema: {
+                err: 1,
+                message: 'Invalid input data'
+            }
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error',
+            schema: {
+                err: 1,
+                message: 'An error occurred while processing your request'
+            }
+        }
+    */
+)
 module.exports = router;

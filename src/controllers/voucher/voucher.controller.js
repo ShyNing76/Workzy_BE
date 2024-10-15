@@ -53,7 +53,6 @@ export const updateVoucherController = async (req, res) => {
             status: Joi.string().valid("active", "inactive")
         }).validate({voucher_id: req.params.voucher_id, ...req.body}).error;
         if(error) return badRequest(res, error);
-        console.log(req.body)
         const response = await services.updateVoucherService(req.params.voucher_id, req.body);
         return ok(res, response);
     } catch (error) {

@@ -1,5 +1,6 @@
 import db from '../../models';
 import {v4} from "uuid";
+import {handleLimit, handleOffset, handleSortOrder} from "../../utils/handleFilter";
 
 export const createReviewService = async (data) => new Promise(async (resolve, reject) => {
     try {
@@ -9,82 +10,53 @@ export const createReviewService = async (data) => new Promise(async (resolve, r
             review_content: data.review_content,
             rating: data.rating,
         })
+        if(!review) return reject("Failed to create review")
         resolve({
             err: 0,
             message: 'Review created successfully!',
             data: review
         })
-
     } catch (error) {
         reject(error)
     }
 })
 
-// export const deleteReviewService = async ({amenity_id}) => new Promise(async (resolve, reject) => {
-//     try {
-//         const review = await db.Review.findAll({
-//                 where: {
-//                     amenity_id: amenity_id
-//                 }
-//             }) 
-            
-//         if (amenities.length === 0) 
-//             return resolve({
-//                 err: 1,
-//                 message: "No amenity found"
-//             })
-        
-//         let alreadyInactiveCount = 0;
-//         let deletedCount = 0;
-
-//         for (const amenity of amenities) {
-//             if (amenity.status === "inactive") {
-//                 alreadyInactiveCount++;
-//             } else {
-//                 amenity.status = "inactive";
-//                 await amenity.save(); // Save each image after updating
-//                 deletedCount++;
-//             }
-//         }
-
-//         if (deletedCount > 0) {
-//             resolve({
-//                 err: 0,
-//                 message: `${deletedCount} amenity(s) deleted successfully!`
-//             });
-//         } else {
-//             resolve({
-//                 err: 1,
-//                 message: alreadyInactiveCount > 0 ? `${alreadyInactiveCount} selected amenities were already deleted.` : 'No images were deleted.'
-//             });
-//         }
-//     } catch (error) {
-//         reject(error)
-//     }
-// })
+export const deleteReviewService = async (review_id) => new Promise(async (resolve, reject) => {
+    try {
+        const review = await db.Review.update({
+            status: "inactive"
+        }, {
+            where: {
+                review_id: review_id,
+                status: "active"
+            }
+        })
+        if(review[0] === 0) return reject("Review not found")
+            resolve({
+                err: 0,
+                message: `Review deleted successfully!`
+            });
+        }
+    catch (error) {
+        reject(error)
+    }
+})
 
 export const getAllReviewService = ({page, limit, order, ...query}) => new Promise(async (resolve, reject) => {
     try {
-        const queries = { raw: true, nest: true };
-        const offset = !page || +page <= 1 ? 0 : +page - 1;
-        const finalLimit = +limit || +process.env.PAGE_LIMIT;
-        queries.offset = offset * finalLimit;
-        queries.limit = finalLimit;
-        if (order) queries.order = [order];
-
         const reviews = await db.Review.findAndCountAll({
-            where: {
-                ...query, 
-            },
-            ...queries,
+            where: query,
+            order: [handleSortOrder(order, "rating")],
+            limit: handleLimit(limit),
+            offset: handleOffset(page, limit),
             attributes: {
                 exclude: ["createdAt", "updatedAt"]
             },
         });
-
+        if(reviews.count === 0) return reject("No Review Found")
         resolve({
-            err: reviews.count > 0 ? 0 : 1,
-            message: reviews.count > 0 ? "Got" : "No Amenity Exist",
+            err: 0,
+            message: "Got",
             data: reviews
         });
     } catch (error) {
@@ -103,9 +75,10 @@ export const getReviewByIdService = (review_id) => new Promise(async (resolve, r
             },
             raw: true
         });
+        if(!review) return reject("No Review Found")
         resolve({
-            err: review ? 0 : 1,
-            message: review ? "Got" : "No Amenity Exist",
+            err: 0,
+            message: "Got",
             data: review
         });
     } catch (error) {

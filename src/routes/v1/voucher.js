@@ -173,7 +173,7 @@ router.put("/:voucher_id", verify_token, verify_role(["admin"]), controllers.upd
         }]
      */
     );
-router.delete("/:voucher_id", verify_token, verify_role(["admin"]), controllers.deleteVoucherController
+router.put("/:voucher_id", verify_token, verify_role(["admin"]), controllers.deleteVoucherController
  /*
         #swagger.description = 'Endpoint to remove a voucher.'
         #swagger.summary = 'Remove a voucher.'
