@@ -786,6 +786,8 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
 
             if (!transaction) return reject("Transaction created failed");
 
+            booking.total_price = parseInt(booking.total_price) + parseInt(booking.total_amenities_price);
+            await booking.save({ transaction: t });
             const updatedPoints = await db.Customer.update(
                 {
                     point:
@@ -1063,7 +1065,10 @@ export const paypalDamageSuccessService = ({ booking_id, order_id }) =>
             );
             if (!changeBookingStatus)
                 return reject("Booking Status changed failed");
-            
+
+            booking.total_price = parseInt(booking.total_price) + parseInt(booking.total_broken_price);
+            await booking.save({ transaction: t });
+
             await sendMail(
                 booking.Customer.User.email,
                 "Payment successful",
