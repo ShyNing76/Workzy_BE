@@ -5,6 +5,9 @@ import client from "../../config/paypal.config.js";
 import db from "../../models/index.js";
 import { sendMail } from "../../utils/sendMail/index.js";
 import { v4 } from "uuid";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const getExchangeRate = async (fromCurrency, toCurrency) => {
     try {
@@ -625,8 +628,8 @@ export const paypalCheckoutAmenitiesService = ({
                 intent: "CAPTURE",
                 application_context: {
                     shipping_preference: "NO_SHIPPING",
-                    return_url: "http://localhost:5173/booking/payment",
-                    cancel_url: "http://localhost:5173/",
+                    return_url: process.env.PAYPAL_RETURN_URL,
+                    cancel_url: process.env.PAYPAL_CANCEL_URL,
                 },
                 purchase_units: [
                     {
@@ -786,7 +789,9 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
 
             if (!transaction) return reject("Transaction created failed");
 
-            booking.total_price = parseInt(booking.total_price) + parseInt(booking.total_amenities_price);
+            booking.total_price =
+                parseInt(booking.total_price) +
+                parseInt(booking.total_amenities_price);
             await booking.save({ transaction: t });
             const updatedPoints = await db.Customer.update(
                 {
@@ -824,10 +829,7 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
     });
 
 // Amenities damage payment
-export const paypalCheckoutDamageService = ({
-    booking_id,
-    user_id,
-}) =>
+export const paypalCheckoutDamageService = ({ booking_id, user_id }) =>
     new Promise(async (resolve, reject) => {
         const t = await db.sequelize.transaction();
         try {
@@ -1066,7 +1068,9 @@ export const paypalDamageSuccessService = ({ booking_id, order_id }) =>
             if (!changeBookingStatus)
                 return reject("Booking Status changed failed");
 
-            booking.total_price = parseInt(booking.total_price) + parseInt(booking.total_broken_price);
+            booking.total_price =
+                parseInt(booking.total_price) +
+                parseInt(booking.total_broken_price);
             await booking.save({ transaction: t });
 
             await sendMail(
