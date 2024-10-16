@@ -123,6 +123,7 @@ export const createBuildingService = (data) =>
             );
 
             if (images && images.length > 0) {
+                console.log(images);
                 try {
                     await createBuildingImages(
                         images,
@@ -140,10 +141,6 @@ export const createBuildingService = (data) =>
             resolve({
                 err: 0,
                 message: "Building created successfully",
-                data: {
-                    ...newBuilding.toJSON(),
-                    images: images || [],
-                },
             });
         } catch (error) {
             console.log(error);
@@ -310,10 +307,11 @@ export const deleteBuildingService = (id) =>
                     status: "inactive",
                 },
                 {
-                where: {
-                    building_id: id,
-                },
-            });
+                    where: {
+                        building_id: id,
+                    },
+                }
+            );
             if (building[0] === 0) {
                 return reject("Building not found");
             }
