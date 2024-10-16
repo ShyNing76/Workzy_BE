@@ -99,8 +99,9 @@ export const deleteAmenityService = (id) => new Promise(async (resolve, reject) 
     }
 })
 
-export const getAllAmenityService = ({page, limit, order, amenity_name, ...query}) => new Promise(async (resolve, reject) => {
+export const getAllAmenityService = ({page, limit, order, amenity_name, status, ...query}) => new Promise(async (resolve, reject) => {
     try {
+        if(status) query.status = status ? status : {[Op.ne]: null};
         const amenities = await db.Amenity.findAndCountAll({
             where: {
                 amenity_name: {

@@ -373,4 +373,72 @@ router.post(
      */
 );
 
+router.get(
+    "/check-amenities/booking/:id",
+    verify_token,
+    verify_role(["staff"]),
+    controllers.getAmenitiesByBookingIdController
+    /*
+        #swagger.description = 'Get all amenities by booking ID.'
+        #swagger.summary = 'Get all amenities by booking ID.'
+        #swagger.parameters['id'] = { description: 'Booking ID.' }
+        #swagger.responses[200] = {
+            description: 'Booking found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
+router.post(
+    "/broken-amenities-booking",
+    verify_token,
+    verify_role(["staff"]),
+    controllers.createBrokenAmenitiesBookingController
+    /*
+        #swagger.description = 'Endpoint to create a broken amenities price.'
+        #swagger.summary = 'Create a broken amenities price.'
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            amenity_name: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    example: 'Amenity Name'
+                                }
+                            },
+                            booking_id: {
+                                type: 'string',
+                                format: 'uuid',
+                                example: '123e4567-e89b-12d3-a456-426614174000'
+                            },
+                        }   
+                    }
+                }
+            }
+        }
+        #swagger.responses[201] = {
+            description: 'Booking created successfully.'
+        }
+        #swagger.responses[400] = {
+            description: 'Bad request. Invalid input.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+)
+
 module.exports = router;

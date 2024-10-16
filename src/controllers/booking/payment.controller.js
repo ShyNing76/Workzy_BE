@@ -176,18 +176,15 @@ export const paypalCheckoutDamageController = async (req, res) => {
         const error = Joi.object({
             user_id: Joi.required(),
             booking_id: Joi.string().uuid().required(),
-            total_damage_price: Joi.number().min(0).required() // lỗi
         }).validate({
             user_id: req.user.user_id,
             booking_id: req.body.booking_id,
-            total_damage_price: req.body.total_damage_price,
         }).error;
         if (error) return badRequest(res, error.details[0].message);
 
         const booking = await services.paypalCheckoutDamageService({
             booking_id: req.body.booking_id,
-            user_id: req.user.user_id,
-            total_damage_price: req.body.total_damage_price,
+            user_id: req.user.user_id
         });
         return ok(res, booking);
     } catch (err) {
@@ -195,7 +192,7 @@ export const paypalCheckoutDamageController = async (req, res) => {
         const knownErrors = [
             "Customer not found",
             "Booking not found",
-            "Booking is not final-payment",
+            "Booking is not damaged-payment",
             "Booking already cancelled",
             "Booking status not found",
             "Failed to create PayPal order",
@@ -228,7 +225,7 @@ export const paypalDamageSuccessController = async (req, res) => {
         const knownErrors = [
             "Booking not found",
             "Booking status not found",
-            "Booking must be final-payment",
+            "Booking must be damaged-payment",
             "Booking already cancelled",
             "Failed to capture PayPal order",
             "Payment not found",
