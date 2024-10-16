@@ -3,12 +3,18 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon --exec babel-node src/server.js",
     "dev": "babel-node src/config/swagger-auto.js && nodemon --exec babel-node src/server.js",
     "sync": "babel-node src/config/connection.js",
     "test": "mocha --require @babel/register \"src/tests/**/*.js\"",
     "kill": "taskkill /F /IM node.exe",
-    "test:email": "babel-node src/tests/email.js"
+    "test:email": "babel-node src/tests/email.js",
+    "clean": "rmdir /s /q dist",
+    "build": "npm run clean && babel src --out-dir dist",
+    "copy": "cp src/config/config.cjs dist/config/config.cjs",
+    "copy:swagger": "cp src/config/swagger-output.json dist/config/swagger-output.json",
+    "copy:env": "cp .env dist/.env",
+    "start:run": "cd dist && node server.js",
+    "start": "npm run build && npm run copy && npm run copy:swagger && npm run copy:env && npm run start:run"
   },
   "type": "commonjs",
   "keywords": [],
