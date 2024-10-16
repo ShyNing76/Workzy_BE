@@ -206,17 +206,19 @@ export const assignManagerService = (building_id, manager_id) =>
     new Promise(async (resolve, reject) => {
         try {
             const [building, manager] = await Promise.all([
-                db.Building.findOne({ where: { building_id } }),
+                db.Building.findOne({ where: { building_id, status: "active" } }),
                 db.Manager.findOne({ where: { manager_id } }),
             ]);
-
+            console.log(building, manager);
             if (!building) return reject("Building not found");
             if (!manager) return reject("Manager not found");
 
-            await building.setManager(manager.manager_id);
+            building.manager_id = manager_id;
+            await building.save();
 
             resolve({ err: 0, message: "Manager assigned successfully" });
         } catch (error) {
+            console.log(error);
             reject(error);
         }
     });
