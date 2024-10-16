@@ -2,7 +2,6 @@
 /src/config/config.json
 /src/config/swagger-output.json
 .env
-.babelrc
 /.idea
 .package-lock.json
 ngrok.exe
