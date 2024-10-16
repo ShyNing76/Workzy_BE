@@ -1063,6 +1063,7 @@ export const paypalDamageSuccessService = ({ booking_id, order_id }) =>
             );
             if (!changeBookingStatus)
                 return reject("Booking Status changed failed");
+            
             await sendMail(
                 booking.Customer.User.email,
                 "Payment successful",

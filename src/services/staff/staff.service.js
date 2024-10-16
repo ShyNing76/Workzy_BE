@@ -649,6 +649,7 @@ export const getAmenitiesByBookingIdService = (booking_id) =>
 
 export const createBrokenAmenitiesBookingService = (amenity_name, booking_id) =>
     new Promise(async (resolve, reject) => {
+        const t = await db.sequelize.transaction();
         try {
             const amenities = await db.Amenity.findAll({
                 where: {
@@ -685,14 +686,21 @@ export const createBrokenAmenitiesBookingService = (amenity_name, booking_id) =>
                 return reject("Booking status is cancelled");
 
             booking.total_broken_price = total_broken_price;
-            await booking.save();            
-
+            await booking.save({transaction: t});           
+            
+            await db.BookingStatus.create({
+                booking_status_id: v4(),
+                booking_id: booking_id,
+                status: "damaged-payment",
+            }, {transaction: t});
+            await t.commit();
             resolve({   
                 err: 0,
                 message: "Broken amenities created successfully",
             });
         } catch (error) {
             console.log(error);
+            await t.rollback();
             reject(error);
         }
     });
