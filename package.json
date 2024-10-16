@@ -14,7 +14,8 @@
     "copy:swagger": "cp src/config/swagger-output.json dist/config/swagger-output.json",
     "copy:env": "cp .env dist/.env",
     "start:run": "cd dist && node server.js",
-    "start": "npm run build && npm run swagger && npm run copy && npm run copy:swagger && npm run start:run",
+    "install": "npm i",
+    "start": "npm run install &&npm run build && npm run swagger && npm run copy && npm run copy:swagger && npm run start:run",
     "start:dev": "npm run build && npm run swagger && npm run copy && npm run copy:swagger && npm run copy:env && npm run start:run"
   },
   "type": "commonjs",
