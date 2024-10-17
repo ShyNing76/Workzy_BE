@@ -40,6 +40,24 @@ export const getBuildingService = ({
                         attributes: ["image"],
                         required: false,
                     },
+                    {
+                        model: db.Manager,
+                        as: "Manager",
+                        include: {
+                            model: db.User,
+                            as: "User",
+                            attributes: {
+                                exclude: [
+                                    "created_at",
+                                    "updated_at",
+                                    "createdAt",
+                                    "updatedAt",
+                                    "password",
+                                    "user_id",
+                                ],
+                            },
+                        },
+                    },
                 ],
                 order: [handleSortOrder(order, "building_name")],
                 limit: handleLimit(limit),
@@ -203,7 +221,9 @@ export const assignManagerService = (building_id, manager_id) =>
     new Promise(async (resolve, reject) => {
         try {
             const [building, manager] = await Promise.all([
-                db.Building.findOne({ where: { building_id, status: "active" } }),
+                db.Building.findOne({
+                    where: { building_id, status: "active" },
+                }),
                 db.Manager.findOne({ where: { manager_id } }),
             ]);
             console.log(building, manager);

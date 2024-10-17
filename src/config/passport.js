@@ -45,12 +45,8 @@ passport.use(
                         : null;
                     profile.phoneNumbers = userInfo.data.phoneNumbers || [];
 
-                    console.log(profile);
-
                     profile.response = await controllers.loginGoogle(profile);
                 }
-                console.log(accessToken);
-                console.log(profile);
             } catch (err) {
                 console.log(err);
             }

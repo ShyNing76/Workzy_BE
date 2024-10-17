@@ -94,6 +94,7 @@ router.get(
     (req, res) => {
         const token = req.user?.token;
         const email = req.user?.emails[0].value;
+        console.log(req.user);
         if (token && email)
             res.redirect(
                 `http://localhost:5173/api/v1/auth/google/callback?token=${req.user?.response.accessToken}`
