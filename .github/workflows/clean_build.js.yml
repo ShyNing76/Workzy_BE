@@ -1,0 +1,55 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code, and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Deploy Workzy Website
+
+on:
+    push:
+        branches: ["main"]
+    pull_request:
+        branches: ["main"]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        strategy:
+            matrix:
+                node-version: [18.x, 20.x, 22.x]
+                # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+        steps:
+            - uses: actions/checkout@v4
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ matrix.node-version }}
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm install
+
+            - name: Clean build
+              run: npm run clean
+
+            - name: Build
+              run: npm run build
+
+            - name: Swagger
+              run: npm run swagger
+
+            - name: Copy package.json
+              run: cp package.json dist/package.json
+
+            - name: Copy Swagger
+              run: cp src/config/swagger-output.json dist/config/swagger-output.json
+
+            - name: Push to github deployment
+              run: |
+                  git config --global user.name 'Deployer Workzy'
+                  git config --global user.email 'deployer@workzy.noreply.com'
+                  git remote add target https://${{ secrets.PUSH_REPO_TOKEN }}@github.com/lehoangtrong/Workzy_Deploy.git
+                  git add -f dist
+                  git commit -m "Deploy ${GITHUB_SHA}"
+                  git push --force --quiet target main
+
