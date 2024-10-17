@@ -10,7 +10,7 @@
     "test:email": "babel-node src/tests/email.js",
     "clean": "rm -rf dist",
     "build": "npx babel src --out-dir dist/src",
-    "swagger": "npx babel-node src/config/swagger-auto.js",
+    "swagger": "SERVER_URL=https://workzy.onrender.com npx babel-node src/config/swagger-auto.js",
     "copy": "cp src/config/config.cjs dist/config/config.cjs",
     "copy:swagger": "cp src/config/swagger-output.json dist/config/swagger-output.json",
     "copy:env": "cp .env dist/.env",
