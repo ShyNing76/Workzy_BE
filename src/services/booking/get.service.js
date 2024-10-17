@@ -133,8 +133,8 @@ export const getAllBookingsService = ({
                         },
                     },
                     {
-                        model: db.BookingAmenities,
-                        as: "BookingAmenities",
+                        model: db.Amenity,
+                        as: "Amenities",
                         attributes: { exclude: ["createdAt", "updatedAt"] },
                     },
                 ],

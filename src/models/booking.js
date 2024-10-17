@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
             Booking.belongsToMany(models.Amenity, {
                 through: "BookingAmenities",
                 foreignKey: "booking_id",
+                as: "Amenities",
             });
             Booking.belongsTo(models.BookingType, {
                 foreignKey: "booking_type_id",
