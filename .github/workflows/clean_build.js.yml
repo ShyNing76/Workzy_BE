@@ -15,7 +15,7 @@ jobs:
 
         strategy:
             matrix:
-                node-version: [18.x, 20.x, 22.x]
+                node-version: [20.x]
                 # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
         steps:
@@ -44,11 +44,24 @@ jobs:
             - name: Copy Swagger
               run: mkdir -p dist/config && cp src/config/swagger-output.json dist/config/swagger-output.json
 
+            - name: Debug infomation
+              env:
+                  PUSH_REPO_TOKEN: ${{ secrets.PUSH_REPO_TOKEN }}
+              run: |
+                  echo "Push Repo Token: $PUSH_REPO_TOKEN"
+                  echo "GITHUB_SHA: $GITHUB_SHA"
+                  echo "PAT available: ${{ secrets.TARGET_REPO_TOKEN != '' }}"
+                  ls -la
+                  echo "Git status:"
+                  git status
             - name: Push to github deployment
+              env:
+                  TARGET_TOKEN: ${{ secrets.PUSH_REPO_TOKEN }}
               run: |
                   git config --global user.name 'Deployer Workzy'
                   git config --global user.email 'deployer@workzy.noreply.com'
                   git remote add target https://${{ secrets.PUSH_REPO_TOKEN }}@github.com/lehoangtrong/Workzy_Deploy.git
+                  git remote -v
                   git add -f dist
                   git commit -m "Deploy ${GITHUB_SHA}"
                   git push --force --quiet target main
