@@ -132,6 +132,11 @@ export const getAllBookingsService = ({
                             attributes: { exclude: ["createdAt", "updatedAt"] },
                         },
                     },
+                    {
+                        model: db.Amenity,
+                        as: "Amenities",
+                        attributes: { exclude: ["createdAt", "updatedAt"] },
+                    },
                 ],
                 order: [handleSortOrder(order, "start_time_date")],
                 limit: handleLimit(limit),
