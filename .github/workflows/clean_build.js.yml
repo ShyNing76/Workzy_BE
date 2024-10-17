@@ -43,12 +43,5 @@ jobs:
 
             - name: Copy Swagger
               run: mkdir -p dist/config && cp src/config/swagger-output.json dist/config/swagger-output.json
+       
 
-            - name: Push to github deployment
-              uses: ad-m/github-push-action@master
-              with:
-                  github_token: ${{ secrets.PUSH_REPO_TOKEN }}
-                  branch: main
-                  force: true
-                  directory: dist
-                  repository: lehoangtrong/Workzy_Deploy
