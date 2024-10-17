@@ -54,5 +54,5 @@ jobs:
                   echo "Files in dist directory:"
                   cp -r ../dist/* .
                   git add .
-                  git commit -m "Deploy Workzy Website"
+                  git commit -m "Deploy Workzy Website $(date) - ${GITHUB_SHA}"
                   git push -u origin main
