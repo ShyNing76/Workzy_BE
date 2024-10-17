@@ -51,6 +51,10 @@ router.post(
                                 type: 'int',
                                 example: '20'
                             },
+                            area: {
+                                type: 'int',
+                                example: '20'
+                            },
                             description: {
                                 type: 'string',
                                 example: 'Workspace description.'
@@ -110,6 +114,10 @@ router.put(
                             workspace_price: {
                                 type: 'int',
                                 example: '1000000'
+                            },
+                            area: {
+                                type: 'int',
+                                example: '20'
                             },
                             capacity: {
                                 type: 'int',

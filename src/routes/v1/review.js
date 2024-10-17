@@ -18,6 +18,11 @@ router.post(
                     schema: {
                         type: 'object',
                         properties: {
+                            booking_id: {
+                                type: 'string',
+                                format: 'uuid',
+                                example: '5f9f1b9b9c9d440000a1b1b1'
+                            },
                             workspace_id: {
                                 type: 'string',
                                 example: '5f9f1b9b9c9d440000a1b1b1'
