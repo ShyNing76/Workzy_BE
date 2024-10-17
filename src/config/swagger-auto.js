@@ -12,13 +12,13 @@ const doc = {
         description: 'API POD Booking System for Workzy', // Mô tả
     },
     servers: [
-        {
-            url: 'http://localhost:5000/',
-            description: 'Local Development Server'
-        },
-        {
+        {   
             url: serverUrl,
             description: 'Production Server'
+        },
+        {
+             url: 'http://localhost:5000/',
+            description: 'Local Development Server'
         }
     ],
     components: {
