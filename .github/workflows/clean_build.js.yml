@@ -44,24 +44,16 @@ jobs:
             - name: Copy Swagger
               run: mkdir -p dist/config && cp src/config/swagger-output.json dist/config/swagger-output.json
 
-            - name: Debug infomation
-              env:
-                  PUSH_REPO_TOKEN: ${{ secrets.PUSH_REPO_TOKEN }}
-              run: |
-                  echo "Push Repo Token: $PUSH_REPO_TOKEN"
-                  echo "GITHUB_SHA: $GITHUB_SHA"
-                  echo "PAT available: ${{ secrets.TARGET_REPO_TOKEN != '' }}"
-                  ls -la
-                  echo "Git status:"
-                  git status
             - name: Push to github deployment
-              env:
-                  TARGET_TOKEN: ${{ secrets.PUSH_REPO_TOKEN }}
-              run: |
-                  git config --global user.name 'Deployer Workzy'
-                  git config --global user.email 'deployer@workzy.noreply.com'
-                  git remote add target https://${{ secrets.PUSH_REPO_TOKEN }}@github.com/lehoangtrong/Workzy_Deploy.git
-                  git remote -v
-                  git add -f dist
-                  git commit -m "Deploy ${GITHUB_SHA}"
-                  git push --force --quiet target main
+              uses: ad-m/github-push-action@master
+              with:
+                  github-token: ${{ secrets.PUSH_REPO_TOKEN }}
+                  local-user-name: deploy.workzy
+                  local-email: deploy.workzy@noreply.com
+                  branch: main
+                  force: true
+                  directory: dist
+                  commit_message: "Deployed Workzy Website from $GITHUB_SHA"
+                  repository: lehoangtrong/Workzy_Deploy
+                  clean: true
+                  verbose: true
