@@ -47,13 +47,8 @@ jobs:
             - name: Push to github deployment
               uses: ad-m/github-push-action@master
               with:
-                  github-token: ${{ secrets.PUSH_REPO_TOKEN }}
-                  local-user-name: deploy.workzy
-                  local-email: deploy.workzy@noreply.com
+                  github_token: ${{ secrets.PUSH_REPO_TOKEN }}
                   branch: main
                   force: true
                   directory: dist
-                  commit_message: "Deployed Workzy Website from $GITHUB_SHA"
                   repository: lehoangtrong/Workzy_Deploy
-                  clean: true
-                  verbose: true
