@@ -44,47 +44,35 @@ export const createWorkspaceService = async ({images, workspace_name, workspace_
 })
 
 export const updateWorkspaceService = async (id, {workspace_name, building_id, workspace_price, workspace_type_id, ...data}) => new Promise(async (resolve, reject) => {
-    const t = await db.sequelize.transaction();
     try {
 
-        const [isWorkspaceExist, isBuildingExist, isTypeExist] = await Promise.all([
+        if(building_id){
+            const isBuildingExist = await db.Building.findByPk(building_id);
+            if(!isBuildingExist) return reject("Building is not exist")
+        }
+        const [isWorkspaceExist, isTypeExist] = await Promise.all([
             db.Workspace.findByPk(id), 
-            db.Building.findByPk(building_id),
             db.WorkspaceType.findByPk(workspace_type_id)
         ])
-        if(!isWorkspaceExist) return reject({
-            err: 1,
-            message: "Workspace is not exist"
-        })
-        if(!isBuildingExist) return reject({
-            err: 1,
-            message: "Building is not exist"
-        })
-        if(!isTypeExist) return reject({
-            err: 1,
-            message: "Workspace Type is not exist"
-        })
+        if(!isWorkspaceExist) return reject("Workspace is not exist")
+        if(!isTypeExist) return reject("Workspace Type is not exist")
 
         const isWorkspaceNameDuplicated = await db.Workspace.findOne({
             where: {
                 workspace_name: workspace_name,
                 workspace_id: { [Op.ne]: id }
             },
-            transaction: t
         })
 
-        if(isWorkspaceNameDuplicated) return reject({
-            err: 1,
-            message: "Workspace name is already used"
-        })
+        if(isWorkspaceNameDuplicated) return reject("Workspace name is already used")
 
         const price_per_day = workspace_price * 8 * 0.8;
         const price_per_month = workspace_price * 22 * 0.8;
 
-        const [updatedRowsCount] = await db.Workspace.update({
+        const updatedRowsCount = await db.Workspace.update({
             workspace_name: workspace_name,
             building_id: building_id,
-            workspace_type_id: data.workspace_type_id,
+            workspace_type_id: workspace_type_id,
             price_per_hour: workspace_price,
             price_per_day: price_per_day,
             price_per_month: price_per_month,
@@ -94,16 +82,14 @@ export const updateWorkspaceService = async (id, {workspace_name, building_id, w
             where: {
                 workspace_id: id
             },
-            transaction: t
         });
-        await t.commit();
+        if(updatedRowsCount[0] === 0) return reject("Cannot find any workspace to update || Workspace is already updated")
         resolve({
-            err: updatedRowsCount > 0 ? 0 : 1,
-            message: updatedRowsCount > 0 ? 'Workspace updated successfully!' : 'Workspace update failed',
+            err: 0,
+            message: 'Workspace updated successfully!',
         })
 
     } catch (error) {
-        await t.rollback();
         reject(error)
     }
 })
