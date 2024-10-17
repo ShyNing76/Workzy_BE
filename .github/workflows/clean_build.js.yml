@@ -42,7 +42,7 @@ jobs:
               run: cp package.json dist/package.json
 
             - name: Copy Swagger
-              run: cp src/config/swagger-output.json dist/config/swagger-output.json
+              run: mkdir -p dist/config && cp src/config/swagger-output.json dist/config/swagger-output.json
 
             - name: Push to github deployment
               run: |
@@ -52,4 +52,3 @@ jobs:
                   git add -f dist
                   git commit -m "Deploy ${GITHUB_SHA}"
                   git push --force --quiet target main
-
