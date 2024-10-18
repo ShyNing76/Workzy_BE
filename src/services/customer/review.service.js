@@ -73,6 +73,28 @@ export const getAllReviewService = ({page, limit, order, ...query}) => new Promi
             attributes: {
                 exclude: ["createdAt", "updatedAt"]
             },
+            include: [
+                {
+                    model: db.Booking,
+                    as: "Booking",
+                    required: true,
+                    attributes: ["booking_id"],
+                    include: [
+                        {
+                            model: db.Customer,
+                            as: "Customer",
+                            attributes: ["user_id"],
+                            include: [
+                                {
+                                    model: db.User,
+                                    as: "User",
+                                    attributes: ["name"]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
         });
         if(reviews.count === 0) return reject("No Review Found")
         resolve({
