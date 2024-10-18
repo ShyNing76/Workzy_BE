@@ -35,3 +35,4 @@ export const cancelBookingController = async (req, res) => {
         internalServerError(res);
     }
 };
+

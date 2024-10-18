@@ -31,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
                     "confirmed", // customer
                     "paid", // customer
                     "check-in", // staff
-                    "in-process", // customer
+                    "usage", // customer
                     "check-out", // staff
                     "check-amenities", // staff (chọn amenities bị hư thông model)
                     "completed", // 1

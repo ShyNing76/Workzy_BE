@@ -295,9 +295,48 @@ export const addToCalendarService = (booking_id, user_id) =>
                         "Insufficient permissions to add event to Google Calendar"
                     );
                 }
-                throw calendarError;
+                return reject(calendarError);
             }
         } catch (error) {
+            console.error(error);
+            return reject(error);
+        }
+    });
+
+export const getTimeBookingService = ({ workspace_id, date }) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const startOfDay = moment(date).startOf("day").toISOString();
+            const endOfDay = moment(date).endOf("day").toISOString();
+            const booking = await db.Booking.findOne({
+                where: {
+                    workspace_id,
+                    start_time_date: {
+                        [db.Sequelize.Op.between]: [startOfDay, endOfDay],
+                    },
+                    end_time_date: {
+                        [db.Sequelize.Op.between]: [startOfDay, endOfDay],
+                    },
+                },
+                attributes: ["booking_id", "start_time_date", "end_time_date"],
+                include: [
+                    {
+                        model: db.BookingStatus,
+                        attributes: ["status"],
+                        limit: 1,
+                        order: [["createdAt", "desc"]],
+                    },
+                ],
+            });
+
+            if (!booking) return reject("Booking not found");
+
+            return resolve({
+                err: 0,
+                message: "Booking found",
+                data: booking,
+            });
+        }catch(error){
             console.error(error);
             return reject(error);
         }

@@ -4,6 +4,67 @@ import { verify_role, verify_token } from "../../middlewares/verifyToken";
 
 const router = express.Router();
 
+router.get(
+    "/time-booking/:id/",
+    controllers.getTimeBookingController
+    /*
+        #swagger.description = 'Get time booking by ID for the authenticated customer.'
+        #swagger.summary = 'Get time booking by ID'
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['id'] = {
+            in: 'path',
+            required: true,
+            type: 'string',
+            format: 'uuid',
+            description: 'Workspace ID'
+        }
+        #swagger.parameters['date'] = {
+            in: 'query',
+            required: true,
+            type: 'string',
+            format: 'date',
+            description: 'Date in ISO 8601 format'
+        }
+        #swagger.responses[200] = {
+            description: 'Time booking retrieved successfully',
+            schema: {
+                err: 0,
+                message: 'Time booking retrieved successfully',
+                data: [
+                    {
+                        start_time: '2023-10-01T08:00:00Z',
+                        end_time: '2023-10-01T09:00:00Z',
+                        status: 'Available'
+                    }
+                ]
+            }
+        }
+        #swagger.responses[400] = {
+            description: 'Bad request',
+            schema: {
+                err: 1,
+                message: 'Invalid input data'
+            }
+        }
+        #swagger.responses[404] = {
+            description: 'Workspace not found',
+            schema: {
+                err: 1,
+                message: 'Workspace not found'
+            }
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error',
+            schema: {
+                err: 1,
+                message: 'An error occurred while processing your request'
+            }
+        }
+     */
+);
+
 router.use(verify_token);
 
 router.post(
