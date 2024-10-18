@@ -132,8 +132,6 @@ export const loginGoogleService = (profile) =>
                 transaction: t,
             });
 
-            console.log("User findOrCreate result:", user);
-
             if (user[1]) {
                 await db.Customer.create(
                     {
@@ -178,8 +176,6 @@ export const loginGoogleService = (profile) =>
                     expiresIn: "1h",
                 }
             );
-
-            console.log("accessToken :::    " + accessToken);
 
             resolve({
                 err: 0,

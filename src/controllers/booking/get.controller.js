@@ -72,3 +72,27 @@ export const getBookingByIdController = async (req, res) => {
         internalServerError(res);
     }
 };
+
+export const getTimeBookingController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            workspace_id: Joi.string().uuid().required(),
+            date: Joi.date().required(),
+        }).validate({
+            workspace_id: req.params.id,
+            date: req.query.date,
+        }).error;
+        if (error) return badRequest(res, error.details[0].message);
+
+        const booking = await services.getTimeBookingService({
+            workspace_id: req.params.id,
+            date: req.query.date,
+        });
+        return ok(res, booking);
+    } catch (err) {
+        console.error(err);
+        const knownErrors = ["Booking not found"];
+        if (knownErrors.includes(err)) return badRequest(res, err);
+        internalServerError(res);
+    }
+}

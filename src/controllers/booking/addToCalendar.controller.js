@@ -18,6 +18,10 @@ export const addToCalendarController = async (req, res, next) => {
         );
         return ok(res, calendar);
     } catch (error) {
+        const knownErrors = ["Customer not found", "No booking found"];
+        if (knownErrors.includes(error)) {
+            return badRequest(res, error);
+        }
         internalServerError(res, error);
     }
 };

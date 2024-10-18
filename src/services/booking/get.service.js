@@ -2,6 +2,7 @@ import { google } from "googleapis";
 import moment from "moment";
 import { oauth2Client } from "../../config/passport";
 import db from "../../models";
+import { v4 as uuidv4 } from "uuid";
 import {
     handleLimit,
     handleOffset,
@@ -246,36 +247,42 @@ export const addToCalendarService = (booking_id, user_id) =>
             if (booking.err) {
                 return reject(booking.message);
             }
+
+            // New Google Calendar API
             const calendar = google.calendar({
                 version: "v3",
                 auth: oauth2Client,
             });
 
-            const event = {
-                summary: booking.data.workspace_name,
-                description: booking.data.workspace_description,
+            let event = {
+                summary: `Booking at ${booking.data.Workspace.workspace_name}`,
+                description: `Booking details:\n\nWorkspace: ${booking.data.Workspace.workspace_name}\nBooking Type: ${booking.data.BookingType.type}\nStart Time: ${booking.data.start_time_date}\nEnd Time: ${booking.data.end_time_date}`,
                 start: {
-                    dateTime: moment(
-                        booking.data.start_time_date,
-                        "DD/MM/YYYY HH:mm:ss"
-                    ).format(),
+                    dateTime: moment(booking.data.start_time_date, "DD/MM/YYYY HH:mm:ss").toISOString(),
+                    timeZone: "Asia/Kolkata",
                 },
                 end: {
-                    dateTime: moment(
-                        booking.data.end_time_date,
-                        "DD/MM/YYYY HH:mm:ss"
-                    ).format(),
+                    dateTime: moment(booking.data.end_time_date, "DD/MM/YYYY HH:mm:ss").toISOString(),
+                    timeZone: "Asia/Kolkata",
+                },
+                attendees: [
+                    // Add attendees if needed
+                ],
+                conferenceData: {
+                    createRequest: {
+                        requestId: uuidv4(),
+                    },
                 },
             };
 
-            console.log(event);
-
             try {
-                const res = await calendar.events.insert({
+                await calendar.events.insert({
+                    auth: oauth2Client, 
                     calendarId: "primary",
-                    requestBody: event,
+                    resource: event,
                 });
-                return resolve(res.data);
+                return resolve({err: 0, message: "Event added to Google Calendar"
+                });
             } catch (calendarError) {
                 if (
                     calendarError.errors &&
@@ -288,9 +295,48 @@ export const addToCalendarService = (booking_id, user_id) =>
                         "Insufficient permissions to add event to Google Calendar"
                     );
                 }
-                throw calendarError;
+                return reject(calendarError);
             }
         } catch (error) {
+            console.error(error);
+            return reject(error);
+        }
+    });
+
+export const getTimeBookingService = ({ workspace_id, date }) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const startOfDay = moment(date).startOf("day").toISOString();
+            const endOfDay = moment(date).endOf("day").toISOString();
+            const booking = await db.Booking.findOne({
+                where: {
+                    workspace_id,
+                    start_time_date: {
+                        [db.Sequelize.Op.between]: [startOfDay, endOfDay],
+                    },
+                    end_time_date: {
+                        [db.Sequelize.Op.between]: [startOfDay, endOfDay],
+                    },
+                },
+                attributes: ["booking_id", "start_time_date", "end_time_date"],
+                include: [
+                    {
+                        model: db.BookingStatus,
+                        attributes: ["status"],
+                        limit: 1,
+                        order: [["createdAt", "desc"]],
+                    },
+                ],
+            });
+
+            if (!booking) return reject("Booking not found");
+
+            return resolve({
+                err: 0,
+                message: "Booking found",
+                data: booking,
+            });
+        }catch(error){
             console.error(error);
             return reject(error);
         }
