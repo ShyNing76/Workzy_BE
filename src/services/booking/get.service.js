@@ -2,6 +2,7 @@ import { google } from "googleapis";
 import moment from "moment";
 import { oauth2Client } from "../../config/passport";
 import db from "../../models";
+import { v4 as uuidv4 } from "uuid";
 import {
     handleLimit,
     handleOffset,
@@ -246,36 +247,42 @@ export const addToCalendarService = (booking_id, user_id) =>
             if (booking.err) {
                 return reject(booking.message);
             }
+
+            // New Google Calendar API
             const calendar = google.calendar({
                 version: "v3",
                 auth: oauth2Client,
             });
 
-            const event = {
-                summary: booking.data.workspace_name,
-                description: booking.data.workspace_description,
+            let event = {
+                summary: `Booking at ${booking.data.Workspace.workspace_name}`,
+                description: `Booking details:\n\nWorkspace: ${booking.data.Workspace.workspace_name}\nBooking Type: ${booking.data.BookingType.type}\nStart Time: ${booking.data.start_time_date}\nEnd Time: ${booking.data.end_time_date}`,
                 start: {
-                    dateTime: moment(
-                        booking.data.start_time_date,
-                        "DD/MM/YYYY HH:mm:ss"
-                    ).format(),
+                    dateTime: moment(booking.data.start_time_date, "DD/MM/YYYY HH:mm:ss").toISOString(),
+                    timeZone: "Asia/Kolkata",
                 },
                 end: {
-                    dateTime: moment(
-                        booking.data.end_time_date,
-                        "DD/MM/YYYY HH:mm:ss"
-                    ).format(),
+                    dateTime: moment(booking.data.end_time_date, "DD/MM/YYYY HH:mm:ss").toISOString(),
+                    timeZone: "Asia/Kolkata",
+                },
+                attendees: [
+                    // Add attendees if needed
+                ],
+                conferenceData: {
+                    createRequest: {
+                        requestId: uuidv4(),
+                    },
                 },
             };
 
-            console.log(event);
-
             try {
-                const res = await calendar.events.insert({
+                await calendar.events.insert({
+                    auth: oauth2Client, 
                     calendarId: "primary",
-                    requestBody: event,
+                    resource: event,
                 });
-                return resolve(res.data);
+                return resolve({err: 0, message: "Event added to Google Calendar"
+                });
             } catch (calendarError) {
                 if (
                     calendarError.errors &&

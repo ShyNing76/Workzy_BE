@@ -1,6 +1,8 @@
 import express from "express";
 import passport from "passport";
 import * as controllers from "../../controllers";
+import axios from "axios";
+import { oauth2Client } from "../../config/passport";
 
 const router = express.Router();
 
@@ -76,7 +78,7 @@ router.get(
             "email",
             "https://www.googleapis.com/auth/user.birthday.read",
             "https://www.googleapis.com/auth/user.phonenumbers.read",
-            "https://www.googleapis.com/auth/contacts.readonly",
+            "https://www.googleapis.com/auth/calendar",
         ],
     })
     /*
@@ -91,10 +93,9 @@ router.get(
         failureRedirect: "/login",
         session: false,
     }),
-    (req, res) => {
+    async (req, res) => {
         const token = req.user?.token;
         const email = req.user?.emails[0].value;
-        console.log(req.user);
         if (token && email)
             res.redirect(
                 `http://localhost:5173/api/v1/auth/google/callback?token=${req.user?.response.accessToken}`

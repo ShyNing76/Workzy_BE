@@ -4,7 +4,11 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { v4 } from "uuid";
 import * as controllers from "../controllers";
 
-export const oauth2Client = new google.auth.OAuth2();
+export const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.GOOGLE_REDIRECT_URI
+);
 
 passport.use(
     new GoogleStrategy(
@@ -18,6 +22,7 @@ passport.use(
                 "https://www.googleapis.com/auth/user.birthday.read",
                 "https://www.googleapis.com/auth/user.phonenumbers.read",
                 "https://www.googleapis.com/auth/contacts.readonly",
+                "https://www.googleapis.com/auth/calendar",
             ],
         },
         async function (accessToken, refreshToken, profile, cb) {
