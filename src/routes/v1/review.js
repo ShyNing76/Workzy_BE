@@ -15,8 +15,9 @@ router.post("/", verify_token, controllers.createReviewController
                     schema: {
                         type: 'object',
                         properties: {
-                            workspace_id: {
+                            booking_id: {
                                 type: 'string',
+                                format: 'uuid',
                                 example: '5f9f1b9b9c9d440000a1b1b1'
                             },
                             rating: {
@@ -25,7 +26,7 @@ router.post("/", verify_token, controllers.createReviewController
                                 minimum: 1,
                                 maximum: 5
                             },
-                            comment: {
+                            review_content: {
                                 type: 'string',
                                 example: 'Great workspace with excellent amenities.'
                             }

@@ -3,7 +3,27 @@ import {v4} from "uuid";
 
 export const createReviewService = async (data) => new Promise(async (resolve, reject) => {
     try {
-        const review = await db.Review.Create({
+        const booking = await db.Booking.findOne({
+            where: { booking_id: data.booking_id },
+            include: [
+                {
+                    model: db.BookingStatus,
+                    as: "BookingStatuses",
+                    order: [["createdAt", "DESC"]],
+                    limit: 1,
+                },
+            ],
+        });
+
+        if (!booking) return reject("Booking not found");
+
+        if (booking.BookingStatuses[0].status !== "completed")
+            return reject("Booking is not completed");
+
+        if (booking.BookingStatuses[0].status === "cancelled")
+            return reject("Booking already cancelled");
+
+        const review = await db.Review.create({
             review_id: v4(),
             booking_id: data.booking_id,
             review_content: data.review_content,
@@ -16,6 +36,7 @@ export const createReviewService = async (data) => new Promise(async (resolve, r
         })
 
     } catch (error) {
+        console.log(error)
         reject(error)
     }
 })

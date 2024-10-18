@@ -12,7 +12,12 @@ export const createReviewController = async (req, res) => {
         const workspace = await services.createWorkspaceService(req.body);
         return res.status(201).json({workspace});
     } catch (error) {
-        return res.status(500).json({error: error.message});
+        if(error.message === "Failed to create review" ||
+            error.message === "Booking not found" ||
+            error.message === "Booking is not completed" ||
+            error.message === "Booking already cancelled"
+        ) return badRequest(res, error);
+       internalServerError(res, error);
     }
 }
 
