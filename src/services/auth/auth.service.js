@@ -146,11 +146,16 @@ export const loginGoogleService = (profile) =>
                 await db.User.update(
                     {
                         google_token: profile.token,
-                        phone: profile.phoneNumbers?.length > 0 ? profile.phoneNumbers[0]?.value : null,
-                        date_of_birth: profile.birthdays ? profile.birthdays[0]?.date || null : null,
+                        phone:
+                            profile.phoneNumbers?.length > 0
+                                ? profile.phoneNumbers[0]?.value
+                                : null,
+                        date_of_birth: profile.birthdays
+                            ? profile.birthdays[0]?.date || null
+                            : null,
                         name: profile.displayName || "",
                         image: profile.photos?.[0]?.value || "",
-                    }, 
+                    },
                     {
                         where: {
                             email: profile.emails?.[0]?.value || "",
