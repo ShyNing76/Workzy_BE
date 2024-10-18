@@ -12,7 +12,7 @@ export const gender = Joi.string().pattern(new RegExp('Male|Female|Other')).requ
 
 export const date_of_birth = Joi.date().required()
 
-export const location = Joi.string().pattern(new RegExp('Hanoi|HCM')).required()
+export const location = Joi.string().pattern(new RegExp('Hanoi|HCM|'))
 
 export const address = Joi.string().required()
 

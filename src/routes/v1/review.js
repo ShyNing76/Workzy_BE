@@ -1,10 +1,13 @@
 import express from "express";
 import * as controllers from "../../controllers";
-import {verify_admin_or_manager, verify_token} from "../../middlewares/verifyToken";
+import { verify_role, verify_token } from "../../middlewares/verifyToken";
 
 const router = express.Router();
 
-router.post("/", verify_token, controllers.createReviewController
+router.post(
+    "/",
+    verify_token,
+    controllers.createReviewController
     /*
         #swagger.description = 'Endpoint to create a new review.'
         #swagger.summary = 'Create a new review.'
@@ -53,27 +56,31 @@ router.post("/", verify_token, controllers.createReviewController
     */
 );
 
-// router.delete("/", verify_token, controllers.deleteWishListController
-//     /*
-//         #swagger.description = 'Endpoint to remove a manager from a workspace.'
-//         #swagger.summary = 'Remove a manager from a workspace.'
-//         #swagger.parameters['id'] = { description: 'Workspace ID.' }
-//         #swagger.responses[200] = {
-//             description: 'Workspace removed successfully.'
-//         }
-//         #swagger.responses[404] = {
-//             description: 'Workspace not found.'
-//         }
-//         #swagger.responses[500] = {
-//             description: 'Internal server error.'
-//         }
-//         #swagger.security = [{
-//             "apiKeyAuth": []
-//         }]
-//      */
-// );
+router.put("/delete/:review_id", verify_token, verify_role(["admin", "manager"]), controllers.deleteReviewController
+    /*
+        #swagger.description = 'Endpoint to remove a review.'
+        #swagger.summary = 'Remove a review.'
+        #swagger.parameters['review_id'] = { description: 'Review Id.' }
+        #swagger.responses[200] = {
+            description: 'Review removed successfully.'
+        }
+        #swagger.responses[404] = {
+            description: 'Review not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
 
-router.get("/", verify_token, verify_admin_or_manager, controllers.getAllReviewController
+router.get(
+    "/",
+    verify_token,
+    verify_role(["admin", "manager"]),
+    controllers.getAllReviewController
     /*
         #swagger.description = 'Endpoint to get all reviews.'
         #swagger.summary = 'Get all reviews.'
@@ -92,7 +99,11 @@ router.get("/", verify_token, verify_admin_or_manager, controllers.getAllReviewC
      */
 );
 
-router.get("/:id", verify_token, verify_admin_or_manager, controllers.getReviewByIdController
+router.get(
+    "/:id",
+    verify_token,
+    verify_role(["admin", "manager"]),
+    controllers.getReviewByIdController
     /*
         #swagger.description = 'Get a review by ID.'
         #swagger.summary = 'Get a review by ID.'

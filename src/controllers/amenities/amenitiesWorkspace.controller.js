@@ -22,13 +22,29 @@ export const createAmenitiesWorkspaceController = async (req, res) => {
 export const deleteAmenitiesWorkspaceController = async (req, res) => {
     try {
         const error = Joi.object({
-            amenities_workspace_ids: Joi.array().required(),
-        }).validate({amenities_workspace_ids: req.body.amenities_workspace_ids}).error;
+            id: Joi.string().uuid().required(),
+        }).validate({id: req.params.id}).error;
         if(error) return badRequest(res, error);
-        const response = await services.deleteAmenitiesWorkspaceService(req.body);
+        const response = await services.deleteAmenitiesWorkspaceService(req.params.id);
         return ok(res, response)
     } catch (error) {
-        if(error === "No amenities-workspace records found to delete") return badRequest(res, error);
+        if(error === "No amenities-workspace record found to delete") return badRequest(res, error);
+        internalServerError(res, error)
+    }
+}
+
+export const getAmenitiesByWorkspaceIdController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            workspace_id: Joi.string().uuid().required(),
+        }).validate({workspace_id: req.params.workspace_id}).error;
+        if(error) return badRequest(res, error);
+        console.log(req.params.workspace_id)
+        const response = await services.getAmenitiesByWorkspaceIdService(req.params.workspace_id);
+        return ok(res, response);
+    } catch (error) {
+        console.log(error)
+        if(error === "No amenities found for this workspace") return badRequest(res, error);
         internalServerError(res, error)
     }
 }

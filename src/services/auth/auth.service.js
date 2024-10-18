@@ -114,26 +114,31 @@ export const loginGoogleService = (profile) =>
         try {
             const user = await db.User.findOrCreate({
                 where: {
-                    email: profile.emails[0].value,
+                    email: profile.emails[0]?.value,
                 },
                 defaults: {
                     user_id: v4(),
-                    email: profile.emails[0].value,
-                    password: hashPassword.hashPassword(profile.id),
+                    email: profile.emails[0]?.value,
+                    password: hashPassword.hashPassword(
+                        profile.emails[0].value
+                    ),
                     name: profile.displayName,
                     role_id: 4,
-                    image: profile.photos[0].value,
+                    image: profile.photos[0]?.value,
                     google_token: profile.token,
+                    phone: profile.phoneNumbers[0]?.value || "",
+                    date_of_birth: profile.birthdays || null,
                 },
                 transaction: t,
             });
+
+            console.log("User findOrCreate result:", user);
 
             if (user[1]) {
                 await db.Customer.create(
                     {
                         customer_id: v4(),
-                        user_id: user[0].user_id,
-                        phone: "",
+                        user_id: user[0]?.user_id,
                     },
                     { transaction: t }
                 );
@@ -141,10 +146,14 @@ export const loginGoogleService = (profile) =>
                 await db.User.update(
                     {
                         google_token: profile.token,
-                    },
+                        phone: profile.phoneNumbers?.length > 0 ? profile.phoneNumbers[0]?.value : null,
+                        date_of_birth: profile.birthdays ? profile.birthdays[0]?.date || null : null,
+                        name: profile.displayName || "",
+                        image: profile.photos?.[0]?.value || "",
+                    }, 
                     {
                         where: {
-                            email: profile.emails[0].value,
+                            email: profile.emails?.[0]?.value || "",
                         },
                         transaction: t,
                     }
@@ -157,12 +166,15 @@ export const loginGoogleService = (profile) =>
                 {
                     email: user[0].email,
                     user_id: user[0].user_id,
+                    role_id: user[0].role_id,
                 },
                 process.env.JWT_SECRET,
                 {
                     expiresIn: "1h",
                 }
             );
+
+            console.log("accessToken :::    " + accessToken);
 
             resolve({
                 err: 0,

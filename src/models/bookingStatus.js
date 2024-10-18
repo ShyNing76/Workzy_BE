@@ -1,5 +1,5 @@
 "use strict";
-const {Model} = require("sequelize");
+const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
     class BookingStatus extends Model {
@@ -9,7 +9,9 @@ module.exports = (sequelize, DataTypes) => {
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            BookingStatus.belongsTo(models.Booking, {foreignKey: "booking_id"});
+            BookingStatus.belongsTo(models.Booking, {
+                foreignKey: "booking_id",
+            });
         }
     }
 
@@ -26,13 +28,14 @@ module.exports = (sequelize, DataTypes) => {
             },
             status: {
                 type: DataTypes.ENUM(
-                    "confirmed",
-                    "paid",
-                    "check-in",
-                    "in-process",
-                    "check-out",
-                    "check-amenities",
-                    "completed",
+                    "confirmed", // customer
+                    "paid", // customer
+                    "check-in", // staff
+                    "in-process", // customer
+                    "check-out", // staff
+                    "check-amenities", // staff (chọn amenities bị hư thông model)
+                    "completed", // 1
+                    "damaged-payment", // 1 customer
                     "cancelled"
                 ),
                 defaultValue: "confirmed",

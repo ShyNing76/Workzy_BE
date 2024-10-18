@@ -38,18 +38,51 @@ export const createAmenitiesWorkspaceService = async ({amenity_ids, workspace_id
     }
 })
 
-export const deleteAmenitiesWorkspaceService = async ({amenities_workspace_ids}) => new Promise(async (resolve, reject) => {
+export const deleteAmenitiesWorkspaceService = async (id) => new Promise(async (resolve, reject) => {
     try {
           const amenitiesWorkspace = await db.AmenitiesWorkspace.destroy({
             where: {
-                amenities_workspace_id: {[Op.in]: amenities_workspace_ids}
+                amenities_workspace_id: id
             }
           });
-          if(amenitiesWorkspace === 0) return reject("No amenities-workspace records found to delete")
+          if(amenitiesWorkspace === 0) return reject("No amenities-workspace record found to delete")
           resolve({
             err: 0,
-            message: `${amenitiesWorkspace} amenities-workspace record(s) deleted successfully!`
+            message: `${amenitiesWorkspace} amenities-workspace record deleted successfully!`
           })
+    } catch (error) {
+        reject(error)
+    }
+})
+
+export const getAmenitiesByWorkspaceIdService = async (workspace_id) => new Promise(async (resolve, reject) => {
+    try {
+        const amenitiesWorkspace = await db.AmenitiesWorkspace.findAll({
+            where: {
+                workspace_id: workspace_id
+            },
+            attributes: [],
+            include: {
+                model: db.Amenity,
+                attributes: ['amenity_name'],
+                required: true
+            },
+            raw: true,
+            nest: true
+        })
+        for(const item of amenitiesWorkspace) {
+            console.log(item.Amenities)
+        }
+        if(amenitiesWorkspace.length === 0) return reject("No amenities found for this workspace")
+        const amenities = []
+        for(const item of amenitiesWorkspace) {
+            amenities.push(item.Amenities.amenity_name)
+        }
+        resolve({
+            err: 0,
+            message: "Got",
+            data: amenities
+        })
     } catch (error) {
         reject(error)
     }

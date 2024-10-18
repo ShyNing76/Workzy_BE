@@ -8,14 +8,13 @@ export const searchBuildingController = async (req, res) => {
         const error = Joi.object(
             {
                 location,
-                workspace_type_name: Joi.string().required(),
-            }).validate({location: req.query.location, workspace_type_name: req.query.workspace_type_name});
+                workspace_type_name: Joi.string(),
+            }).validate({location: req.query.location, workspace_type_name: req.query.workspace_type_name}).error;
 
-        if (error) return badRequest(res, error);
+        if (error) return badRequest(res, error.details[0].message);
         const response = await services.searchBuildingService(req.query);
         return ok(res, response);
     } catch (error) {
-        console.log(error);
         if (error === 'No buildings found')
             return badRequest(res, error);
         internalServerError(res, error);

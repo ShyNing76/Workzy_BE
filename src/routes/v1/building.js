@@ -1,10 +1,7 @@
 import express from "express";
 import * as controllers from "../../controllers";
-import {
-    verify_admin,
-    verify_admin_or_manager,
-    verify_token,
-} from "../../middlewares/verifyToken";
+import { verify_role, verify_token } from "../../middlewares/verifyToken";
+import { uploadImages } from "../../middlewares/imageGoogleUpload";
 
 const router = express.Router();
 
@@ -73,7 +70,8 @@ router.use(verify_token);
 
 router.post(
     "/",
-    verify_admin,
+    verify_role(["admin"]),
+    uploadImages,
     controllers.createBuildingController
     /*
         #swagger.description = 'Endpoint to create a new building.'
@@ -81,7 +79,7 @@ router.post(
         #swagger.requestBody = {
             required: true,
             content: {
-                "application/json": {
+                "multipart/form-data": {
                     schema: {
                         type: 'object',
                         required: ['building_name', 'location', 'address', 'google_address', 'images'],
@@ -118,8 +116,9 @@ router.post(
                                 type: 'array',
                                 items: {
                                     type: 'string',
-                                    example: 'Image URL'
-                                }
+                                    format: 'binary'
+                                },
+                                description: 'Array of image files'
                             }
                         }
                     }
@@ -143,7 +142,7 @@ router.post(
 
 router.put(
     "/:id",
-    verify_admin_or_manager,
+    verify_role(["admin", "manager"]),
     controllers.updateBuildingController
     /*
         #swagger.description = 'Endpoint to update a building.'
@@ -217,7 +216,7 @@ router.put(
 
 router.put(
     "/:id/status",
-    verify_admin_or_manager,
+    verify_role(["admin", "manager"]),
     controllers.updateBuildingStatusController
     /*
         #swagger.description = 'Endpoint to update status of a building.'
@@ -260,7 +259,7 @@ router.put(
 
 router.put(
     "/:id/image",
-    verify_admin_or_manager,
+    verify_role(["admin", "manager"]),
     controllers.updateBuildingImageController
     /*
         #swagger.description = 'Endpoint to update image of a building.'
@@ -303,7 +302,7 @@ router.put(
 
 router.put(
     "/:id/manager",
-    verify_admin,
+    verify_role(["admin"]),
     controllers.assignManagerController
     /*
         #swagger.description = 'Endpoint to assign a manager to a building.'
@@ -347,7 +346,7 @@ router.put(
 
 router.put(
     "/:id/manager/remove",
-    verify_admin,
+    verify_role(["admin"]),
     controllers.removeManagerController
     /*
         #swagger.description = 'Endpoint to remove a manager from a building.'
@@ -370,7 +369,7 @@ router.put(
 
 router.delete(
     "/:id",
-    verify_admin,
+    verify_role(["admin"]),
     controllers.deleteBuildingController
     /*
         #swagger.description = 'Endpoint to delete a building.'

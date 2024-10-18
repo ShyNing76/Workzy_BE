@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
             Amenity.belongsToMany(models.Booking, {
                 through: "BookingAmenities",
                 foreignKey: "amenity_id",
+                as: "Bookings",                
             });
         }
     }
@@ -46,10 +47,6 @@ module.exports = (sequelize, DataTypes) => {
             rent_price: {
                 type: DataTypes.DECIMAL(10, 2),
                 defaultValue: 0.0,
-            },
-            type: {
-                type: DataTypes.ENUM("amenity", "service"),
-                defaultValue: "amenity",
             },
             status: {
                 type: DataTypes.ENUM("active", "inactive"),

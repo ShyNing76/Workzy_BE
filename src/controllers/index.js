@@ -8,3 +8,5 @@ export * from './manager';
 export * from './notification';
 export * from './workspace';
 export * from './booking';
+export * from './voucher';
+export * from './bookingType';

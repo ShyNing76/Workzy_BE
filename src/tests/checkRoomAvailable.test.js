@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import * as checkRoomAvailabilityModule from "./index";
-import db from "../../models";
+import db from "../models";
 
 describe("checkRoomAvailability", () => {
   let sandbox;

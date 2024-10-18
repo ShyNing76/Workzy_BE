@@ -1,4 +1,5 @@
 import db from "../../models";
+import { Sequelize } from "sequelize";
 
 export const checkRoomAvailability = async ({
     workspace_id,
@@ -6,9 +7,15 @@ export const checkRoomAvailability = async ({
     end_time,
 }) => {
     try {
-        const checkBookingStatus = await db.Booking.findOne({
+        const bookingStatues = await db.Booking.findAll({
+            attributes: [
+                "booking_id",
+                "workspace_id",
+                "start_time_date",
+                "end_time_date",
+            ],
             where: {
-                workspace_id,
+                workspace_id: workspace_id,
                 start_time_date: {
                     [db.Sequelize.Op.lt]: end_time,
                 },
@@ -20,18 +27,37 @@ export const checkRoomAvailability = async ({
                 {
                     model: db.BookingStatus,
                     as: "BookingStatuses",
-                    where: {
-                        status: "confirmed",
-                    },
+                    attributes: [
+                        [
+                            Sequelize.fn(
+                                "ARRAY_AGG",
+                                Sequelize.col("BookingStatuses.status")
+                            ),
+                            "statusArray",
+                        ],
+                    ],
                 },
+            ],
+            group: [
+                "Booking.booking_id",
+                "Booking.workspace_id",
+                "Booking.start_time_date",
+                "Booking.end_time_date",
             ],
             raw: true,
         });
 
-        if (checkBookingStatus) {
-            return false; // Room is not available
+        // Nếu không có booking nào thì trả về true | Nghĩa là phòng đang trống
+        if (bookingStatues.length === 0) {
+            return true;
         }
-        return true; // Room is available
+
+        // Nếu tất cả các trạng thái trong statusArray đều là "cancelled" thì trả về true | Nghĩa là phòng đang trống
+        const isAvailable = bookingStatues.every((booking) =>
+            booking["BookingStatuses.statusArray"].includes("cancelled")
+        );
+
+        return isAvailable;
     } catch (error) {
         console.error(error);
         return false; // Return false in case of error

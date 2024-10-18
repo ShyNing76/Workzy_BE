@@ -1,10 +1,17 @@
 import express from "express";
 import * as controllers from "../../controllers";
-import {verify_admin, verify_token} from "../../middlewares/verifyToken";
+import {
+    verify_role,
+    verify_token,
+} from "../../middlewares/verifyToken";
 
 const router = express.Router();
 
-router.post("/", verify_token, verify_admin, controllers.createWorkspaceImageController
+router.post(
+    "/",
+    verify_token,
+    verify_role(["admin"]),
+    controllers.createWorkspaceImageController
     /*
         #swagger.description = 'Endpoint to create a new workspace image.'
         #swagger.summary = 'Create a new workspace image.'
@@ -43,7 +50,11 @@ router.post("/", verify_token, verify_admin, controllers.createWorkspaceImageCon
     */
 );
 
-router.delete("/", verify_token, verify_admin, controllers.deleteWorkspaceImageController
+router.delete(
+    "/",
+    verify_token,
+    verify_role(["admin"]),
+    controllers.deleteWorkspaceImageController
     /*
         #swagger.description = 'Endpoint to remove a workspace image.'
         #swagger.summary = 'Remove a image.'
@@ -63,7 +74,10 @@ router.delete("/", verify_token, verify_admin, controllers.deleteWorkspaceImageC
      */
 );
 
-router.get("/", verify_token, controllers.getAllWorkspaceImageController
+router.get(
+    "/",
+    verify_token,
+    controllers.getAllWorkspaceImageController
     /*
         #swagger.description = 'Endpoint to get all workspaces.'
         #swagger.summary = 'Get all workspaces.'
@@ -82,7 +96,10 @@ router.get("/", verify_token, controllers.getAllWorkspaceImageController
         }]
      */
 );
-router.get("/:id", verify_token, controllers.getWorkspaceImageByWorkspaceIdController
+router.get(
+    "/:id",
+    verify_token,
+    controllers.getWorkspaceImageByWorkspaceIdController
     /*
         #swagger.description = 'Get a workspace image by workspace_id.'
         #swagger.summary = 'Get a workspace image by workspace_id.'

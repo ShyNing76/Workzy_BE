@@ -2,7 +2,6 @@
 /src/config/config.json
 /src/config/swagger-output.json
 .env
-.babelrc
 /.idea
 .package-lock.json
 ngrok.exe
@@ -13,3 +12,7 @@ Dockerfile
 /.vscode
 /certs/*.pem
 /log
+/dist
+.dockerignore
+Dockerfile
+docker-compose.yml

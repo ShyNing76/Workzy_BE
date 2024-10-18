@@ -3,56 +3,63 @@ import db from "../models";
 import { CronJob } from "cron";
 import winston from "winston";
 import path from "path";
+import { Sequelize } from "../models";
 
 const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.printf(({ timestamp, level, message }) => {
-      return `${timestamp} ${level}: ${message}`;
-    })
-  ),
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: path.join('./log', 'checkBookingStatus.log') })
-  ]
+    level: "info",
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.printf(({ timestamp, level, message }) => {
+            return `${timestamp} ${level}: ${message}`;
+        })
+    ),
+    transports: [
+        new winston.transports.Console(),
+        new winston.transports.File({
+            filename: path.join("./log", "checkBookingStatus.log"),
+        }),
+    ],
 });
 
 const checkBookingStatus = async () => {
-    logger.info('---------------------------------');
-    logger.info('Starting checkBookingStatus job');
+    logger.info("---------------------------------");
+    logger.info("Starting checkBookingStatus job");
     const tenMinutesAgo = moment().subtract(10, "minutes").toISOString();
-    console.log(tenMinutesAgo);
     const bookingStatus = await db.BookingStatus.findAll({
-        where: {
-            status: "confirmed",
-            createdAt: {
-                [db.Sequelize.Op.lt]: tenMinutesAgo,
-            },
-        },
+        attributes: [
+            "booking_id",
+            [Sequelize.fn("ARRAY_AGG", Sequelize.col("status")), "statusArray"],
+            [Sequelize.fn("MAX", Sequelize.col("created_at")), "lastCreatedAt"],
+        ],
+        group: ["booking_id"],
+        raw: true,
+        nest: true,
     });
 
-    logger.info(`Found ${bookingStatus.length} bookings to update`);
+    let bookingCancelled = 0;
 
-    for (const status of bookingStatus) {
-        await db.BookingStatus.update(
-            {
+    bookingStatus.forEach(async (booking) => {
+        if (
+            booking.statusArray.length === 1 &&
+            booking.statusArray.includes("confirmed") &&
+            moment(booking.lastCreatedAt).isBefore(tenMinutesAgo)
+        ) {
+            await db.BookingStatus.create({
+                booking_id: booking.booking_id,
                 status: "cancelled",
-            },
-            {
-                where: { booking_id: status.booking_id },
-            }
-        );
-        logger.info(`Updated booking status to cancelled for booking_id: ${status.booking_id}`);
-    }
+            });
 
-    logger.info('Finished checkBookingStatus job');
-    logger.info('---------------------------------');
+            logger.info(`Booking ${booking.booking_id} has been cancelled`);
+            bookingCancelled++;
+        }
+    });
+
+    logger.info(`${bookingCancelled} bookings have been cancelled`);
+
+    logger.info("Finishing checkBookingStatus job");
+    logger.info("---------------------------------");
 };
 
 const job = new CronJob("*/2 * * * *", checkBookingStatus, null, true, "UTC");
-job.start();
-
-logger.info('CronJob for checkBookingStatus has been started');
 
 export default job;

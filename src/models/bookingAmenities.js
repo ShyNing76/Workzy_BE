@@ -1,5 +1,5 @@
 "use strict";
-const {Model} = require("sequelize");
+const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
     class BookingAmenities extends Model {
@@ -9,11 +9,13 @@ module.exports = (sequelize, DataTypes) => {
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            BookingAmenities.hasMany(models.Booking, {
+            BookingAmenities.belongsTo(models.Booking, {
                 foreignKey: "booking_id",
+                sourceKey: "booking_id",
             });
-            BookingAmenities.hasMany(models.Amenity, {
+            BookingAmenities.belongsTo(models.Amenity, {
                 foreignKey: "amenity_id",
+                sourceKey: "amenity_id",
             });
         }
     }
@@ -28,20 +30,22 @@ module.exports = (sequelize, DataTypes) => {
             booking_id: {
                 type: DataTypes.UUID,
                 allowNull: false,
+                unique: false,
             },
             amenity_id: {
                 type: DataTypes.UUID,
                 allowNull: false,
+                unique: false,
             },
             quantity: {
                 type: DataTypes.INTEGER,
                 defaultValue: 1,
             },
-            amenitiy_price: {
+            price: {
                 type: DataTypes.DECIMAL(10, 2),
                 defaultValue: 0.0,
             },
-            broken_price: {
+            total_price: {
                 type: DataTypes.DECIMAL(10, 2),
                 defaultValue: 0.0,
             },

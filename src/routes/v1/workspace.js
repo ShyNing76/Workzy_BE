@@ -1,10 +1,17 @@
 import express from "express";
 import * as controllers from "../../controllers";
-import {verify_admin, verify_token} from "../../middlewares/verifyToken";
+import {
+    verify_role,
+    verify_token,
+} from "../../middlewares/verifyToken";
 
 const router = express.Router();
 
-router.post("/", verify_token, verify_admin, controllers.createWorkspaceController 
+router.post(
+    "/",
+    verify_token,
+    verify_role(["admin"]),
+    controllers.createWorkspaceController
     /*
         #swagger.description = 'Endpoint to create a new workspace.'
         #swagger.summary = 'Create a new workspace.'
@@ -44,6 +51,10 @@ router.post("/", verify_token, verify_admin, controllers.createWorkspaceControll
                                 type: 'int',
                                 example: '20'
                             },
+                            area: {
+                                type: 'int',
+                                example: '20'
+                            },
                             description: {
                                 type: 'string',
                                 example: 'Workspace description.'
@@ -70,7 +81,11 @@ router.post("/", verify_token, verify_admin, controllers.createWorkspaceControll
         }]
     */
 );
-router.put("/:id", verify_token, verify_admin, controllers.updateWorkspaceController
+router.put(
+    "/:id",
+    verify_token,
+    verify_role(["admin"]),
+    controllers.updateWorkspaceController
     /*
         #swagger.description = 'Endpoint to update a workspace.'
         #swagger.summary = 'Update a workspace.'
@@ -99,6 +114,10 @@ router.put("/:id", verify_token, verify_admin, controllers.updateWorkspaceContro
                             workspace_price: {
                                 type: 'int',
                                 example: '1000000'
+                            },
+                            area: {
+                                type: 'int',
+                                example: '20'
                             },
                             capacity: {
                                 type: 'int',
@@ -131,7 +150,11 @@ router.put("/:id", verify_token, verify_admin, controllers.updateWorkspaceContro
         }]
      */
 );
-router.delete("/delete/:id", verify_token, verify_admin, controllers.deleteWorkspaceController
+router.delete(
+    "/delete/:id",
+    verify_token,
+    verify_role(["admin"]),
+    controllers.deleteWorkspaceController
     /*
         #swagger.description = 'Endpoint to remove a workspace.'
         #swagger.summary = 'Remove a workspace.'
@@ -153,7 +176,9 @@ router.delete("/delete/:id", verify_token, verify_admin, controllers.deleteWorks
      */
 );
 
-router.get("/", controllers.getAllWorkspaceController
+router.get(
+    "/",
+    controllers.getAllWorkspaceController
     /*
         #swagger.description = 'Endpoint to get all workspaces.'
         #swagger.summary = 'Get all workspaces.'
@@ -165,6 +190,8 @@ router.get("/", controllers.getAllWorkspaceController
         #swagger.parameters['min_price'] = { description: 'Minimum price.' }
         #swagger.parameters['max_price'] = { description: 'Maximum price.' }
         #swagger.parameters['workspace_type_name'] = { description: 'Workspace type name.' }
+        #swagger.parameters['building_id'] = { description: 'Building ID.' }
+        #swagger.parameters['status'] = { description: 'Status.' }
         #swagger.responses[200] = {
             description: 'Workspace found.'
         }
@@ -179,7 +206,9 @@ router.get("/", controllers.getAllWorkspaceController
         }]
      */
 );
-router.get("/:id", controllers.getWorkspaceByIdController
+router.get(
+    "/:id",
+    controllers.getWorkspaceByIdController
     /*
         #swagger.description = 'Endpoint to get a workspace by ID.'
         #swagger.summary = 'Get a workspace by ID.'
@@ -198,7 +227,10 @@ router.get("/:id", controllers.getWorkspaceByIdController
         }]
      */
 );
-router.put("/assign/:id", verify_token, controllers.assignWorkspaceToBuildingController
+router.put(
+    "/assign/:id",
+    verify_token,
+    controllers.assignWorkspaceToBuildingController
     /*
         #swagger.description = 'Endpoint to assign a workspace to a building.'
         #swagger.summary = 'Assign a workspace to a building.' 
@@ -238,6 +270,5 @@ router.put("/assign/:id", verify_token, controllers.assignWorkspaceToBuildingCon
         }]
      */
 );
-
 
 module.exports = router;

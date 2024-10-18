@@ -1,5 +1,5 @@
 "use strict";
-const {Model} = require("sequelize");
+const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
     class Booking extends Model {
@@ -9,16 +9,20 @@ module.exports = (sequelize, DataTypes) => {
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            Booking.belongsTo(models.Customer, {foreignKey: "customer_id"});
+            Booking.belongsTo(models.Customer, { foreignKey: "customer_id" });
             Booking.belongsToMany(models.Amenity, {
                 through: "BookingAmenities",
                 foreignKey: "booking_id",
+                as: "Amenities",
             });
-            Booking.belongsTo(models.BookingType, {foreignKey: "booking_type_id"});
-            Booking.belongsTo(models.Workspace, {foreignKey: "workspace_id"});
-            Booking.hasOne(models.Review, {foreignKey: "booking_id"});
-            Booking.hasMany(models.BookingStatus, {foreignKey: "booking_id"});
-            Booking.hasMany(models.Payment, {foreignKey: "booking_id"});
+            Booking.belongsTo(models.BookingType, {
+                foreignKey: "booking_type_id",
+            });
+            Booking.belongsTo(models.Workspace, { foreignKey: "workspace_id" });
+            Booking.hasOne(models.Review, { foreignKey: "booking_id" });
+            Booking.hasMany(models.BookingStatus, { foreignKey: "booking_id" });
+            Booking.hasMany(models.Payment, { foreignKey: "booking_id" });
+            Booking.belongsTo(models.Voucher, { foreignKey: "voucher_id" });
         }
     }
 
@@ -41,11 +45,19 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.UUID,
                 allowNull: false,
             },
-            total_amenities_price: {
+            voucher_id: {
+                type: DataTypes.UUID,
+                allowNull: true,
+            },
+            workspace_price: {
                 type: DataTypes.DECIMAL(10, 2),
                 defaultValue: 0.0,
             },
-            workspace_price: {
+            total_workspace_price: {
+                type: DataTypes.DECIMAL(10, 2),
+                defaultValue: 0.0,
+            },
+            total_amenities_price: {
                 type: DataTypes.DECIMAL(10, 2),
                 defaultValue: 0.0,
             },

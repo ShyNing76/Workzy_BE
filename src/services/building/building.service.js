@@ -40,6 +40,24 @@ export const getBuildingService = ({
                         attributes: ["image"],
                         required: false,
                     },
+                    {
+                        model: db.Manager,
+                        as: "Manager",
+                        include: {
+                            model: db.User,
+                            as: "User",
+                            attributes: {
+                                exclude: [
+                                    "created_at",
+                                    "updated_at",
+                                    "createdAt",
+                                    "updatedAt",
+                                    "password",
+                                    "user_id",
+                                ],
+                            },
+                        },
+                    },
                 ],
                 order: [handleSortOrder(order, "building_name")],
                 limit: handleLimit(limit),
@@ -123,6 +141,7 @@ export const createBuildingService = (data) =>
             );
 
             if (images && images.length > 0) {
+                console.log(images);
                 try {
                     await createBuildingImages(
                         images,
@@ -140,12 +159,9 @@ export const createBuildingService = (data) =>
             resolve({
                 err: 0,
                 message: "Building created successfully",
-                data: {
-                    ...newBuilding.toJSON(),
-                    images: images || [],
-                },
             });
         } catch (error) {
+            console.log(error);
             await t.rollback();
             reject(error);
         }
@@ -205,17 +221,21 @@ export const assignManagerService = (building_id, manager_id) =>
     new Promise(async (resolve, reject) => {
         try {
             const [building, manager] = await Promise.all([
-                db.Building.findOne({ where: { building_id } }),
+                db.Building.findOne({
+                    where: { building_id, status: "active" },
+                }),
                 db.Manager.findOne({ where: { manager_id } }),
             ]);
-
+            console.log(building, manager);
             if (!building) return reject("Building not found");
             if (!manager) return reject("Manager not found");
 
-            await building.setManager(manager.manager_id);
+            building.manager_id = manager_id;
+            await building.save();
 
             resolve({ err: 0, message: "Manager assigned successfully" });
         } catch (error) {
+            console.log(error);
             reject(error);
         }
     });
@@ -304,21 +324,19 @@ export const updateBuildingStatusService = (id, status) =>
 export const deleteBuildingService = (id) =>
     new Promise(async (resolve, reject) => {
         try {
-            const building = await db.Building.findOne({
-                where: {
-                    building_id: id,
+            const building = await db.Building.update(
+                {
+                    status: "inactive",
                 },
-            });
-            if (!building) {
+                {
+                    where: {
+                        building_id: id,
+                    },
+                }
+            );
+            if (building[0] === 0) {
                 return reject("Building not found");
             }
-
-            await db.Building.destroy({
-                where: {
-                    building_id: id,
-                },
-            });
-
             resolve({
                 err: 0,
                 message: "Building deleted successfully",
@@ -343,7 +361,7 @@ const createBuildingImages = async (images, building_id, t) => {
     newImages.forEach((image) => {
         db.BuildingImage.create({
             building_id,
-            image,
+            image: image.firebaseUrl,
         });
     });
 };

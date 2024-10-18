@@ -1,7 +1,7 @@
 import db from '../../models';
 import { createWorkspaceImageService } from './workspaceImage.service';
 import {v4} from "uuid";
-import {Op} from "sequelize";
+import { Op } from "sequelize";
 import { handleLimit, handleOffset, handleSortOrder } from "../../utils/handleFilter";
 
 export const createWorkspaceService = async ({images, workspace_name, workspace_price, ...data}) => new Promise(async (resolve, reject) => {
@@ -44,47 +44,35 @@ export const createWorkspaceService = async ({images, workspace_name, workspace_
 })
 
 export const updateWorkspaceService = async (id, {workspace_name, building_id, workspace_price, workspace_type_id, ...data}) => new Promise(async (resolve, reject) => {
-    const t = await db.sequelize.transaction();
     try {
 
-        const [isWorkspaceExist, isBuildingExist, isTypeExist] = await Promise.all([
+        if(building_id){
+            const isBuildingExist = await db.Building.findByPk(building_id);
+            if(!isBuildingExist) return reject("Building is not exist")
+        }
+        const [isWorkspaceExist, isTypeExist] = await Promise.all([
             db.Workspace.findByPk(id), 
-            db.Building.findByPk(building_id),
             db.WorkspaceType.findByPk(workspace_type_id)
         ])
-        if(!isWorkspaceExist) return reject({
-            err: 1,
-            message: "Workspace is not exist"
-        })
-        if(!isBuildingExist) return reject({
-            err: 1,
-            message: "Building is not exist"
-        })
-        if(!isTypeExist) return reject({
-            err: 1,
-            message: "Workspace Type is not exist"
-        })
+        if(!isWorkspaceExist) return reject("Workspace is not exist")
+        if(!isTypeExist) return reject("Workspace Type is not exist")
 
         const isWorkspaceNameDuplicated = await db.Workspace.findOne({
             where: {
                 workspace_name: workspace_name,
                 workspace_id: { [Op.ne]: id }
             },
-            transaction: t
         })
 
-        if(isWorkspaceNameDuplicated) return reject({
-            err: 1,
-            message: "Workspace name is already used"
-        })
+        if(isWorkspaceNameDuplicated) return reject("Workspace name is already used")
 
         const price_per_day = workspace_price * 8 * 0.8;
         const price_per_month = workspace_price * 22 * 0.8;
 
-        const [updatedRowsCount] = await db.Workspace.update({
+        const updatedRowsCount = await db.Workspace.update({
             workspace_name: workspace_name,
             building_id: building_id,
-            workspace_type_id: data.workspace_type_id,
+            workspace_type_id: workspace_type_id,
             price_per_hour: workspace_price,
             price_per_day: price_per_day,
             price_per_month: price_per_month,
@@ -94,16 +82,14 @@ export const updateWorkspaceService = async (id, {workspace_name, building_id, w
             where: {
                 workspace_id: id
             },
-            transaction: t
         });
-        await t.commit();
+        if(updatedRowsCount[0] === 0) return reject("Cannot find any workspace to update || Workspace is already updated")
         resolve({
-            err: updatedRowsCount > 0 ? 0 : 1,
-            message: updatedRowsCount > 0 ? 'Workspace updated successfully!' : 'Workspace update failed',
+            err: 0,
+            message: 'Workspace updated successfully!',
         })
 
     } catch (error) {
-        await t.rollback();
         reject(error)
     }
 })
@@ -118,9 +104,12 @@ export const deleteWorkspaceService = async (id) => new Promise(async (resolve, 
                 status: "active"
             },
         });
+        if (updatedRowsCount === 0) {
+            return reject("Cannot find any workspace to delete");
+        }
         resolve({
-            err: updatedRowsCount > 0 ? 0 : 1,
-            message: updatedRowsCount > 0 ? `${updatedRowsCount} Workspace deleted successfully!` : 'Cannot find any workspace to delete',
+            err: 0,
+            message: `Workspace deleted successfully!`,
         });
 
     } catch (error) {
@@ -128,43 +117,38 @@ export const deleteWorkspaceService = async (id) => new Promise(async (resolve, 
     }
 })
 
-export const getAllWorkspaceService = ({page, limit, order, workspaceName, officeSize, minPrice, maxPrice, workspace_type_name, ...query}) => new Promise(async (resolve, reject) => {
+export const getAllWorkspaceService = ({page, limit, order, workspace_name, office_size, min_price, max_price, workspace_type_name, building_id, status, ...query}) => new Promise(async (resolve, reject) => {
     try {
-        const capacity = {};
-        if (officeSize)
-            switch (officeSize) {
-                case 1:
-                    capacity.capacity = {[Op.lte]: 10}
+        if (office_size){
+            switch (office_size) {
+                case "1":
+                    query.capacity = {[Op.lte]: 10}
                     break;
-                case 2:
-                    capacity.capacity = {[Op.between]: [10,20]}
+                case "2":
+                    query.capacity = {[Op.between]: [10,20]}
                     break;
-                case 3:
-                    capacity.capacity = {[Op.between]: [20,30]}
+                case "3":
+                    query.capacity = {[Op.between]: [20,30]}
                     break;
-                case 4:
-                    capacity.capacity = {[Op.between]: [30,40]}
+                case "4":
+                    query.capacity = {[Op.between]: [30,40]}
                     break;
-                case 5:
-                    capacity.capacity = {[Op.between]: [40,50]}
+                case "5":
+                    query.capacity = {[Op.between]: [40,50]}
                     break;
-                case 6:
-                    capacity.capacity = {[Op.gte]: 50}
+                case "6":
+                    query.capacity = {[Op.gte]: 50}
                     break;
                 default:
                     break;
+            }
         }
-        const workspaces = await db.Workspace.findAndCountAll({
-            where: {
-                workspace_name: {
-                    [Op.substring]: workspaceName || ""
-                },
-                price_per_hour: {
-                    [Op.between]: [minPrice, maxPrice]
-                },
-                ...capacity,
-                ...query
-            },
+        if (min_price && max_price) {
+            query.price_per_hour = {[Op.between]: [min_price, max_price]}
+        }
+        query.status = status ? status : {[Op.ne]: null};
+        const workspaces = await db.Workspace.findAll({
+            where: query,
             offset: handleOffset(page, limit),
             limit: handleLimit(limit),
             order: [handleSortOrder(order, "workspace_name")],
@@ -175,37 +159,41 @@ export const getAllWorkspaceService = ({page, limit, order, workspaceName, offic
                 {
                     model: db.Building,
                     attributes: ["building_id"],
+                    where: {
+                        building_id: building_id ? building_id : {[Op.ne]: null}
+                    },
                     required: true,
                 }, 
                 {
                     model: db.WorkspaceType,
                     attributes: ["workspace_type_name"],
                     where: {
-                        workspace_type_name: workspace_type_name
+                        workspace_type_name: workspace_type_name ? workspace_type_name : {[Op.ne]: null}
                     },
                     required: true,
                 }, 
             ],
             raw: true, 
-            nest: true
+            nest: true,
+            distinct: true,
         });
-
+        if(workspaces.length === 0) return reject("No Workspace Exist")
         resolve({
-            err: workspaces.count > 0 ? 0 : 1,
-            message: workspaces.count > 0 ? "Got" : "No Workspace Exist",
+            err: 0,
+            message: "Got Workspace successfully",
             data: workspaces
         });
     } catch (error) {
+        console.log(error)
         reject(error)
     }
 })
 
-export const getWorkspaceByIdService = (workspace_id, building_id) => new Promise(async (resolve, reject) => {
+export const getWorkspaceByIdService = (workspace_id) => new Promise(async (resolve, reject) => {
     try {
         const workspace = await db.Workspace.findOne({
             where: {
                 workspace_id: workspace_id,
-                building_id: building_id
             },
             attributes: {
                 exclude: ["createdAt", "updatedAt"]

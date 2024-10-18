@@ -6,7 +6,11 @@ import { handleLimit, handleOffset, handleSortOrder } from "../../utils/handleFi
 export const createAmenityService = (data) => new Promise(async (resolve, reject) => {
     try {
         data.depreciation_price = data.original_price * 0.7;
-        if(data.type == "service") data.depreciation_price = 0;
+        data.rent_price = data.original_price * 0.3;
+        if(data.type === "Food"){
+            data.depreciation_price = 0; 
+            data.rent_price = 0;
+        } 
 
         const amenity = await db.Amenity.findOrCreate({
             where: {
@@ -18,11 +22,13 @@ export const createAmenityService = (data) => new Promise(async (resolve, reject
                 image: data.image,
                 original_price: data.original_price,
                 depreciation_price: data.depreciation_price,
+                rent_price: data.rent_price,
                 ...data,
                 status: "active"
             }
         })
-        if(amenity[1]) return reject("Amenity already exists")
+
+        if(amenity[1] === false) return reject("Amenity already exists")
         resolve({
             err: 0,
             message: 'Amenity created successfully!',
@@ -48,7 +54,7 @@ export const updateAmenityService = (amenity_id, data) => new Promise(async (res
             return reject(`Amenity is already used`)
         
         data.depreciation_price = data.original_price * 0.7;
-        if(data.type == "service") data.depreciation_price = 0;
+        if(data.type === "Food") data.depreciation_price = 0;
 
         const [updatedRowsCount] = await db.Amenity.update(
             {
@@ -72,20 +78,20 @@ export const updateAmenityService = (amenity_id, data) => new Promise(async (res
     }
 })
 
-export const deleteAmenityService = ({amenity_ids}) => new Promise(async (resolve, reject) => {
+export const deleteAmenityService = (id) => new Promise(async (resolve, reject) => {
     try {
         const [updatedRowsCount] = await db.Amenity.update({
             status: "inactive"
         },{
             where: {
-                amenity_id: { [Op.in]: amenity_ids },
+                amenity_id: id,
                 status: "active"
             }
         }) 
-        if(updatedRowsCount === 0) return reject("Cannot find any amenity to delete")
+        if(updatedRowsCount === 0) return reject("No Amenity Exist")
         resolve({
             err: 0,
-            message: `${updatedRowsCount} Amenity (s) deleted successfully!`,
+            message: `${updatedRowsCount} Amenity deleted successfully!`,
         })
         
     } catch (error) {
@@ -93,10 +99,9 @@ export const deleteAmenityService = ({amenity_ids}) => new Promise(async (resolv
     }
 })
 
-export const getAllAmenityService = ({page, limit, order, amenity_name, ...query}) => new Promise(async (resolve, reject) => {
+export const getAllAmenityService = ({page, limit, order, amenity_name, status, ...query}) => new Promise(async (resolve, reject) => {
     try {
-        
-
+        if(status) query.status = status ? status : {[Op.ne]: null};
         const amenities = await db.Amenity.findAndCountAll({
             where: {
                 amenity_name: {
@@ -122,11 +127,11 @@ export const getAllAmenityService = ({page, limit, order, amenity_name, ...query
     }
 })
 
-export const getAmenityByIdService = (amenity_id) => new Promise(async (resolve, reject) => {
+export const getAmenityByIdService = (id) => new Promise(async (resolve, reject) => {
     try {
         const amenity = await db.Amenity.findOne({
             where: {
-                amenity_id: amenity_id
+                amenity_id: id
             },
             attributes: {
                 exclude: ["createdAt", "updatedAt"]

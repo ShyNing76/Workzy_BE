@@ -33,6 +33,7 @@ export const createBookingController = async (req, res) => {
 
         return created(res, response);
     } catch (err) {
+        console.error(err);
         const knownErrors = new Set([
             "Workspace is already booked for the selected time period",
             "Customer not found",
@@ -40,8 +41,7 @@ export const createBookingController = async (req, res) => {
             "Booking type not found",
         ]);
 
-        if (knownErrors.has(err.message)) return badRequest(res, err.message);
+        if (knownErrors.has(err)) return badRequest(res, err);
         internalServerError(res);
     }
 };
-

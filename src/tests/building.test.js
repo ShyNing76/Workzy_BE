@@ -2,6 +2,7 @@ import {expect} from "chai";
 import sinon from "sinon";
 import * as buildingService from "../services/building/building.service";
 import db from "../models";
+import * as assert from "node:assert";
 
 describe("Building Service", () => {
     let sandbox;
