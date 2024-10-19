@@ -70,7 +70,7 @@ export const getAllReviewService = ({page, limit, order, ...query}) => new Promi
             limit: handleLimit(limit),
             offset: handleOffset(page, limit),
             attributes: {
-                exclude: ["createdAt", "updatedAt"]
+                exclude: ["updatedAt"]
             },
             include: [
                 {
@@ -83,6 +83,7 @@ export const getAllReviewService = ({page, limit, order, ...query}) => new Promi
                             model: db.Customer,
                             as: "Customer",
                             attributes: ["user_id"],
+                            required: true,
                             include: [
                                 {
                                     model: db.User,
@@ -90,6 +91,11 @@ export const getAllReviewService = ({page, limit, order, ...query}) => new Promi
                                     attributes: ["name"]
                                 }
                             ]
+                        },
+                        {
+                            model: db.Workspace,
+                            attributes: ["workspace_name"],
+                            required: true,
                         }
                     ]
                 }

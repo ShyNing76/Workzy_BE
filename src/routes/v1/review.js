@@ -87,6 +87,7 @@ router.get(
         #swagger.parameters['order'] = { description: 'Order by rating, date, workspace_id.' }
         #swagger.parameters['page'] = { description: 'Page number.' }
         #swagger.parameters['limit'] = { description: 'Number of items per page.' }
+        #swagger.parameters['workspace_id'] = { description: 'Filter by workspace ID.' }
         #swagger.responses[200] = {
             description: 'Reviews found.'
         }
