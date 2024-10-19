@@ -159,7 +159,7 @@ export const paypalAmenitiesSuccessController = async (req, res) => {
         const knownErrors = [
             "Booking not found",
             "Booking status not found",
-            "Booking must be in-process",
+            "Booking must be usage",
             "Booking already cancelled",
             "Failed to capture PayPal order",
             "Payment not found",
