@@ -44,21 +44,20 @@ export const createReviewService = async (data) => new Promise(async (resolve, r
 
 export const deleteReviewService = async (review_id) => new Promise(async (resolve, reject) => {
     try {
-        const review = await db.Review.update({
-            status: "inactive"
-        }, {
+
+        const review = await db.Review.destroy({
             where: {
                 review_id: review_id,
-                status: "active"
             }
         })
-        if(review[0] === 0) return reject("Review not found")
+        if(!review) return reject("Review not found")
             resolve({
                 err: 0,
                 message: `Review deleted successfully!`
             });
         }
     catch (error) {
+        console.log(error)
         reject(error)
     }
 })

@@ -56,7 +56,7 @@ router.post(
     */
 );
 
-router.put("/delete/:review_id", verify_token, verify_role(["admin", "manager"]), controllers.deleteReviewController
+router.delete("/delete/:review_id", verify_token, verify_role(["admin", "manager"]), controllers.deleteReviewController
     /*
         #swagger.description = 'Endpoint to remove a review.'
         #swagger.summary = 'Remove a review.'

@@ -22,7 +22,13 @@ export const createReviewController = async (req, res) => {
 
 export const deleteReviewController = async (req, res) => {
     try {
-        const workspace = await services.deleteReviewService(req.params.id);
+        const error = Joi.object({
+            review_id: Joi.required()
+        }).validate({
+            review_id: req.params.review_id
+        }).error;
+        if (error) return badRequest(res, error);
+        const workspace = await services.deleteReviewService(req.params.review_id);
         return ok(res, workspace);
     } catch (error) {
         if(error === "Review not found") return badRequest(res, error);
