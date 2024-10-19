@@ -21,7 +21,7 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
             if (!customer) return reject("Customer not found");
 
             const tabStatus = {
-                Current: ["check-in", "in-process"],
+                Current: ["check-in", "usage"],
                 Upcoming: ["paid", "confirmed"],
                 "Check-out": ["check-out", "check-amenities"],
                 Completed: ["completed"],
@@ -90,7 +90,7 @@ export const getAllBookingsService = ({
     new Promise(async (resolve, reject) => {
         try {
             const tabStatus = {
-                Current: ["in-process", "check-out", "check-amenities"],
+                Current: ["usage", "check-out", "check-amenities"],
                 Upcoming: ["paid", "confirmed"],
                 Completed: ["completed"],
                 Cancelled: ["cancelled"],

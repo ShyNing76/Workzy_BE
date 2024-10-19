@@ -540,9 +540,9 @@ export const paypalCheckoutAmenitiesService = ({
                     !customer ? "Customer not found" : "Booking not found"
                 );
 
-            // Check if booking is in-process and not cancelled
-            if (booking.BookingStatuses[0].status !== "in-process")
-                return reject("Booking must be in-process");
+            // Check if booking is usage and not cancelled
+            if (booking.BookingStatuses[0].status !== "usage")
+                return reject("Booking must be usage");
             if (booking.BookingStatuses[0].status === "cancelled")
                 return reject("Booking already cancelled");
 
@@ -744,8 +744,8 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
                 return reject("Booking status not found");
             }
 
-            if (booking.BookingStatuses[0].status !== "in-process")
-                return reject("Booking must be in-process");
+            if (booking.BookingStatuses[0].status !== "usage")
+                return reject("Booking must be usage");
 
             if (booking.BookingStatuses[0].status === "cancelled")
                 return reject("Booking already cancelled");
