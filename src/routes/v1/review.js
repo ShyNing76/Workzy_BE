@@ -78,8 +78,6 @@ router.delete("/delete/:review_id", verify_token, verify_role(["admin", "manager
 
 router.get(
     "/",
-    verify_token,
-    verify_role(["admin", "manager"]),
     controllers.getAllReviewController
     /*
         #swagger.description = 'Endpoint to get all reviews.'
