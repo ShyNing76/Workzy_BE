@@ -223,7 +223,7 @@ export const changeStatusService = ({ booking_id, user_id, status }) =>
 
             const statusTransitions = {
                 paid: "check-in",
-                "in-process": "check-out",
+                "usage": "check-out",
             };
 
             const changeStatus =
