@@ -9,7 +9,7 @@ import * as services from "../../services/booking";
 export const getAllBookingsController = async (req, res) => {
     try {
         const error = Joi.object({
-            building_id: Joi.string().uuid().required(),
+            building_id: Joi.string().uuid(),
         }).validate({
             building_id: req.query.building_id,
         }).error;
@@ -95,4 +95,4 @@ export const getTimeBookingController = async (req, res) => {
         if (knownErrors.includes(err)) return badRequest(res, err);
         internalServerError(res);
     }
-}
+};

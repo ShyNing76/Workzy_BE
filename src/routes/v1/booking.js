@@ -155,10 +155,16 @@ router.get(
         #swagger.description = 'Get all bookings for the authenticated admin, manager, or staff.'
         #swagger.summary = 'Get bookings'
         #swagger.parameters['building_id'] = {
+            in: 'query',
             description: 'Filter by building ID',
             type: 'string',
             format: 'uuid',
-            required: true
+        }
+        #swagger.parameters['workspace_id'] = {
+            in: 'query',
+            description: 'Filter by workspace ID',
+            type: 'string',
+            format: 'uuid',
         }
         #swagger.parameters['page'] = { description: 'Page number' }
         #swagger.parameters['limit'] = { description: 'Number of items per page' }

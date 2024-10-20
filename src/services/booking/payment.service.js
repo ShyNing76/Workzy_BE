@@ -365,6 +365,19 @@ export const paypalSuccessService = ({ booking_id, order_id }) =>
         }
     });
 
+const cancelBooking = (start_time_date) => {
+    const isLate = false;
+    const currentDate = moment().format("YYYY-MM-DD HH:mm:ss");
+    console.log("Current Date: " + currentDate);
+    start_time_date = moment(start_time_date).format("YYYY - MM - DD HH:mm:ss");
+    console.log("Start Time Date: " + start_time_date);
+    const diff = moment(currentDate).diff(moment(start_time_date), "days");
+    if (diff > 1) {
+        isLate = true;
+    }
+    return isLate;
+};
+
 export const refundBookingService = ({ booking_id, user_id }) =>
     new Promise(async (resolve, reject) => {
         const t = await db.sequelize.transaction();
@@ -393,10 +406,7 @@ export const refundBookingService = ({ booking_id, user_id }) =>
                 return reject("Booking must be paid");
 
             // if booking is cancelled within 24 hours, do not refund
-            if (
-                booking.BookingStatuses[0].createdAt <
-                new Date(new Date().setDate(new Date().getDate() - 1))
-            ) {
+            if (cancelBooking(booking.start_time_date)) {
                 const bookingStatus = await db.BookingStatus.create(
                     {
                         booking_id: booking_id,

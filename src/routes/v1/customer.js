@@ -76,6 +76,27 @@ router.get(
 );
 
 router.get(
+    "/notification",
+    verify_token,
+    verify_role(["customer"]),
+    controller.getNotificationsController
+    /* #swagger.description = 'Endpoint to get notifications.'
+    #swagger.summary = 'Get notifications.'
+    #swagger.parameters['page'] = {description: 'Page number.'}
+    #swagger.parameters['limit'] = {description: 'Number of items per page.'}
+    #swagger.responses[200] = {
+        description: 'Notifications found.'
+    }
+    #swagger.responses[500] = {
+        description: 'Internal server error.'
+    }
+    #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
+router.get(
     "/:id",
     verify_token,
     verify_role(["admin", "staff", "manager"]),
@@ -152,4 +173,5 @@ router.put(
         type: 'integer'
     } */
 );
+
 module.exports = router;

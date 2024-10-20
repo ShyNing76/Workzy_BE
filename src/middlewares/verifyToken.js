@@ -25,18 +25,23 @@ export const verify_token = (req, res, next) => {
     });
 };
 
-export const verify_role = (roles) => {
+export const verify_role = (allowedRoles) => {
     return (req, res, next) => {
-        const role_id = {
+        console.log(allowedRoles);
+
+        const role_ids = {
             1: "admin",
             2: "manager",
             3: "staff",
             4: "customer",
         };
 
-        if (!roles.includes(role_id[req.user.role_id]))
-            return notAuthorized("Unauthorized", res, false);
+        const userRole = role_ids[req.user.role_id];
 
-        next();
+        if (!userRole || !allowedRoles.includes(userRole)) {
+            return notAuthorized("Unauthorized", res, false);
+        } else {
+            next();
+        }
     };
 };
