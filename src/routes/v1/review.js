@@ -56,7 +56,7 @@ router.post(
     */
 );
 
-router.put("/delete/:review_id", verify_token, verify_role(["admin", "manager"]), controllers.deleteReviewController
+router.delete("/delete/:review_id", verify_token, verify_role(["admin", "manager"]), controllers.deleteReviewController
     /*
         #swagger.description = 'Endpoint to remove a review.'
         #swagger.summary = 'Remove a review.'
@@ -87,6 +87,7 @@ router.get(
         #swagger.parameters['order'] = { description: 'Order by rating, date, workspace_id.' }
         #swagger.parameters['page'] = { description: 'Page number.' }
         #swagger.parameters['limit'] = { description: 'Number of items per page.' }
+        #swagger.parameters['workspace_name'] = { description: 'Filter by workspace name.' }
         #swagger.responses[200] = {
             description: 'Reviews found.'
         }

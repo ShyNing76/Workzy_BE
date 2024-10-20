@@ -21,7 +21,7 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
             if (!customer) return reject("Customer not found");
 
             const tabStatus = {
-                Current: ["check-in", "in-process"],
+                Current: ["check-in", "usage"],
                 Upcoming: ["paid", "confirmed"],
                 "Check-out": ["check-out", "check-amenities"],
                 Completed: ["completed"],
@@ -90,7 +90,7 @@ export const getAllBookingsService = ({
     new Promise(async (resolve, reject) => {
         try {
             const tabStatus = {
-                Current: ["in-process", "check-out", "check-amenities"],
+                Current: ["usage", "check-out", "check-amenities"],
                 Upcoming: ["paid", "confirmed"],
                 Completed: ["completed"],
                 Cancelled: ["cancelled"],
@@ -103,8 +103,6 @@ export const getAllBookingsService = ({
                       },
                   }
                 : {};
-
-            console.log(building_id);
 
             const bookings = await db.Booking.findAndCountAll({
                 where: { ...data },
@@ -143,6 +141,7 @@ export const getAllBookingsService = ({
                 limit: handleLimit(limit),
                 offset: handleOffset(page, limit),
                 attributes: { exclude: ["createdAt", "updatedAt"] },
+                subquery: false,
             });
 
             if (!bookings || bookings.count === 0)
