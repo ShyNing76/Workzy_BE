@@ -9,11 +9,17 @@ export const searchBuildingService = ({ location, workspace_type_name }) =>
                 include: {
                     model: db.Workspace,
                     required: true,
+                    where:{
+                        status: "active",
+                    },
                     attributes: [],
                     include: {
                         model: db.WorkspaceType,
                         required: true,
                         attributes: [],
+                        where: {
+                            status: "active",
+                        }
                     },
                 },
                 attributes: [
@@ -55,8 +61,6 @@ export const searchBuildingService = ({ location, workspace_type_name }) =>
                       building.workspace_types.includes(workspace_type_name)
                   )
                 : buildingsWorkspace;
-
-            console.log(buildingsWorkspaceWithWorkspaceTypes);
 
             resolve({
                 err: 0,
