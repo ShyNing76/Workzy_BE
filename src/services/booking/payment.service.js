@@ -369,9 +369,7 @@ const cancelBooking = (start_time_date) => {
     const isLate = false;
     const currentDate = moment().format("YYYY-MM-DD HH:mm:ss");
     console.log("Current Date: " + currentDate);
-    const start_time_date = moment(start_time_date).format(
-        "YYYY - MM - DD HH:mm:ss"
-    );
+    start_time_date = moment(start_time_date).format("YYYY - MM - DD HH:mm:ss");
     console.log("Start Time Date: " + start_time_date);
     const diff = moment(currentDate).diff(moment(start_time_date), "days");
     if (diff > 1) {

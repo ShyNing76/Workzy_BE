@@ -74,3 +74,17 @@ export const changeStatusController = async (req, res) => {
         internalServerError(res, error);
     }
 };
+
+export const getNotificationsController = async (req, res) => {
+    try {
+        const response = await services.getNotificationsService({
+            ...req.body,
+            ...req.user,
+        });
+        return ok(res, response);
+    } catch (error) {
+        console.log(error);
+        if (error === "Notifications not found") return badRequest(res, error);
+        internalServerError(res, error);
+    }
+};
