@@ -517,12 +517,13 @@ export const changeBookingStatusService = (booking_id, status) =>
             if (!booking) return reject("User not found");
             let statusTransitions = {
                 "paid": "usage",
+                "check-in": "usage",
                 "check-out": "check-amenities",
                 "check-amenities": "completed",
             };
             let changeStatus;
             if (statusTransitions[bookingStatus.status] === status) {
-                const statusesToCreate = statusTransitions[bookingStatus.status] === "usage"
+                const statusesToCreate = bookingStatus.status === "paid"
                     ? ["check-in", "usage"]
                     : [statusTransitions[bookingStatus.status]];
                 for (const statusToCreate of statusesToCreate) {
