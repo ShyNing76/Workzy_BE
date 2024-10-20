@@ -1,5 +1,6 @@
 import db from '../../models';
 import {v4} from "uuid";
+import {Op} from "sequelize";
 import {handleLimit, handleOffset, handleSortOrder} from "../../utils/handleFilter";
 
 export const createReviewService = async (data) => new Promise(async (resolve, reject) => {
