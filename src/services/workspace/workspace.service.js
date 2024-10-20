@@ -39,6 +39,7 @@ export const createWorkspaceService = async ({images, workspace_name, workspace_
         })
     } catch (error) {
         await t.rollback();
+        console.log(error)
         reject(error)
     }
 })
@@ -90,6 +91,7 @@ export const updateWorkspaceService = async (id, {workspace_name, building_id, w
         })
 
     } catch (error) {
+        console.log(error)
         reject(error)
     }
 })
@@ -113,40 +115,24 @@ export const deleteWorkspaceService = async (id) => new Promise(async (resolve, 
         });
 
     } catch (error) {
+        console.log(error)
         reject(error);
     }
 })
 
 export const getAllWorkspaceService = ({page, limit, order, workspace_name, office_size, min_price, max_price, workspace_type_name, building_id, status, ...query}) => new Promise(async (resolve, reject) => {
     try {
-        if (office_size){
-            switch (office_size) {
-                case "1":
-                    query.capacity = {[Op.lte]: 10}
-                    break;
-                case "2":
-                    query.capacity = {[Op.between]: [10,20]}
-                    break;
-                case "3":
-                    query.capacity = {[Op.between]: [20,30]}
-                    break;
-                case "4":
-                    query.capacity = {[Op.between]: [30,40]}
-                    break;
-                case "5":
-                    query.capacity = {[Op.between]: [40,50]}
-                    break;
-                case "6":
-                    query.capacity = {[Op.gte]: 50}
-                    break;
-                default:
-                    break;
-            }
+        const office_size_case = {
+            "1": {[Op.lte]: 10},
+            "2": {[Op.between]: [10,20]},
+            "3": {[Op.between]: [20,30]},
+            "4": {[Op.between]: [30,40]},
+            "5": {[Op.between]: [40,50]},
+            "6": {[Op.gte]: 50},
         }
-        if (min_price && max_price) {
-            query.price_per_hour = {[Op.between]: [min_price, max_price]}
-        }
-        query.status = status ? status : {[Op.ne]: null};
+        if (office_size) query.capacity = office_size_case[office_size];
+        if (min_price && max_price) query.price_per_hour = {[Op.between]: [min_price, max_price]}
+        query.status = status || {[Op.ne]: null};
         const workspaces = await db.Workspace.findAll({
             where: query,
             offset: handleOffset(page, limit),
@@ -173,9 +159,6 @@ export const getAllWorkspaceService = ({page, limit, order, workspace_name, offi
                     required: true,
                 }, 
             ],
-            raw: true, 
-            nest: true,
-            distinct: true,
         });
         if(workspaces.length === 0) return reject("No Workspace Exist")
         resolve({
@@ -184,7 +167,6 @@ export const getAllWorkspaceService = ({page, limit, order, workspace_name, offi
             data: workspaces
         });
     } catch (error) {
-        console.log(error)
         reject(error)
     }
 })
@@ -205,49 +187,37 @@ export const getWorkspaceByIdService = (workspace_id) => new Promise(async (reso
                 },
             }
         });
+        if(!workspace) return reject("Workspace is not exist")
         resolve({
-            err: workspace ? 0 : 1,
-            message: workspace ? "Got" : "No Workspace Exist",
+            err: 0,
+            message: "Got",
             data: workspace
         });
     } catch (error) {
+        console.log(error)
         reject(error)
     }
 })
 
 export const assignWorkspacetoBuildingService = async (id, building_id) => new Promise(async (resolve, reject) => {
     try {
-
-        const [workspace, isBuildingExist] = await Promise.all([
-            db.Workspace.findOne({
-                where: {
-                    workspace_id: id
-                }
-            }), 
-            db.Building.findOne({
-                where: {
-                    building_id: building_id
-                }
-            })
-        ])
-        if(!workspace) return resolve({
-            err: 1,
-            message: "Workspace is not exist"
+        const isBuildingExist = db.Building.findByPk(building_id);
+        if(!isBuildingExist) return resolve("Building is not exist")
+        const [updatedWorkspace] = await db.Workspace.update({
+            building_id: building_id
+        },{
+            where: {
+                workspace_id: id,
+                building_id: null
+            }
         })
-        if(!isBuildingExist) return resolve({
-            err: 1,
-            message: "Building is not exist"
-        })
-
-        workspace.building_id = building_id;
-        await workspace.save();
-        
+        if(updatedWorkspace === 0) return reject("Workspace is not exist || Workspace has been allocated to the building")
         resolve({
             err: 0,
-            message: 'Workspace updated successfully!',
+            message: 'Workspace allocated successfully!',
         })
-
     } catch (error) {
+        console.log(error)
         reject(error)
     }
 })

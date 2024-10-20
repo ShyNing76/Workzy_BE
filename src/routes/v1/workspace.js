@@ -234,7 +234,6 @@ router.put(
     /*
         #swagger.description = 'Endpoint to assign a workspace to a building.'
         #swagger.summary = 'Assign a workspace to a building.' 
-        #swagger.parameters['workspace_id'] = { description: 'Workspace ID.' }
         #swagger.requestBody = {
             required: true,
             content: {

@@ -104,8 +104,6 @@ export const getAllBookingsService = ({
                   }
                 : {};
 
-            console.log(building_id);
-
             const bookings = await db.Booking.findAndCountAll({
                 where: { ...data },
                 include: [
@@ -143,6 +141,7 @@ export const getAllBookingsService = ({
                 limit: handleLimit(limit),
                 offset: handleOffset(page, limit),
                 attributes: { exclude: ["createdAt", "updatedAt"] },
+                subquery: false,
             });
 
             if (!bookings || bookings.count === 0)

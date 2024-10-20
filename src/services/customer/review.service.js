@@ -62,7 +62,7 @@ export const deleteReviewService = async (review_id) => new Promise(async (resol
     }
 })
 
-export const getAllReviewService = ({page, limit, order, ...query}) => new Promise(async (resolve, reject) => {
+export const getAllReviewService = ({page, limit, order, workspace_name, ...query}) => new Promise(async (resolve, reject) => {
     try {
         const reviews = await db.Review.findAndCountAll({
             where: query,
@@ -70,7 +70,7 @@ export const getAllReviewService = ({page, limit, order, ...query}) => new Promi
             limit: handleLimit(limit),
             offset: handleOffset(page, limit),
             attributes: {
-                exclude: ["createdAt", "updatedAt"]
+                exclude: ["updatedAt"]
             },
             include: [
                 {
@@ -83,6 +83,7 @@ export const getAllReviewService = ({page, limit, order, ...query}) => new Promi
                             model: db.Customer,
                             as: "Customer",
                             attributes: ["user_id"],
+                            required: true,
                             include: [
                                 {
                                     model: db.User,
@@ -90,10 +91,19 @@ export const getAllReviewService = ({page, limit, order, ...query}) => new Promi
                                     attributes: ["name"]
                                 }
                             ]
+                        },
+                        {
+                            model: db.Workspace,
+                            attributes: ["workspace_name"],
+                            where: {
+                                workspace_name: workspace_name || {[Op.ne]: null}
+                            },
+                            required: true,
                         }
                     ]
                 }
             ],
+            subquery: false,
         });
         if(reviews.count === 0) return reject("No Review Found")
         resolve({
@@ -102,6 +112,7 @@ export const getAllReviewService = ({page, limit, order, ...query}) => new Promi
             data: reviews
         });
     } catch (error) {
+        console.log(error)
         reject(error)
     }
 })

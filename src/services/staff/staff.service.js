@@ -492,9 +492,7 @@ export const changeBookingStatusService = (booking_id, status) =>
                 raw: true,
                 nest: true,
             });
-
             if (!bookingStatus) return reject("Booking not found");
-
             const booking = await db.Booking.findOne({
                 where: {
                     booking_id: booking_id,
@@ -518,27 +516,33 @@ export const changeBookingStatusService = (booking_id, status) =>
             });
             if (!booking) return reject("User not found");
             let statusTransitions = {
+                "paid": "usage",
                 "check-in": "usage",
                 "check-out": "check-amenities",
                 "check-amenities": "completed",
             };
             let changeStatus;
             if (statusTransitions[bookingStatus.status] === status) {
-                changeStatus = await db.BookingStatus.create({
-                    booking_status_id: v4(),
-                    booking_id: booking_id,
-                    status: statusTransitions[bookingStatus.status],
-                });
+                const statusesToCreate = bookingStatus.status === "paid"
+                    ? ["check-in", "usage"]
+                    : [statusTransitions[bookingStatus.status]];
+                for (const statusToCreate of statusesToCreate) {
+                    changeStatus = await db.BookingStatus.create({
+                        booking_status_id: v4(),
+                        booking_id: booking_id,
+                        status: statusToCreate,
+                    });
+                }
+
                 await sendMail(
                     booking.Customer.User.email,
                     "Booking Status Updated",
                     "Your booking status has been updated to <b>" +
-                        statusTransitions[bookingStatus.status] +
+                        statusesToCreate[statusesToCreate.length - 1] +
                         "</b>"
                 );
             }
             if (!changeStatus) return reject("Failed to update booking status");
-
             resolve({
                 err: 0,
                 message: "Booking status updated successfully",
@@ -567,13 +571,11 @@ export const getAmenitiesByBookingIdService = (booking_id) =>
                             model: db.Customer,
                             attributes: [],
                             required: true,
-                            include: [
-                                {
-                                    model: db.User,
-                                    attributes: ["email", "name"],
-                                    required: true,
-                                },
-                            ],
+                            include: {
+                                model: db.User,
+                                attributes: ["email", "name"],
+                                required: true,
+                            },
                         },
                         {
                             model: db.BookingStatus,
@@ -584,7 +586,6 @@ export const getAmenitiesByBookingIdService = (booking_id) =>
                         }
                     ],
                 }),
-
                 db.BookingAmenities.findAll({
                     where: {
                         booking_id: booking_id,
