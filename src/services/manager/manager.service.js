@@ -233,3 +233,42 @@ export const deleteManagerService = (id) => new Promise(async (resolve, reject) 
         reject(error);
     }
 });
+
+export const getBuildingByManagerIdService = (tokenUser) => new Promise(async (resolve, reject) => {
+    try {
+        console.log(tokenUser.user_id)
+        const manager = await db.Manager.findOne({
+            where: {
+                attributes: ["manager_id"],
+                user_id: tokenUser.user_id,
+                
+            },
+            attributes: ["user_id"],
+            include: {
+                model: db.User,
+                where: {
+                    user_id: tokenUser.user_id,
+                    status: "active",
+                    role_id: 2
+                },
+                required: true,
+            }
+        });
+        console.log(manager)
+        if(!manager) return reject("Manager not found");
+        const building = await db.Building.findAll({
+            where: {
+                manager_id: manager.Manager.manager_id
+            },
+        });
+        if(!building) return reject("Building not found");
+        resolve({
+            err: 0,
+            message: "List of buildings",
+            data: building
+        });
+    } catch (error) {
+        console.log(error)
+        reject(error);
+    }
+})

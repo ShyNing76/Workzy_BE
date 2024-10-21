@@ -68,6 +68,29 @@ router.get(
      */
 );
 
+router.get(
+    "/buildings",
+    verify_token,
+    verify_role(["manager"]),
+    controllers.getBuildingByManagerIdController
+    /*
+        #swagger.description = 'Get a building by Manager ID.'
+        #swagger.summary = 'Get a building by Manager ID.'
+        #swagger.responses[200] = {
+            description: 'Building found.'
+        }
+        #swagger.responses[404] = {
+            description: 'Building not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
 router.post(
     "/",
     verify_token,

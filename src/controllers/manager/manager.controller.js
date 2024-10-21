@@ -28,6 +28,15 @@ export const getManagerByIdController = async (req, res) => {
     }
 }
 
+export const getBuildingByManagerIdController = async (req, res) => {
+    try {
+        const response = await services.getBuildingByManagerIdService(req.user);
+        return ok(res, response)
+    } catch (error) {
+        internalServerError(res, error)
+    }
+}
+
 export const getAllManagersController = async (req, res) => {
     try {
         const response = await services.getAllManagersService(req.query);

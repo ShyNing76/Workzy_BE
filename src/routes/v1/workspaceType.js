@@ -1,13 +1,14 @@
 import express from "express";
 import * as controllers from "../../controllers";
 import { verify_role, verify_token } from "../../middlewares/verifyToken";
-import { createWorkspaceController } from "../../controllers";
+import { uploadImage } from "../../middlewares/imageGoogleUpload";
 
 const router = express.Router();
 
 router.post(
     "/",
     verify_token,
+    uploadImage,
     verify_role(["manager", "admin"]),
     controllers.createWorkspaceTypeController
     /*
@@ -16,7 +17,7 @@ router.post(
         #swagger.requestBody = {
             required: true,
             content: {
-                "application/json": {
+                "multipart/form-data": {
                     schema: {
                         type: 'object',
                         properties: {
@@ -26,7 +27,7 @@ router.post(
                             },
                             image: {
                                 type: 'string',
-                                example: 'image.jpg'
+                                format: 'binary'
                             },
                             description: {
                                 type: 'string',
@@ -179,8 +180,8 @@ router.put(
      */
 );
 
-router.delete(
-    "/:id",
+router.put(
+    "/delete/:id",
     verify_token,
     verify_role(["admin"]),
     controllers.deleteWorkspaceTypeController

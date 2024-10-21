@@ -17,7 +17,7 @@ export const createWorkspaceTypeController = async (req, res) => {
         }).error;
         if (error) return badRequest(res, error);
 
-        const response = await services.createWorkspaceTypeService(req.body);
+        const response = await services.createWorkspaceTypeService({...req.body, image: req.file.firebaseUrl});
         return created(res, response);
     } catch (error) {
         if (error === "Workspace type name already exists") {
