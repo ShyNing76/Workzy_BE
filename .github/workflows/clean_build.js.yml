@@ -50,9 +50,12 @@ jobs:
                   git config --global user.name "Deployer Workzy Website"
                   git clone https://deployerworkzy:${{ secrets.API_TOKEN_GITHUB }}@github.com/lehoangtrong/workzy-deploy
                   cd workzy-deploy
-                  ls -la ../dist
-                  echo "Files in dist directory:"
                   cp -r ../dist/* .
                   git add .
-                  git commit -m "Deploy Workzy Website $(date) - ${GITHUB_SHA}"
-                  git push -u origin main
+                  if git diff-index --quiet HEAD --; then
+                      echo "No changes to the output on this push; exiting."
+                      exit 0
+                  else
+                      git commit -m "Deploy Workzy Website $(date) - ${GITHUB_SHA}"
+                      git push -u origin main
+                  fi

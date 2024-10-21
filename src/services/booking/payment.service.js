@@ -682,15 +682,25 @@ export const paypalCheckoutAmenitiesService = ({
             const bookingAmenities = amenities.map((amenity, index) => {
                 const quantity = quantities[index];
                 const bookingAmenity = {
-                    booking_amenities_id: v4(),
                     booking_id: booking.booking_id,
                     amenity_id: amenity.amenity_id,
                     quantity: quantity,
                     price: amenity.rent_price,
                     total_price: amenity.rent_price * quantity,
                 };
-                return db.BookingAmenities.create(bookingAmenity, {
+                return db.BookingAmenities.findOne({
+                    where: { booking_id: booking.booking_id, amenity_id: amenity.amenity_id },
                     transaction: t,
+                }).then(existingBookingAmenity => {
+                    console.log(existingBookingAmenity);
+                    if (existingBookingAmenity) {
+                        return db.BookingAmenities.increment(
+                            { quantity: quantity, total_price: amenity.rent_price * quantity },
+                            { where: { booking_id: booking.booking_id, amenity_id: amenity.amenity_id }, transaction: t }
+                        );
+                    } else {
+                        return db.BookingAmenities.create(bookingAmenity, { transaction: t });
+                    }
                 });
             });
             await Promise.all(bookingAmenities);
