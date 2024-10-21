@@ -33,6 +33,7 @@ export const getBuildingByManagerIdController = async (req, res) => {
         const response = await services.getBuildingByManagerIdService(req.user);
         return ok(res, response)
     } catch (error) {
+        if(error === "Manager not found") return badRequest(res, error);
         internalServerError(res, error)
     }
 }
