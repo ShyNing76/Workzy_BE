@@ -7,9 +7,11 @@ export const createAmenityController = async (req, res) => {
         const error = Joi.object({
             amenity_name: Joi.string().required(),
             original_price: Joi.number().positive().required(),
-        }).validate({amenity_name: req.body.amenity_name, original_price: req.body.original_price}).error;
+            rent_price: Joi.number().positive().required(),
+        }).validate({amenity_name: req.body.amenity_name, original_price: req.body.original_price, 
+            rent_price: req.body.rent_price}).error;
         if(error) return badRequest(res, error);
-        const response = await services.createAmenityService(req.body);
+        const response = await services.createAmenityService({...req.body, image: req.file.firebaseUrl});
         return created(res, response);
     } catch (error) {
         console.log(error)
@@ -23,10 +25,14 @@ export const updateAmenityController = async (req, res) => {
         const error = Joi.object({
             amenity_name: Joi.string().required(),
             original_price: Joi.number().positive().required(),
-        }).validate({amenity_name: req.body.amenity_name, original_price: req.body.original_price}).error;
+            rent_price: Joi.number().positive().required(),
+            image: Joi.required(),
+        }).validate({amenity_name: req.body.amenity_name, original_price: req.body.original_price,
+            rent_price: req.body.rent_price, image: req.file.firebaseUrl
+        }).error;
         if(error) return badRequest(res, error);
-        const response = await services.updateAmenityService(req.params.id, req.body);
-        return ok(res, response)
+        const response = await services.updateAmenityService(req.params.id, {...req.body, image: req.file.firebaseUrl});
+        return ok(res, response);
     } catch (error) {
         if(error === "Amenity is already used"
             || error === "Cannot find any amenity to update") return badRequest(res, error);
@@ -34,13 +40,13 @@ export const updateAmenityController = async (req, res) => {
     }
 }
 
-export const deleteAmenityController = async (req, res) => {
+export const updateStatusAmenityController = async (req, res) => {
     try {
         const error = Joi.object({
             id: Joi.string().uuid().required(),
         }).validate({id: req.params.id}).error;
         if(error) return badRequest(res, error);
-        const response = await services.deleteAmenityService(req.params.id);
+        const response = await services.updateStatusAmenityService(req.params.id);
         return ok(res, response)
     } catch (error) {
         if(error === "No Amenity Exist") return badRequest(res, error);

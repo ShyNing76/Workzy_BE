@@ -16,3 +16,4 @@ Dockerfile
 .dockerignore
 Dockerfile
 docker-compose.yml
+.babelrc
