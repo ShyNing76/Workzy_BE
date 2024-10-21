@@ -1,6 +1,7 @@
 import express from "express";
 import * as controllers from "../../controllers";
 import { verify_role, verify_token } from "../../middlewares/verifyToken";
+import { uploadImage } from "../../middlewares/imageGoogleUpload"
 
 const router = express.Router();
 
@@ -113,6 +114,7 @@ router.get(
 router.post(
     "/",
     verify_token,
+    uploadImage,
     verify_role(["admin"]),
     controllers.createAmenityController
     /*
@@ -121,7 +123,7 @@ router.post(
         #swagger.requestBody = {
             required: true,
             content: {
-                "application/json": {
+                "multipart/form-data": {
                     schema: {
                         type: 'object',
                         properties: {
@@ -131,18 +133,18 @@ router.post(
                             },
                             image: {
                                 type: 'string',
-                                example: 'fax-machine.png'
+                                format: 'binary'
                             },
                             original_price: {
                                 type: 'integer',
                                 example: 100000
                             },
-                            type: {
-                                type: 'string',
-                                example: 'Device'
-                            },
+                            rent_price: {
+                                type: 'integer',
+                                example: 20000
+                            }
                         },
-                        required: ['amenity_name', 'original_price', 'type']
+                        required: ['amenity_name', 'original_price', 'rent_price', 'image']
                     }
                 }
             }
@@ -246,14 +248,15 @@ router.put(
         }]
      */
 );
-router.delete(
-    "/:id",
+
+router.put(
+    "/delete/:id",
     verify_token,
     verify_role(["admin"]),
-    controllers.deleteAmenityController
+    controllers.updateStatusAmenityController
     /*
-        #swagger.description = 'Endpoint to delete an amenity.'
-        #swagger.summary = 'Delete an amenity.'
+        #swagger.description = 'Endpoint to update an amenity status.'
+        #swagger.summary = 'Update status an amenity.'
         #swagger.tags = ['Amenities']
         #swagger.parameters['id'] = {
             in: 'path',
@@ -262,7 +265,7 @@ router.delete(
             type: 'string'
         }
         #swagger.responses[200] = {
-            description: 'Amenity deleted successfully.',
+            description: 'Amenity updated successfully.',
             content: {
                 "application/json": {
                     schema: {

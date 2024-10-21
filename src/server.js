@@ -2,11 +2,19 @@ import cors from "cors";
 import express from "express";
 import job from "./config/checkBookingStatus";
 import initWebRoutes from "./routes/v1";
-
+import { createServer } from "http";
+import { Server } from "socket.io";
 require("dotenv").config();
 require("./config/passport");
 
 const app = express();
+const io = new Server(createServer(app), {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"],
+    },
+});
+
 app.use(
     cors({
         origin: "*",

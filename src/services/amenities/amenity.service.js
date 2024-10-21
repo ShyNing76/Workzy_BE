@@ -6,11 +6,6 @@ import { handleLimit, handleOffset, handleSortOrder } from "../../utils/handleFi
 export const createAmenityService = (data) => new Promise(async (resolve, reject) => {
     try {
         data.depreciation_price = data.original_price * 0.7;
-        data.rent_price = data.original_price * 0.3;
-        if(data.type === "Food"){
-            data.depreciation_price = 0; 
-            data.rent_price = 0;
-        } 
 
         const amenity = await db.Amenity.findOrCreate({
             where: {
@@ -54,8 +49,15 @@ export const updateAmenityService = (amenity_id, data) => new Promise(async (res
             return reject(`Amenity is already used`)
         
         data.depreciation_price = data.original_price * 0.7;
-        if(data.type === "Food") data.depreciation_price = 0;
 
+        const amenity = await db.Amenity.findOne({
+            where: {
+                amenity_id: amenity_id,
+            }
+        });
+        if(!amenity) return reject("Cannot find any amenity to update")
+        
+        deleteImage(amenity.image);
         const [updatedRowsCount] = await db.Amenity.update(
             {
                 ...data
@@ -78,9 +80,9 @@ export const updateAmenityService = (amenity_id, data) => new Promise(async (res
     }
 })
 
-export const deleteAmenityService = (id) => new Promise(async (resolve, reject) => {
+export const updateStatusAmenityService = (id) => new Promise(async (resolve, reject) => {
     try {
-        const [updatedRowsCount] = await db.Amenity.update({
+        const [updatedInactive] = await db.Amenity.update({
             status: "inactive"
         },{
             where: {
@@ -88,13 +90,26 @@ export const deleteAmenityService = (id) => new Promise(async (resolve, reject) 
                 status: "active"
             }
         }) 
-        if(updatedRowsCount === 0) return reject("No Amenity Exist")
+        if(updatedInactive === 0) {
+            const [updatedActive] = await db.Amenity.update({
+                status: "active"
+            },{
+                where: {
+                    amenity_id: id,
+                    status: "inactive"
+                }
+            }) 
+            if(updatedActive === 0) return reject("No Amenity Exist")
+        }
+
+            
         resolve({
             err: 0,
-            message: `${updatedRowsCount} Amenity deleted successfully!`,
+            message: `Amenity updated successfully!`,
         })
         
     } catch (error) {
+        console.log(error.message)
         reject(error)
     }
 })
