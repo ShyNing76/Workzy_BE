@@ -1,3 +1,4 @@
+import { where } from "sequelize";
 import db from "../../models";
 import {
     handleLimit,
@@ -225,16 +226,22 @@ export const changeStatusService = ({ booking_id, user_id, status }) =>
                 "usage": "check-out",
             };
 
-            const changeStatus = statusTransitions[booking.BookingStatuses[0].status];
+            const changeStatus =
+                statusTransitions[booking.BookingStatuses[0].status];
 
             if (changeStatus !== status) {
                 return reject("Invalid status");
             }
 
             if (changeStatus === "check-in") {
-                const timeDifference = moment(booking.start_date_time).diff(moment(), "minutes");
+                const timeDifference = moment(booking.start_date_time).diff(
+                    moment(),
+                    "minutes"
+                );
                 if (timeDifference < -15) {
-                    return reject("Booking start time has passed more than 15 minutes ago");
+                    return reject(
+                        "Booking start time has passed more than 15 minutes ago"
+                    );
                 }
             }
 
@@ -250,6 +257,52 @@ export const changeStatusService = ({ booking_id, user_id, status }) =>
             resolve({
                 err: 0,
                 message: `Change status ${changeStatus} successful`,
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+
+export const getNotificationsService = ({ page, limit, order, ...query }) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            console.log(query);
+            const customer = await db.Customer.findOne({
+                where: {
+                    user_id: query.user_id,
+                },
+            });
+
+            const notifications = await db.CustomerNotification.findAndCountAll(
+                {
+                    where: {
+                        customer_id: customer.customer_id,
+                    },
+                    include: [
+                        {
+                            model: db.Notification,
+                            attributes: {
+                                exclude: ["created_at", "updated_at"],
+                            },
+                        },
+                    ],
+                    attributes: {
+                        exclude: ["customer_notification_id"],
+                    },
+                    order: [handleSortOrder(order, "created_at")],
+                    limit: handleLimit(limit),
+                    offset: handleOffset(page, limit),
+                }
+            );
+
+            if (!notifications) {
+                return reject("Error while fetching notifications");
+            }
+
+            resolve({
+                err: 0,
+                message: "Notification found",
+                data: notifications,
             });
         } catch (error) {
             reject(error);

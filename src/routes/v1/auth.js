@@ -3,6 +3,8 @@ import passport from "passport";
 import * as controllers from "../../controllers";
 import axios from "axios";
 import { oauth2Client } from "../../config/passport";
+import dotenv from "dotenv";
+dotenv.config();
 
 const router = express.Router();
 
@@ -98,9 +100,10 @@ router.get(
         const email = req.user?.emails[0].value;
         if (token && email)
             res.redirect(
-                `http://localhost:5173/api/v1/auth/google/callback?token=${req.user?.response.accessToken}`
+                process.env.CLIENT_URL +
+                    `/api/v1/auth/google/callback?token=${req.user?.response.accessToken}`
             );
-        else res.redirect(`http://localhost:5173/login`);
+        else res.redirect(process.env.CLIENT_URL + `/login`);
     }
     /*
     #swagger.description = 'Redirect to the client login success page.'

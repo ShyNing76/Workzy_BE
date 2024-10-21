@@ -77,6 +77,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.DATE,
                 allowNull: false,
             },
+            report_damage_ameninites: {
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
         },
         {
             sequelize,
