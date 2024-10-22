@@ -88,3 +88,14 @@ export const getNotificationsController = async (req, res) => {
         internalServerError(res, error);
     }
 };
+
+export const getPointController = async (req, res) => {
+    try {
+        const response = await services.getPointService(req.user);
+        return ok(res, response);
+    } catch (error) {
+        console.log(error);
+        if (error === "User not found") return badRequest(res, error);
+        internalServerError(res, error);
+    }
+};

@@ -77,11 +77,13 @@ export const updateBuildingController = async (req, res) => {
             building_name: req.body.building_name,
             location: req.body.location,
             address: req.body.address,
-            images: req.body.images,
+            images: req.images,
         }).error;
         if (error) return badRequest(res, error);
+        console.log;
         const response = await services.updateBuildingService(
             req.params.id,
+            req.images,
             req.body
         );
         return ok(res, response);
@@ -110,22 +112,23 @@ export const assignManagerController = async (req, res) => {
     }
 };
 
-export const updateBuildingImageController = async (req, res) => {
+export const deleteBuildingImageController = async (req, res) => {
     try {
         const error = Joi.object({
             id: Joi.required(),
-            image: Joi.required(),
+            images: Joi.required(),
         }).validate({
             id: req.params.id,
-            image: req.body.image,
+            images: req.body.images,
         }).error;
         if (error) return badRequest(res, error);
-        const response = await services.updateBuildingImageService(
+        const response = await services.deleteBuildingImageService(
             req.params.id,
-            req.body.image
+            req.body.images
         );
         return ok(res, response);
     } catch (error) {
+        if (error === "Building not found") return badRequest(res, error);
         internalServerError(res, error);
     }
 };
@@ -176,6 +179,7 @@ export const deleteBuildingController = async (req, res) => {
         const response = await services.deleteBuildingService(req.params.id);
         res.json(response);
     } catch (error) {
+        if (error === "Building not found") return badRequest(res, error);
         internalServerError(res, error);
     }
 };

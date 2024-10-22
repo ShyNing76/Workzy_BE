@@ -143,6 +143,7 @@ router.post(
 router.put(
     "/:id",
     verify_role(["admin", "manager"]),
+    uploadImages,
     controllers.updateBuildingController
     /*
         #swagger.description = 'Endpoint to update a building.'
@@ -151,7 +152,7 @@ router.put(
         #swagger.requestBody = {
             required: true,
             content: {
-                "application/json": {
+                "multipart/form-data": {
                     schema: {
                         type: 'object',
                         properties: {
@@ -187,9 +188,10 @@ router.put(
                                 type: 'array',
                                 items: {
                                     type: 'string',
-                                    example: 'Image URL'
+                                    format: 'binary',
+                                    description: 'Image files'
                                 }
-                            }
+                            },
                         },
                         required: ['building_name', 'location', 'address', 'google_address', 'images']
                     }
@@ -257,33 +259,36 @@ router.put(
      */
 );
 
-router.put(
+router.delete(
     "/:id/image",
     verify_role(["admin", "manager"]),
-    controllers.updateBuildingImageController
+    controllers.deleteBuildingImageController
     /*
-        #swagger.description = 'Endpoint to update image of a building.'
-        #swagger.summary = 'Update image of a building.'
+        #swagger.description = 'Endpoint to delete images of a building.'
+        #swagger.summary = 'Delete images of a building.'
         #swagger.parameters['id'] = { description: 'Building ID.' }
         #swagger.requestBody = {
             required: true,
             content: {
-                "multipart/form-data": {
+                "application/json": {
                     schema: {
                         type: 'object',
                         properties: {
-                            image: {
-                                type: 'string',
-                                format: 'binary'
+                            images: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    example: 'Image URL.'
+                                }
                             }
                         },
-                        required: ['image']
+                        required: ['images']
                     }
                 }
             }
         }
         #swagger.responses[200] = {
-            description: 'Building image updated successfully.'
+            description: 'Images deleted successfully.'
         }
         #swagger.responses[400] = {
             description: 'Invalid data.'
@@ -297,7 +302,7 @@ router.put(
         #swagger.security = [{
             "apiKeyAuth": []
         }]
-     */
+    */
 );
 
 router.put(

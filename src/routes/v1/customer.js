@@ -3,6 +3,26 @@ import { verify_role, verify_token } from "../../middlewares/verifyToken";
 
 const router = require("express").Router();
 
+
+router.get(
+    "/point",
+    verify_token,
+    verify_role(["customer"]),
+    controller.getPointController
+    /* #swagger.description = 'Endpoint to get point.'
+    #swagger.summary = 'Get point.'
+    #swagger.responses[200] = {
+        description: 'Point found.'
+    }
+    #swagger.responses[500] = {
+        description: 'Internal server error.'
+    }
+    #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
 router.get(
     "/",
     verify_token,

@@ -6,6 +6,8 @@ import {
     handleOffset,
     handleSortOrder,
 } from "../../utils/handleFilter";
+import { Op } from "sequelize";
+import { deleteImages } from "../../middlewares/imageGoogleUpload";
 
 export const getBuildingService = ({
     page,
@@ -167,7 +169,7 @@ export const createBuildingService = (data) =>
         }
     });
 
-export const updateBuildingService = (id, data) =>
+export const updateBuildingService = (id, firebaseUrl, data) =>
     new Promise(async (resolve, reject) => {
         const t = await db.sequelize.transaction();
         try {
@@ -180,11 +182,9 @@ export const updateBuildingService = (id, data) =>
                 return reject("Building not found");
             }
 
-            const { images, ...buildingData } = data;
-
             const isBuildingNameExist = await db.Building.findOne({
                 where: {
-                    building_name: buildingData.building_name,
+                    building_name: data.building_name,
                     building_id: { [db.Sequelize.Op.ne]: id },
                 },
             });
@@ -192,12 +192,18 @@ export const updateBuildingService = (id, data) =>
                 return reject("Building name already exists");
             }
 
-            building.set({ ...building.dataValues, ...buildingData });
+            building.set({ ...building.dataValues, ...data });
             await building.save({ transaction: t });
 
             try {
-                await updateBuildingImages(images, building.building_id, t);
+                // tạo mới những ảnh thêm mới
+                await createBuildingImages(
+                    firebaseUrl,
+                    building.building_id,
+                    t
+                );
             } catch (error) {
+                console.log(error);
                 reject(error.message);
             }
 
@@ -208,10 +214,10 @@ export const updateBuildingService = (id, data) =>
                 message: "Building updated successfully",
                 data: {
                     ...building.dataValues,
-                    images: images,
                 },
             });
         } catch (error) {
+            console.error(error);
             await t.rollback();
             reject(error);
         }
@@ -240,7 +246,7 @@ export const assignManagerService = (building_id, manager_id) =>
         }
     });
 
-export const updateBuildingImageService = (id, images) =>
+export const deleteBuildingImageService = (id, images) =>
     new Promise(async (resolve, reject) => {
         try {
             const building = await db.Building.findOne({
@@ -249,19 +255,23 @@ export const updateBuildingImageService = (id, images) =>
                 },
                 include: {
                     model: db.BuildingImage,
-                    as: "images",
+                    as: "BuildingImages",
                 },
             });
             if (!building) {
                 return reject("Building not found");
             }
-            // image is a list like ["image1", "image2"]
-            images.forEach((image) => {
-                // add image to models buildingImage
-                db.BuildingImage.create({
-                    building_id: building.building_id,
-                    image,
-                });
+
+            const imageUrls = building.BuildingImages.map((item) => item.image);
+            await deleteImages(imageUrls);
+
+            await db.BuildingImage.destroy({
+                where: {
+                    building_id: id,
+                    image: {
+                        [Op.in]: images,
+                    },
+                },
             });
 
             resolve({
@@ -269,6 +279,7 @@ export const updateBuildingImageService = (id, images) =>
                 message: "Building image updated successfully",
             });
         } catch (error) {
+            console.log(error);
             reject(error);
         }
     });
@@ -348,7 +359,7 @@ export const deleteBuildingService = (id) =>
 
 const createBuildingImages = async (images, building_id, t) => {
     const uniqueImages = new Set();
-    const newImages = [];
+    const newImages = []; // tạo ra mảng mới chứa những ảnh không trùng lặp
 
     for (const image of images) {
         if (!uniqueImages.has(image)) {
@@ -358,31 +369,20 @@ const createBuildingImages = async (images, building_id, t) => {
     }
     console.log(newImages);
 
-    await Promise.all(newImages.map((image) =>
-        db.BuildingImage.create({
-            building_id,
-            image: image.firebaseUrl,
-        }, { transaction: t })
-    ));
-};
-
-const updateBuildingImages = async (images, building_id, t) => {
-    // Delete all existing images for the building
-    await db.BuildingImage.destroy({
-        where: { building_id },
-        transaction: t,
-    });
-
-    // Create new images
-    await Promise.all(
-        images.map((img) =>
-            db.BuildingImage.create(
-                {
-                    building_id,
-                    image: img,
-                },
-                { transaction: t }
+    try {
+        await Promise.all(
+            newImages.map((image) =>
+                db.BuildingImage.create(
+                    {
+                        building_id,
+                        image: image.firebaseUrl,
+                    },
+                    { transaction: t }
+                )
             )
-        )
-    );
+        );
+    } catch (error) {
+        console.error("Failed to create building images:", error);
+        throw error;
+    }
 };

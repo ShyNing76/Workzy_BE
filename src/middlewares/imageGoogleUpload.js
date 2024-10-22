@@ -35,6 +35,9 @@ const upload = multer({
 export const uploadImage = (req, res, next) => {
     upload.single("image")(req, res, async (err) => {
         if (err) {
+            if (err.code === "LIMIT_UNEXPECTED_FILE") {
+                return next(new Error("Unexpected field"));
+            }
             return next(err);
         }
         if (!req.file) {
@@ -59,7 +62,13 @@ export const uploadImage = (req, res, next) => {
 export const uploadImages = (req, res, next) => {
     upload.array("images", 10)(req, res, async (err) => {
         if (err) {
+            if (err.code === "LIMIT_UNEXPECTED_FILE") {
+                return next(new Error("Unexpected field"));
+            }
             return next(err);
+        }
+        if (!req.files) {
+            return next();
         }
         const images = [];
         for (const image of req.files) {

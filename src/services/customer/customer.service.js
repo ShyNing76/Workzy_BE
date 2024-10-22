@@ -223,7 +223,7 @@ export const changeStatusService = ({ booking_id, user_id, status }) =>
 
             const statusTransitions = {
                 paid: "check-in",
-                "usage": "check-out",
+                usage: "check-out",
             };
 
             const changeStatus =
@@ -303,6 +303,46 @@ export const getNotificationsService = ({ page, limit, order, ...query }) =>
                 err: 0,
                 message: "Notification found",
                 data: notifications,
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+
+export const getPointService = (tokenUser) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const user = await db.User.findOne({
+                where: {
+                    user_id: tokenUser.user_id,
+                },
+                attributes: [],
+                include: [
+                    {
+                        model: db.Customer,
+                        attributes: {
+                            exclude: [
+                                "customer_id",
+                                "user_id",
+                                "createdAt",
+                                "updatedAt",
+                            ],
+                        },
+                        required: true,
+                    },
+                ],
+                raw: true,
+                nest: true,
+            });
+
+            if (!user) {
+                return reject("User not found");
+            }
+
+            resolve({
+                err: 0,
+                message: "Get point successful",
+                data: user.Customer.point,
             });
         } catch (error) {
             reject(error);
