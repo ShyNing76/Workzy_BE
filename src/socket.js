@@ -161,7 +161,7 @@ export const initSocket = (io) => {
         // Lấy tổng số Amenities
         socket.on("newAmenities", async () => {
             try {
-                const totalAmenities = await db.Amenities.count({
+                const totalAmenities = await db.Amenity.count({
                     where: {
                         status: "active",
                     },
@@ -183,13 +183,14 @@ export const initSocket = (io) => {
                     include: [
                         {
                             model: db.BookingStatus,
+                            as: "BookingStatuses",
                             order: [["createdAt", "DESC"]],
                             limit: 1,
-                            required: false,
+                            require: true,
                         },
                         {
                             model: db.Customer,
-                            attributes: [],
+                            attributes: ["user_id"],
                             include: [
                                 {
                                     model: db.User,
@@ -200,6 +201,12 @@ export const initSocket = (io) => {
                         {
                             model: db.Workspace,
                             attributes: ["workspace_name"],
+                            include: [
+                                {
+                                    model: db.WorkspaceType,
+                                    attributes: ["workspace_type_name"],
+                                },
+                            ],
                         },
                     ],
                 });

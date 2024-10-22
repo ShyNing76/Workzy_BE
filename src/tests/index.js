@@ -81,12 +81,56 @@ import { Op } from "sequelize";
 
 // totalPricesInMonth();
 
-function totalBooking() {
-    const totalBooking = db.Booking.count().then(result => {
-        console.log("Total Booking: " + result);
+function top5Booking() {
+    const bookings = db.Booking.findAll({
+        order: [["createdAt", "DESC"]],
+        limit: 5,
+        include: [
+            {
+                model: db.BookingStatus,
+                as: "BookingStatuses",
+                order: [["createdAt", "DESC"]],
+                limit: 1,
+                require: true,
+            },
+            {
+                model: db.Customer,
+                attributes: ["user_id"],
+                include: [
+                    {
+                        model: db.User,
+                        attributes: ["name"],
+                    },
+                ],
+            },
+            {
+                model: db.Workspace,
+                attributes: ["workspace_name"],
+                include: [
+                    {
+                        model: db.WorkspaceType,
+                        attributes: ["workspace_type_name"],
+                    },
+                ],
+            },
+        ],
+    }).then(result => {
+        console.log("Top 5 Booking: " + result);
+        console.log("==================================");
+        for (let i = 0; i < result.length; i++) {
+            console.log("Booking ID: " + result[i].id);
+            console.log("Customer Name: " + result[i].Customer.User.name);
+            console.log("Workspace Name: " + result[i].Workspace.workspace_name);
+            console.log("Workspace Type: " + result[i].Workspace.WorkspaceType.workspace_type_name);
+            console.log("Total Price: " + result[i].total_price);
+            for (let j = 0; j < result[i].BookingStatuses.length; j++) {
+                console.log("Booking Status: " + result[i].BookingStatuses[j].status);
+            }
+            console.log("==================================");
+        }
     }).catch(error => {
-        console.error("Error while fetching booking:", error);
+        console.error("Error while fetching top 5 booking:", error);
     });
 }
 
-totalBooking();
+top5Booking();
