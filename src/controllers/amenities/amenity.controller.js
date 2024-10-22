@@ -26,9 +26,8 @@ export const updateAmenityController = async (req, res) => {
             amenity_name: Joi.string().required(),
             original_price: Joi.number().positive().required(),
             rent_price: Joi.number().positive().required(),
-            image: Joi.required(),
         }).validate({amenity_name: req.body.amenity_name, original_price: req.body.original_price,
-            rent_price: req.body.rent_price, image: req.file.firebaseUrl
+            rent_price: req.body.rent_price
         }).error;
         if(error) return badRequest(res, error);
         const response = await services.updateAmenityService(req.params.id, {...req.body, image: req.file.firebaseUrl});

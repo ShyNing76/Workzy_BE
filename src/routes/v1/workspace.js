@@ -20,7 +20,7 @@ router.post(
         #swagger.requestBody = {
             required: true,
             content: {
-                "application/json": {
+                "multipart/form-data": {
                     schema: {
                         type: 'object',
                         properties: {
@@ -37,8 +37,9 @@ router.post(
                                 type: 'array',
                                 items: {
                                     type: 'string',
-                                    format: 'uuid'
-                                }
+                                    format: 'binary'
+                                },
+                                description: 'Array of image files'
                             },
                             workspace_type_id: {
                                 type: 'string',
@@ -152,7 +153,7 @@ router.put(
         }]
      */
 );
-router.delete(
+router.put(
     "/delete/:id",
     verify_token,
     verify_role(["admin"]),

@@ -29,13 +29,15 @@ export const createWorkspaceService = async ({images, workspace_name, workspace_
 
         if(!workspace[1]) return reject("Workspace already exists")
         const workspaceId = workspace[0].workspace_id;
-        const workspaceImages = await createWorkspaceImageService({images, workspaceId}, t);
-        if(workspaceImages.foundCount > 0) return reject(`${workspaceImages.foundCount} Workspace Image is already exist`)
+    
+        // if (images && images.length > 0) {
+        //     console.log(images);
+        //         await createWorkspaceImageService({images, workspaceId}, t);
+        // }
         await t.commit();
         resolve({
             err: 0,
             message: 'Workspace created successfully!',
-            data: {workspace: workspace[0], workspaceImages}
         })
     } catch (error) {
         await t.rollback();
@@ -44,7 +46,7 @@ export const createWorkspaceService = async ({images, workspace_name, workspace_
     }
 })
 
-export const updateWorkspaceService = async (id, {workspace_name, building_id, workspace_price, workspace_type_id, ...data}) => new Promise(async (resolve, reject) => {
+export const updateWorkspaceService = async (id, {workspace_name, building_id, workspace_price, workspace_type_id, images, ...data}) => new Promise(async (resolve, reject) => {
     try {
 
         if(building_id){
@@ -98,12 +100,22 @@ export const updateWorkspaceService = async (id, {workspace_name, building_id, w
 
 export const deleteWorkspaceService = async (id) => new Promise(async (resolve, reject) => {
     try {
+        const workspace = await db.Workspace.findOne({
+            where: {
+                workspace_id: id,
+            },
+            attributes: ["status", "workspace_id"]
+        });
+        if(!workspace) return reject("Workspace is not exist")
+        
+        const changeStatus = workspace.status === "active" ? "inactive" : "active";
+
         const [updatedRowsCount] = await db.Workspace.update({
-            status: "inactive"
+            status: changeStatus
         }, {
             where: {
                 workspace_id: id,
-                status: "active"
+                status: workspace.status
             },
         });
         if (updatedRowsCount === 0) {

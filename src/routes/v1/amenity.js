@@ -179,6 +179,7 @@ router.post(
 router.put(
     "/:id",
     verify_token,
+    uploadImage,
     verify_role(["admin"]),
     controllers.updateAmenityController
     /*
@@ -193,7 +194,7 @@ router.put(
         #swagger.requestBody = {
             required: true,
             content: {
-                "application/json": {
+                "multipart/form-data": {
                     schema: {
                         type: 'object',
                         properties: {
@@ -203,7 +204,7 @@ router.put(
                             },
                             image: {
                                 type: 'string',
-                                example: 'updated-fax-machine.png'
+                                format: 'binary'
                             },
                             original_price: {
                                 type: 'integer',

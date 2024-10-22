@@ -8,10 +8,10 @@ export const createWorkspaceController = async (req, res) => {
         const error = Joi.object({
             workspace_name,
             workspace_price,
-            images: Joi.array().required()
-        }).validate({workspace_name: req.body.workspace_name, workspace_price: req.body.workspace_price, images: req.body.images}).error;
+        }).validate({workspace_name: req.body.workspace_name, workspace_price: req.body.workspace_price}).error;
         if(error) return badRequest(res, error);
-        const response = await services.createWorkspaceService(req.body);
+        console.log(req.images)
+        const response = await services.createWorkspaceService({...req.body, images: req.images});
         return created(res, response);
     } catch (error) {
         internalServerError(res, error)

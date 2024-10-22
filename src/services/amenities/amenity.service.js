@@ -57,7 +57,7 @@ export const updateAmenityService = (amenity_id, data) => new Promise(async (res
         });
         if(!amenity) return reject("Cannot find any amenity to update")
         
-        deleteImage(amenity.image);
+        // deleteImage(amenity.image);
         const [updatedRowsCount] = await db.Amenity.update(
             {
                 ...data
