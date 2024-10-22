@@ -39,10 +39,12 @@ export const createBuildingController = async (req, res) => {
             building_name: name,
             location: location,
             address: address,
+            images: Joi.required(),
         }).validate({
             building_name: req.body.building_name,
             location: req.body.location,
             address: req.body.address,
+            images: req.images,
         }).error;
         if (error) return badRequest(res, error);
 

@@ -1,36 +1,31 @@
 import db from '../../models';
 import {v4} from "uuid";
 import { handleLimit, handleOffset, handleSortOrder } from "../../utils/handleFilter";
-
-export const createWorkspaceImageService = async ({images, workspaceId}, transaction) => {
+export const createWorkspaceImageService = async ({images, workspaceId}, t) => {
     try {
-        const workspaceImages = [];
-        let foundCount = 0;
-        for (const image of images) {
+        await Promise.all(images.map(async (image) => {
             const [workspaceImage, created] = await db.WorkspaceImage.findOrCreate({
                 where: {
-                    image: image
+                    image: image.firebaseUrl,
                 },
                 defaults: {
                     workspace_image_id: v4(),
-                    workspace_id: workspaceId || null, 
-                    image: image
+                    workspace_id: workspaceId,
+                    image: image.firebaseUrl,
                 },
-                transaction: transaction
+                transaction: t
             });
-
-            if(!created) foundCount++;
-            workspaceImages.push({
-                image: workspaceImage,
-                created
-            });
-        }
+        }));
         return {
-            workspaceImages,
-            foundCount
+            "err": 0,
+            "message": "Workspace image created successfully!"
         };
     } catch (error) {
-        await transaction.rollback();
+        await t.rollback();
+        return {
+            "err": 1,
+            "message": error.message
+        };
     }
 }
 

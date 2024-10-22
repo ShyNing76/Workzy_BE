@@ -358,12 +358,12 @@ const createBuildingImages = async (images, building_id, t) => {
     }
     console.log(newImages);
 
-    newImages.forEach((image) => {
+    await Promise.all(newImages.map((image) =>
         db.BuildingImage.create({
             building_id,
             image: image.firebaseUrl,
-        });
-    });
+        }, { transaction: t })
+    ));
 };
 
 const updateBuildingImages = async (images, building_id, t) => {

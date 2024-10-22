@@ -1,4 +1,10 @@
-import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
+import {
+    getDownloadURL,
+    getStorage,
+    ref,
+    uploadBytes,
+    deleteObject,
+} from "firebase/storage";
 import multer from "multer";
 import { firebaseApp } from "../config/firebase.config";
 
@@ -38,7 +44,7 @@ export const uploadImage = (req, res, next) => {
             const dateTime = Date.now();
             const storageRef = ref(
                 firebaseStorage,
-                `images/${req.file.originalname + "_" + dateTime}`
+                `images/${dateTime + "_" + req.file.originalname}`
             );
             const snapshot = await uploadBytes(storageRef, req.file.buffer);
             req.file.firebaseUrl = snapshot.metadata.fullPath;
@@ -60,7 +66,7 @@ export const uploadImages = (req, res, next) => {
             const dateTime = Date.now();
             const storageRef = ref(
                 firebaseStorage,
-                `images/${image.originalname + "_" + dateTime}`
+                `images/${dateTime + "_" + image.originalname}`
             );
             const snapshot = await uploadBytes(storageRef, image.buffer);
             image.firebaseUrl = snapshot.metadata.fullPath;
@@ -70,4 +76,26 @@ export const uploadImages = (req, res, next) => {
         req.images = images;
         next();
     });
+};
+
+export const deleteImage = async (url) => {
+    try {
+        const storageRef = ref(firebaseStorage, url);
+        await deleteObject(storageRef);
+    } catch (error) {
+        console.error("Error deleting image:", error);
+        throw error;
+    }
+};
+
+export const deleteImages = async (urls) => {
+    try {
+        for (const url of urls) {
+            const storageRef = ref(firebaseStorage, url);
+            await deleteObject(storageRef);
+        }
+    } catch (error) {
+        console.error("Error deleting images:", error);
+        throw error;
+    }
 };

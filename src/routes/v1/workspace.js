@@ -11,8 +11,8 @@ const router = express.Router();
 router.post(
     "/",
     verify_token,
-    uploadImages,
     verify_role(["admin"]),
+    uploadImages,
     controllers.createWorkspaceController
     /*
         #swagger.description = 'Endpoint to create a new workspace.'

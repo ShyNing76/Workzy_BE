@@ -13,6 +13,7 @@ export const createWorkspaceImageController = async (req, res) => {
         const response = await services.createWorkspaceImageService(req.body);
         return created(res, response)
     } catch (error) {
+        
         internalServerError(res, error)
     }
 }
