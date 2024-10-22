@@ -8,6 +8,7 @@
     "test": "mocha --require @babel/register \"src/tests/**/*.js\"",
     "kill": "taskkill /F /IM node.exe",
     "test:email": "babel-node src/tests/email.js",
+    "test:index": "babel-node src/tests/index.js",
     "clean": "rm -rf dist",
     "build": "npx babel src --out-dir dist/src",
     "swagger": "SERVER_URL=https://workzy.onrender.com npx babel-node src/config/swagger-auto.js",
