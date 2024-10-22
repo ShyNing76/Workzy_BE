@@ -91,6 +91,7 @@ export const deleteImage = async (url) => {
     try {
         const storageRef = ref(firebaseStorage, url);
         await deleteObject(storageRef);
+        console.log("🚀 ~ deleteImage ~ url:", url);
     } catch (error) {
         console.error("Error deleting image:", error);
         throw error;

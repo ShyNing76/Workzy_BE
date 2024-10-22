@@ -259,11 +259,6 @@ export const getAllWorkspaceService = ({
                         },
                         required: true,
                     },
-                    {
-                        model: db.WorkspaceImage,
-                        attributes: ["image"],
-                        required: true,
-                    },
                 ],
             });
             if (workspaces.length === 0) return reject("No Workspace Exist");
