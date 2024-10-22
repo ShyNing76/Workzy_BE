@@ -9,7 +9,7 @@ router.post(
     "/",
     verify_token,
     uploadImage,
-    verify_role(["manager", "admin"]),
+    verify_role(["admin"]),
     controllers.createWorkspaceTypeController
     /*
         #swagger.description = 'Endpoint to create a workspace type.'
@@ -128,7 +128,8 @@ router.get(
 router.put(
     "/:id",
     verify_token,
-    verify_role(["manager", "admin"]),
+    uploadImage,
+    verify_role(["admin"]),
     controllers.updateWorkspaceTypeController
     /*
         #swagger.description = 'Endpoint to update a workspace type.'
@@ -140,7 +141,7 @@ router.put(
         #swagger.requestBody = {
             required: true,
             content: {
-                "application/json": {
+                "multipart/form-data": {
                     schema: {
                         type: 'object',
                         properties: {
@@ -150,7 +151,7 @@ router.put(
                             },
                             image: {
                                 type: 'string',
-                                example: 'image.jpg'
+                                format: 'binary'
                             },
                             description: {
                                 type: 'string',

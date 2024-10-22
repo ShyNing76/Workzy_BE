@@ -1,5 +1,6 @@
 import express from "express";
 import * as controllers from "../../controllers";
+import { uploadImages } from "../../middlewares/imageGoogleUpload";
 import {
     verify_role,
     verify_token,
@@ -10,6 +11,7 @@ const router = express.Router();
 router.post(
     "/",
     verify_token,
+    uploadImages,
     verify_role(["admin"]),
     controllers.createWorkspaceController
     /*

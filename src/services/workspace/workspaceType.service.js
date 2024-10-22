@@ -10,6 +10,7 @@ import {
 export const createWorkspaceTypeService = async (data) =>
     new Promise(async (resolve, reject) => {
         try {
+            console.log(data)
             const checkDuplicateName = await isDuplicate(
                 db.WorkspaceType,
                 "workspace_type_name",
@@ -35,6 +36,7 @@ export const createWorkspaceTypeService = async (data) =>
                 data: workspaceType,
             });
         } catch (error) {
+            console.log(error);
             reject(error);
         }
     });
@@ -132,7 +134,9 @@ export const updateWorkspaceTypeService = async ({ id }, data) =>
                 return reject("Workspace type name already exists");
             }
 
-            const workspaceType = await db.WorkspaceType.update(data, {
+            const workspaceType = await db.WorkspaceType.update({
+                ...data
+            }, {
                 where: {
                     workspace_type_id: id,
                 },
@@ -151,47 +155,53 @@ export const updateWorkspaceTypeService = async ({ id }, data) =>
         }
     });
 
-export const deleteWorkspaceTypeService = async (id) =>
+export const updateWorkspaceTypeStatusService = async (id) =>
     new Promise(async (resolve, reject) => {
         const t = await db.sequelize.transaction();
         try {
-            const workspaceType = await db.WorkspaceType.update(
-                {
-                    status: "inactive",
+            const workspaceType = await db.WorkspaceType.findOne({
+                where: {
+                    workspace_type_id: id
                 },
+                attributes: ["status", "workspace_type_id"]
+            })
+            if(!workspaceType) return reject("Workspace type not found")
+
+            const changeStatus = workspaceType.status === "active" ? "inactive" : "active";
+            const [update, rows] = await db.WorkspaceType.update(
                 {
-                    where: {
-                        workspace_type_id: id,
+                    status: changeStatus,
+                },{
+                    where:{
+                        workspace_type_id: workspaceType.workspace_type_id,
+                        status: workspaceType.status
                     },
                     transaction: t,
                 }
-            );
+            )
+            console.log(workspaceType)
+            console.log(changeStatus)
             const workspace = await db.Workspace.update(
                 {
-                    status: "inactive",
+                    status: changeStatus,
                 },
                 {
                     where: {
-                        workspace_type_id: id,
+                        workspace_type_id: workspaceType.workspace_type_id,
+                        status: workspaceType.status
                     },
                     transaction: t,
                 }
             );
 
-            if (!workspaceType) {
-                return reject("Workspace type not found");
-            }
-            if (!workspace) {
-                return reject("Workspace not found");
-            }
             await t.commit();
-
             resolve({
                 err: 0,
-                message: "Workspace type deleted successfully",
+                message: "Workspace type updated status successfully",
             });
         } catch (error) {
             await t.rollback();
+            console.log(error)
             reject(error);
         }
     });

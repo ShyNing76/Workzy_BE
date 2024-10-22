@@ -16,11 +16,13 @@ export const createWorkspaceTypeController = async (req, res) => {
             workspace_type_name: req.body.workspace_type_name,
         }).error;
         if (error) return badRequest(res, error);
-
         const response = await services.createWorkspaceTypeService({...req.body, image: req.file.firebaseUrl});
         return created(res, response);
     } catch (error) {
-        if (error === "Workspace type name already exists") {
+        console.log(error);
+        if (error === "Workspace type name already exists" || 
+            error === "Failed to create workspace type") 
+        {
             return badRequest(res, error);
         }
         internalServerError(res, error);
@@ -61,7 +63,8 @@ export const updateWorkspaceTypeController = async (req, res) => {
         if (error) return badRequest(res, error);
         const response = await services.updateWorkspaceTypeService(
             req.params,
-            req.body
+            {...req.body,
+            image: req.file.firebaseUrl}
         );
         return ok(res, response);
     } catch (error) {
@@ -78,7 +81,8 @@ export const updateWorkspaceTypeController = async (req, res) => {
 
 export const deleteWorkspaceTypeController = async (req, res) => {
     try {
-        const response = await services.deleteWorkspaceTypeService(
+        console.log(req.params.id);
+        const response = await services.updateWorkspaceTypeStatusService(
             req.params.id
         );
         return ok(res, response);
