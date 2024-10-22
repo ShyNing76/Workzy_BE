@@ -3,6 +3,7 @@ import {v4} from "uuid";
 import { handleLimit, handleOffset, handleSortOrder } from "../../utils/handleFilter";
 export const createWorkspaceImageService = async ({images, workspaceId}, t) => {
     try {
+        console.log(images);
         await Promise.all(images.map(async (image) => {
             const [workspaceImage, created] = await db.WorkspaceImage.findOrCreate({
                 where: {
@@ -21,6 +22,7 @@ export const createWorkspaceImageService = async ({images, workspaceId}, t) => {
             "message": "Workspace image created successfully!"
         };
     } catch (error) {
+        console.log(error);
         await t.rollback();
         return {
             "err": 1,

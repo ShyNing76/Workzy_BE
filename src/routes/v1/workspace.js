@@ -1,10 +1,7 @@
 import express from "express";
 import * as controllers from "../../controllers";
 import { uploadImages } from "../../middlewares/imageGoogleUpload";
-import {
-    verify_role,
-    verify_token,
-} from "../../middlewares/verifyToken";
+import { verify_role, verify_token } from "../../middlewares/verifyToken";
 
 const router = express.Router();
 
@@ -88,6 +85,7 @@ router.put(
     "/:id",
     verify_token,
     verify_role(["admin"]),
+    uploadImages,
     controllers.updateWorkspaceController
     /*
         #swagger.description = 'Endpoint to update a workspace.'
@@ -96,7 +94,7 @@ router.put(
         #swagger.requestBody = {
             required: true,
             content: {
-                "application/json": {
+                "multipart/form-data": {
                     schema: {
                         type: 'object',
                         properties: {
@@ -130,6 +128,14 @@ router.put(
                                 type: 'string',
                                 example: 'Workspace description.'
                             },
+                            images: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    format: 'binary'
+                                },
+                                description: 'Array of image files'
+                            }
                         },
                         required: ['workspace_name','workspace_price','building_id','workspace_type_id']
                     }
@@ -153,6 +159,52 @@ router.put(
         }]
      */
 );
+
+router.delete(
+    "/delete-image/:id",
+    verify_token,
+    verify_role(["admin"]),
+    controllers.deleteImageOfWorkspaceController
+    /*
+        #swagger.description = 'Endpoint to remove a workspace image.'
+        #swagger.summary = 'Remove a workspace image.'
+        #swagger.parameters['id'] = { description: 'Workspace ID.' }
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            images: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    example: 'image.jpg'
+                                },
+                                description: 'Array of image filenames to be deleted'
+                            }
+                        },
+                        required: ['images']
+                    }
+                }
+            }
+        }
+        #swagger.responses[200] = {
+            description: 'Workspace image(s) deleted successfully.'
+        }
+        #swagger.responses[404] = {
+            description: 'Workspace image(s) not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
 router.put(
     "/delete/:id",
     verify_token,

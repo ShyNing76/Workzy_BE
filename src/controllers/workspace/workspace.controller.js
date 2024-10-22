@@ -20,7 +20,6 @@ export const createWorkspaceController = async (req, res) => {
             images: req.images,
         }).error;
         if (error) return badRequest(res, error);
-        console.log(req.images);
         const response = await services.createWorkspaceService({
             ...req.body,
             images: req.images,
@@ -28,7 +27,7 @@ export const createWorkspaceController = async (req, res) => {
         return created(res, response);
     } catch (error) {
         if (error === "Workspace already exists") return badRequest(res, error);
-        
+
         internalServerError(res, error);
     }
 };
@@ -40,22 +39,40 @@ export const updateWorkspaceController = async (req, res) => {
             workspace_price,
             building_id: Joi.required(),
             workspace_type_id: Joi.required(),
+            images: Joi.required(),
         }).validate({
             workspace_name: req.body.workspace_name,
             workspace_price: req.body.workspace_price,
             building_id: req.body.building_id,
             workspace_type_id: req.body.workspace_type_id,
+            images: req.images,
         }).error;
         if (error) return badRequest(res, error);
-        const response = await services.updateWorkspaceService(
-            req.params.id,
-            req.body
-        );
+        const response = await services.updateWorkspaceService(req.params.id, {
+            ...req.body,
+            images: req.images,
+        });
         return ok(res, response);
     } catch (error) {
         internalServerError(res, error);
     }
 };
+
+export const deleteImageOfWorkspaceController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            images: Joi.required(),
+        }).validate({ images: req.body.images }).error;
+        if (error) return badRequest(res, error);
+        const response = await services.deleteImageOfWorkspaceService(
+            req.params.id,
+            req.body.images
+        );
+        return ok(res, response);
+    } catch (error) {
+        internalServerError(res, error);
+    }
+}
 
 export const deleteWorkspaceController = async (req, res) => {
     try {

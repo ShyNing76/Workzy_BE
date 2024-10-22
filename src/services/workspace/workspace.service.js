@@ -7,6 +7,7 @@ import {
     handleOffset,
     handleSortOrder,
 } from "../../utils/handleFilter";
+import { deleteImages } from "../../middlewares/imageGoogleUpload";
 
 export const createWorkspaceService = async ({
     images,
@@ -113,6 +114,15 @@ export const updateWorkspaceService = async (
                     },
                 }
             );
+
+            if (images && images.length > 0) {
+                console.log(images);
+                const response = await createWorkspaceImageService({
+                    images: images,
+                    workspaceId: id,
+                });
+                if (response.err === 1) return reject(response.message);
+            }
             if (updatedRowsCount[0] === 0)
                 return reject(
                     "Cannot find any workspace to update || Workspace is already updated"
@@ -120,6 +130,34 @@ export const updateWorkspaceService = async (
             resolve({
                 err: 0,
                 message: "Workspace updated successfully!",
+            });
+        } catch (error) {
+            console.log(error);
+            reject(error);
+        }
+    });
+
+export const deleteImageOfWorkspaceService = async (workspace_id, images) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const workspace = await db.Workspace.findByPk(workspace_id);
+            if (!workspace) return reject("Workspace is not exist");
+
+            const deletedImages = await db.WorkspaceImage.destroy({
+                where: {
+                    workspace_id: workspace_id,
+                    image: {
+                        [Op.in]: images,
+                    },
+                },
+            });
+
+            await deleteImages(images);
+            if (deletedImages === 0)
+                return reject("Cannot find any image to delete");
+            resolve({
+                err: 0,
+                message: "Image deleted successfully!",
             });
         } catch (error) {
             console.log(error);
@@ -221,6 +259,11 @@ export const getAllWorkspaceService = ({
                         },
                         required: true,
                     },
+                    {
+                        model: db.WorkspaceImage,
+                        attributes: ["image"],
+                        required: true,
+                    },
                 ],
             });
             if (workspaces.length === 0) return reject("No Workspace Exist");
@@ -244,17 +287,24 @@ export const getWorkspaceByIdService = (workspace_id) =>
                 attributes: {
                     exclude: ["createdAt", "updatedAt"],
                 },
-                include: {
-                    model: db.Building,
-                    attributes: {
-                        exclude: [
-                            "buildingId",
-                            "status",
-                            "createdAt",
-                            "updatedAt",
-                        ],
+                include: [
+                    {
+                        model: db.Building,
+                        attributes: {
+                            exclude: [
+                                "buildingId",
+                                "status",
+                                "createdAt",
+                                "updatedAt",
+                            ],
+                        },
                     },
-                },
+                    {
+                        model: db.WorkspaceImage,
+                        attributes: ["image"],
+                        required: true,
+                    },
+                ],
             });
             if (!workspace) return reject("Workspace is not exist");
             resolve({

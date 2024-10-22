@@ -51,7 +51,7 @@ router.post(
 );
 
 router.delete(
-    "/",
+    "/:id",
     verify_token,
     verify_role(["admin"]),
     controllers.deleteWorkspaceImageController
