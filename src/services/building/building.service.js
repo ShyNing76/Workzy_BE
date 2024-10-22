@@ -60,6 +60,11 @@ export const getBuildingService = ({
                             },
                         },
                     },
+                    {
+                        model: db.BuildingImage,
+                        as: "BuildingImages",
+                        attributes: ["image"],
+                    },
                 ],
                 order: [handleSortOrder(order, "building_name")],
                 limit: handleLimit(limit),
