@@ -4,6 +4,7 @@ import { CronJob } from "cron";
 import winston from "winston";
 import path from "path";
 import { Sequelize } from "../models";
+import { v4 } from "uuid";
 
 const logger = winston.createLogger({
     level: "info",
@@ -47,6 +48,18 @@ const checkBookingStatus = async () => {
             await db.BookingStatus.create({
                 booking_id: booking.booking_id,
                 status: "cancelled",
+            });
+
+            const customer = await db.Booking.findOne({
+                where: { booking_id: booking.booking_id },
+                include: db.Customer,
+            });
+
+            await db.Notification.create({
+                notification_id: v4(),
+                customer_id: customer.customer_id,
+                type: "booking",
+                description: `Booking cancelled for workspace ${booking.Workspace.workspace_name}`,
             });
 
             logger.info(`Booking ${booking.booking_id} has been cancelled`);

@@ -25,6 +25,13 @@ export const createReviewService = async (data) => new Promise(async (resolve, r
         if (booking.BookingStatuses[0].status === "cancelled")
             return reject("Booking already cancelled");
 
+        await db.Notification.create({
+            notification_id: v4(),
+            customer_id: booking.customer_id,
+            type: "booking",
+            description: `You have a new review from ${booking.Workspace.workspace_name}`,
+        });
+
         const review = await db.Review.create({
             review_id: v4(),
             booking_id: data.booking_id,

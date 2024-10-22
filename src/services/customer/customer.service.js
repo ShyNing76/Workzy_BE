@@ -273,28 +273,24 @@ export const getNotificationsService = ({ page, limit, order, ...query }) =>
                 },
             });
 
-            const notifications = await db.CustomerNotification.findAndCountAll(
+            if (!customer) {
+                return reject("Customer not found");
+            }
+
+            const notifications = await db.Notification.findAndCountAll(
                 {
                     where: {
                         customer_id: customer.customer_id,
                     },
-                    include: [
-                        {
-                            model: db.Notification,
-                            attributes: {
-                                exclude: ["created_at", "updated_at"],
-                            },
-                        },
-                    ],
                     attributes: {
-                        exclude: ["customer_notification_id"],
+                        exclude: ["created_at", "updated_at"],
                     },
                     order: [handleSortOrder(order, "created_at")],
                     limit: handleLimit(limit),
                     offset: handleOffset(page, limit),
                 }
             );
-
+            
             if (!notifications) {
                 return reject("Error while fetching notifications");
             }

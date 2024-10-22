@@ -2,6 +2,7 @@ import db from "../../models";
 
 export const cancelBookingService = ({ booking_id, user_id }) =>
     new Promise(async (resolve, reject) => {
+        const t = await db.sequelize.transaction();
         try {
             const customer = await db.Customer.findOne({
                 where: {
@@ -76,16 +77,37 @@ export const cancelBookingService = ({ booking_id, user_id }) =>
             if (bookingStatus.status !== "confirmed")
                 return reject("Booking not confirmed");
 
-            await db.BookingStatus.create({
-                booking_id: booking_id,
-                status: "cancelled",
-            });
+            await db.BookingStatus.create(
+                {
+                    booking_id: booking_id,
+                    status: "cancelled",
+                },
+                {
+                    transaction: t,
+                }
+            );
+
+            await db.Notification.create(
+                {
+                    notification_id: v4(),
+                    customer_id: customer.customer_id,
+                    type: "booking",
+                    description: `Booking cancelled for workspace ${booking.Workspace.workspace_name}`,
+                },
+                {
+                    transaction: t,
+                }
+            );
+
+            await t.commit();
 
             resolve({
                 err: 0,
                 message: "Booking cancelled",
             });
         } catch (error) {
+            console.log(error);
+            await t.rollback();
             reject(error);
         }
     });

@@ -186,6 +186,16 @@ export const paypalCheckoutService = ({ booking_id, user_id }) =>
                 { where: { payment_id: payment.payment_id }, transaction: t }
             );
 
+            await db.Notification.create(
+                {
+                    notification_id: v4(),
+                    customer_id: customer.customer_id,
+                    type: "booking",
+                    description: `Order created for workspace ${booking.Workspace.workspace_name}`,
+                },
+                { transaction: t }
+            );
+
             await t.commit();
 
             return resolve({
@@ -352,6 +362,17 @@ export const paypalSuccessService = ({ booking_id, order_id }) =>
                     <p>Thank you for choosing our service!</p>
                 `
             );
+
+            await db.Notification.create(
+                {
+                    notification_id: v4(),
+                    customer_id: booking.Customer.customer_id,
+                    type: "booking",
+                    description: `Order successfully paid for workspace ${booking.Workspace.workspace_name}`,
+                },
+                { transaction: t }
+            );
+
             await t.commit();
 
             return resolve({
@@ -474,6 +495,16 @@ export const refundBookingService = ({ booking_id, user_id }) =>
                 {
                     booking_id: booking_id,
                     status: "cancelled",
+                },
+                { transaction: t }
+            );
+
+            await db.Notification.create(
+                {
+                    notification_id: v4(),
+                    customer_id: customer.customer_id,
+                    type: "booking",
+                    description: `Order cancelled for booking ${booking_id}`,
                 },
                 { transaction: t }
             );
@@ -689,17 +720,31 @@ export const paypalCheckoutAmenitiesService = ({
                     total_price: amenity.rent_price * quantity,
                 };
                 return db.BookingAmenities.findOne({
-                    where: { booking_id: booking.booking_id, amenity_id: amenity.amenity_id },
+                    where: {
+                        booking_id: booking.booking_id,
+                        amenity_id: amenity.amenity_id,
+                    },
                     transaction: t,
-                }).then(existingBookingAmenity => {
+                }).then((existingBookingAmenity) => {
                     console.log(existingBookingAmenity);
                     if (existingBookingAmenity) {
                         return db.BookingAmenities.increment(
-                            { quantity: quantity, total_price: amenity.rent_price * quantity },
-                            { where: { booking_id: booking.booking_id, amenity_id: amenity.amenity_id }, transaction: t }
+                            {
+                                quantity: quantity,
+                                total_price: amenity.rent_price * quantity,
+                            },
+                            {
+                                where: {
+                                    booking_id: booking.booking_id,
+                                    amenity_id: amenity.amenity_id,
+                                },
+                                transaction: t,
+                            }
                         );
                     } else {
-                        return db.BookingAmenities.create(bookingAmenity, { transaction: t });
+                        return db.BookingAmenities.create(bookingAmenity, {
+                            transaction: t,
+                        });
                     }
                 });
             });
@@ -708,6 +753,13 @@ export const paypalCheckoutAmenitiesService = ({
             // Update booking with total amenities price
             booking.total_amenities_price = parseInt(total_amenities_price);
             await booking.save({ transaction: t });
+
+            await db.Notification.create({
+                notification_id: v4(),
+                customer_id: customer.customer_id,
+                type: "booking",
+                description: `Order created for amenities booking ${booking.booking_id}`,
+            });
 
             await t.commit();
             return resolve({
@@ -835,6 +887,13 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
                 "Payment successful",
                 "Thank you for your payment. Enjoy your workspace."
             );
+
+            await db.Notification.create({
+                notification_id: v4(),
+                customer_id: customer.customer_id,
+                type: "booking",
+                description: `Order successfully paid for amenities booking ${booking_id}`,
+            });
 
             await t.commit();
             return resolve({
@@ -973,6 +1032,13 @@ export const paypalCheckoutDamageService = ({ booking_id, user_id }) =>
                 { where: { payment_id: payment.payment_id }, transaction: t }
             );
 
+            await db.Notification.create({
+                notification_id: v4(),
+                customer_id: customer.customer_id,
+                type: "booking",
+                description: `Order created for damage payment ${booking_id}`,
+            });
+
             await t.commit();
             resolve({
                 err: 0,
@@ -1098,6 +1164,13 @@ export const paypalDamageSuccessService = ({ booking_id, order_id }) =>
                 "Payment successful",
                 "Thank you for using the service at Workzy."
             );
+
+            await db.Notification.create({
+                notification_id: v4(),
+                customer_id: customer.customer_id,
+                type: "booking",
+                description: `Order successfully paid for damage payment ${booking_id}`,
+            });
 
             await t.commit();
             resolve({

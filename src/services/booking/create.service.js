@@ -63,7 +63,17 @@ export const createBookingService = (data) =>
                 status: "confirmed",
             };
 
-            await Promise.all([
+            const notification = {
+                notification_id: v4(),
+                customer_id: customer.customer_id,
+                type: "booking",
+                description: `Booking confirmed for workspace ${workspace.workspace_name}`,
+            };
+
+            await await Promise.all([
+                db.Notification.create(notification, {
+                    transaction: t,
+                }),
                 db.Booking.create(booking, { transaction: t }),
                 db.BookingStatus.create(bookingStatus, { transaction: t }),
             ]);

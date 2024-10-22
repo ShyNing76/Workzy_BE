@@ -14,10 +14,7 @@ module.exports = (sequelize, DataTypes) => {
                 through: "Wishlist",
                 foreignKey: "customer_id",
             });
-            Customer.belongsToMany(models.Notification, {
-                through: "CustomerNotification",
-                foreignKey: "customer_id",
-            });
+            Customer.hasMany(models.Notification, { foreignKey: "customer_id" });
             Customer.hasMany(models.Booking, { foreignKey: "customer_id" });
         }
     }

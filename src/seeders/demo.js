@@ -2,6 +2,7 @@
 
 /** @type {function(*, *): *} */
 const hashSync = require("bcrypt").hashSync;
+const { notification } = require("paypal-rest-sdk");
 const { v4 } = require("uuid");
 
 module.exports = {
@@ -972,6 +973,7 @@ module.exports = {
                 ],
                 { transaction }
             );
+
             transaction.commit();
         } catch (error) {
             transaction.rollback();

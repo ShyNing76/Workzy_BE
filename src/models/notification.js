@@ -9,9 +9,9 @@ module.exports = (sequelize, DataTypes) => {
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            Notification.belongsToMany(models.Customer, {
-                through: "CustomerNotification",
-                foreignKey: "notification_id",
+            Notification.belongsTo(models.Customer, {
+                through: "Customer",
+                foreignKey: "customer_id",
             });
         }
     }
@@ -22,6 +22,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.UUID,
                 defaultValue: DataTypes.UUIDV4,
                 primaryKey: true,
+            },
+            customer_id: {
+                type: DataTypes.UUID,
+                allowNull: false,
             },
             type: {
                 type: DataTypes.ENUM("booking", "payment", "system"),
