@@ -96,3 +96,23 @@ export const getTimeBookingController = async (req, res) => {
         internalServerError(res);
     }
 };
+
+// export const getTotalPricesInMonthController = async (req, res) => {
+//     try {
+//         const totalPrice = await services.getTotalPricesInMonthService();
+//         return ok(res, totalPrice);
+//     } catch (err) {
+//         console.error(err);
+//         internalServerError(res);
+//     }
+// }
+
+// export const getTotalBookingController = async (req, res) => {
+//     try {
+//         const totalBooking = await services.getTotalBookingService();
+//         return ok(res, totalBooking);
+//     } catch (err) {
+//         console.error(err);
+//         internalServerError(res);
+//     }
+// }

@@ -340,3 +340,60 @@ export const getTimeBookingService = ({ workspace_id, date }) =>
             return reject(error);
         }
     });
+
+// export const getTotalPricesInMonthService = () =>
+//     new Promise(async (resolve, reject) => {
+//         try {
+//             const currentYear = new Date().getFullYear();
+//             const currentMonth = new Date().getMonth();
+
+//             const startDate = new Date(
+//                 Date.UTC(currentYear, currentMonth, 1)
+//             ).toISOString();
+//             const endDate = new Date(
+//                 Date.UTC(currentYear, currentMonth + 1, 0, 23, 59, 59)
+//             ).toISOString();
+
+//             const totalPrice = await db.Booking.sum("total_price", {
+//                 where: {
+//                     createdAt: {
+//                         [db.Sequelize.Op.between]: [startDate, endDate],
+//                     },
+//                 },
+//                 include: [
+//                     {
+//                         model: db.BookingStatus,
+//                         order: [["createdAt", "DESC"]],
+//                         limit: 1,
+//                         where: {
+//                             status: "completed",
+//                         },
+//                         required: false,
+//                     },
+//                 ],
+//             });
+//             return resolve({
+//                 err: 0,
+//                 message: "Total prices in month found",
+//                 data: totalPrice,
+//             });
+//         } catch (error) {
+//             console.error(error);
+//             return reject(error);
+//         }
+//     });
+
+// export const getTotalBookingService = () =>
+//     new Promise(async (resolve, reject) => {
+//         try {
+//             const totalBooking = await db.Booking.count();
+//             return resolve({
+//                 err: 0,
+//                 message: "Total booking found",
+//                 data: totalBooking,
+//             });
+//         } catch (error) {
+//             console.error(error);
+//             return reject(error);
+//         }
+//     });
