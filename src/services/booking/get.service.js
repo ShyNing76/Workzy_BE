@@ -376,12 +376,12 @@ export const getTotalPricesInMonthService = (tokenUser) =>
                 },
             ];
 
-            if (tokenUser.role_id === "1") {
+            if (tokenUser.role_id === 1) {
                 totalPrice = await db.Booking.sum("total_price", {
                     where: commonWhere,
                     include: commonInclude,
                 });
-            } else if (tokenUser.role_id === "2") {
+            } else if (tokenUser.role_id === 2) {
                 const manager = await db.Manager.findOne({
                     where: {
                         user_id: tokenUser.user_id,
@@ -425,9 +425,9 @@ export const getTotalBookingService = (tokenUser) =>
     new Promise(async (resolve, reject) => {
         try {
             let totalBooking = 0;
-            if(tokenUser.role_id === "1") {
+            if(tokenUser.role_id === 1) {
                 totalBooking = await db.Booking.count();
-            } else if(tokenUser.role_id === "2") {
+            } else if(tokenUser.role_id === 2) {
                 const manager = await db.Manager.findOne({
                     where: {
                         user_id: tokenUser.user_id,
@@ -467,9 +467,9 @@ export const get5RecentBookingService = (tokenUser) =>
     new Promise(async (resolve, reject) => {
         try {
             let bookings = [];
-            if(tokenUser.role_id === "1") {
-
+            if(tokenUser.role_id === 1) {
                 bookings = await db.Booking.findAll({
+                attributes: ["booking_id", "start_time_date", "end_time_date", "total_price"],
                 order: [["createdAt", "DESC"]],
                 limit: 5,
                 include: [
@@ -478,11 +478,12 @@ export const get5RecentBookingService = (tokenUser) =>
                         as: "BookingStatuses",
                         order: [["createdAt", "DESC"]],
                         limit: 1,
+                        attributes: ["status"],
                         require: true,
                     },
                     {
                         model: db.Customer,
-                        attributes: ["user_id"],
+                        attributes: [],
                         include: [
                             {
                                 model: db.User,
@@ -502,7 +503,7 @@ export const get5RecentBookingService = (tokenUser) =>
                     },
                 ],
             });
-        } else if(tokenUser.role_id === "2") {
+        } else if(tokenUser.role_id === 2) {
             const manager = await db.Manager.findOne({
                 where: {
                     user_id: tokenUser.user_id,
