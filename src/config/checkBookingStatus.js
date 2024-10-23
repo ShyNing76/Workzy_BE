@@ -59,7 +59,7 @@ const checkBookingStatus = async () => {
                 notification_id: v4(),
                 customer_id: customer.customer_id,
                 type: "booking",
-                description: `Booking cancelled for workspace ${booking.Workspace.workspace_name}`,
+                description: `Booking cancelled for booking id ${booking.booking_id}`,
             });
 
             logger.info(`Booking ${booking.booking_id} has been cancelled`);
