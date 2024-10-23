@@ -309,7 +309,7 @@ export const getTimeBookingService = ({ workspace_id, date }) =>
         try {
             const startOfDay = moment(date).startOf("day").toISOString();
             const endOfDay = moment(date).endOf("day").toISOString();
-            const booking = await db.Booking.findOne({
+            const booking = await db.Booking.findAll({
                 where: {
                     workspace_id,
                     start_time_date: {
