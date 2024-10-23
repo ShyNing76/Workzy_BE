@@ -6,28 +6,32 @@ export const searchBuildingService = ({ location, workspace_type_name }) =>
         try {
             const buildingsWorkspace = await db.Building.findAll({
                 where: location ? { location } : {},
-                include: {
-                    model: db.Workspace,
-                    required: true,
-                    where: {
-                        status: "active",
-                    },
-                    attributes: [],
-                    include: [
-                        {
-                            model: db.WorkspaceType,
-                            required: true,
-                            attributes: [],
-                            where: {
-                                status: "active",
+                include: [
+                    {
+                        model: db.Workspace,
+                        required: true,
+                        where: {
+                            status: "active",
+                        },
+                        attributes: [],
+                        include: [
+                            {
+                                model: db.WorkspaceType,
+                                required: true,
+                                attributes: [],
+                                where: {
+                                    status: "active",
+                                },
                             },
-                        },
-                        {
-                            model: db.BuildingImage,
-                            required: false,
-                        },
-                    ],
-                },
+                        ],
+                    },
+                    {
+                        model: db.BuildingImage,
+                        as: "BuildingImages",
+                        attributes: ["image"],
+                        required: false,
+                    },
+                ],
                 attributes: [
                     "building_id",
                     "building_name",
@@ -58,6 +62,7 @@ export const searchBuildingService = ({ location, workspace_type_name }) =>
                     "Building.location",
                     "Building.description",
                     "Building.rating",
+                    "BuildingImages.image",
                 ],
                 nest: true,
             });
@@ -74,6 +79,7 @@ export const searchBuildingService = ({ location, workspace_type_name }) =>
                 data: buildingsWorkspaceWithWorkspaceTypes,
             });
         } catch (error) {
+            console.log(error);
             reject(error);
         }
     });
