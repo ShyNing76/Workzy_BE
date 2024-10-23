@@ -111,7 +111,7 @@ export const getAllManagersService = ({page, limit, order, name, ...query}) => n
             include: {
                 model: db.Manager,
                 attributes: {
-                    exclude: ["created_at", "updated_at", "manager_id", "createdAt", "updatedAt"]
+                    exclude: ["created_at", "updated_at", "createdAt", "updatedAt"]
                 }
             },
             attributes: {
