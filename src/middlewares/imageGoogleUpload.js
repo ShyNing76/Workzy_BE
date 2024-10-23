@@ -52,6 +52,7 @@ export const uploadImage = (req, res, next) => {
             const snapshot = await uploadBytes(storageRef, req.file.buffer);
             req.file.firebaseUrl = snapshot.metadata.fullPath;
             req.file.firebaseUrl = await getDownloadURL(snapshot.ref);
+            console.log("🚀 ~ file.firebaseUrl", req.file.firebaseUrl);
             next();
         } catch (error) {
             next(error);

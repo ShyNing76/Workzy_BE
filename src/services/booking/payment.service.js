@@ -890,7 +890,7 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
 
             await db.Notification.create({
                 notification_id: v4(),
-                customer_id: customer.customer_id,
+                customer_id: booking.Customer.customer_id,
                 type: "booking",
                 description: `Order successfully paid for amenities booking ${booking_id}`,
             });

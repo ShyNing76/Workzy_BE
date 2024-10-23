@@ -6,6 +6,7 @@ import {
     handleOffset,
     handleSortOrder,
 } from "../../utils/handleFilter";
+import { deleteImage } from "../../middlewares/imageGoogleUpload";
 
 export const createWorkspaceTypeService = async (data) =>
     new Promise(async (resolve, reject) => {
@@ -134,7 +135,20 @@ export const updateWorkspaceTypeService = async ({ id }, data) =>
                 return reject("Workspace type name already exists");
             }
 
-            const workspaceType = await db.WorkspaceType.update({
+            const workspaceType = await db.WorkspaceType.findOne({
+                where: {
+                    workspace_type_id: id,
+                },
+            });
+
+            if (!workspaceType) {
+                return reject("Workspace type not found");
+            }
+
+            console.log(workspaceType);
+            if (workspaceType.image) await deleteImage(workspaceType.image);
+
+            await db.WorkspaceType.update({
                 ...data
             }, {
                 where: {
@@ -168,6 +182,7 @@ export const updateWorkspaceTypeStatusService = async (id) =>
             if(!workspaceType) return reject("Workspace type not found")
 
             const changeStatus = workspaceType.status === "active" ? "inactive" : "active";
+
             const [update, rows] = await db.WorkspaceType.update(
                 {
                     status: changeStatus,
@@ -179,8 +194,6 @@ export const updateWorkspaceTypeStatusService = async (id) =>
                     transaction: t,
                 }
             )
-            console.log(workspaceType)
-            console.log(changeStatus)
             const workspace = await db.Workspace.update(
                 {
                     status: changeStatus,

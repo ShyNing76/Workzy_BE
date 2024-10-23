@@ -128,8 +128,8 @@ router.get(
 router.put(
     "/:id",
     verify_token,
-    uploadImage,
     verify_role(["admin"]),
+    uploadImage,
     controllers.updateWorkspaceTypeController
     /*
         #swagger.description = 'Endpoint to update a workspace type.'

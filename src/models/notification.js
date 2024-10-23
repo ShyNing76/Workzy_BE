@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
             },
             customer_id: {
                 type: DataTypes.UUID,
-                allowNull: false,
+                allowNull: true,
             },
             type: {
                 type: DataTypes.ENUM("booking", "payment", "system"),
