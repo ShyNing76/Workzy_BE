@@ -1,4 +1,3 @@
-import { where } from "sequelize";
 import db from "../../models";
 import {
     handleLimit,
@@ -344,3 +343,27 @@ export const getPointService = (tokenUser) =>
             reject(error);
         }
     });
+
+
+//lấy top 5 customer có điểm cao nhất
+export const getTopFiveCustomerService = () => new Promise(async (resolve, reject) => {
+    try {
+        const customers = await db.Customer.findAll({
+            order: [["point", "DESC"]],
+            limit: 5,
+            include: [
+                {
+                    model: db.User,
+                    attributes: ["name"],
+                },
+            ],
+        });
+        resolve({
+            err: 0,
+            message: "Got",
+            data: customers
+        });
+    } catch (error) {
+        reject(error)
+    }
+})

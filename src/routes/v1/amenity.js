@@ -6,6 +6,32 @@ import { uploadImage } from "../../middlewares/imageGoogleUpload"
 const router = express.Router();
 
 router.get(
+    "/total", 
+    verify_token, 
+    verify_role(["admin"]), 
+    controllers.getTotalAmenityController
+    /*
+        #swagger.description = 'Endpoint to get total amenities.'
+        #swagger.summary = 'Get total amenities.'
+        #swagger.responses[200] = {
+            description: 'Amenities found.',
+        }
+        #swagger.responses[401] = {
+            description: 'Unauthorized - Invalid or missing token.'
+        }
+        #swagger.responses[403] = {
+            description: 'Forbidden - User is not an admin.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
+router.get(
     "/",
     verify_token,
     controllers.getAllAmenityController

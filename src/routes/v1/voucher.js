@@ -7,6 +7,25 @@ import {
 
 const router = express.Router();
 
+router.get("/total", verify_token, verify_role(["admin"]), controllers.getTotalVoucherController
+     /*
+        #swagger.description = 'Endpoint to get total vouchers.'
+        #swagger.summary = 'Get total vouchers.'
+        #swagger.responses[200] = {
+            description: 'Get total vouchers successfully.'
+        }
+        #swagger.responses[404] = {
+            description: 'Voucher not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
 router.get("/", verify_token, controllers.getAllVoucherController
     /*
         #swagger.description = 'Endpoint to get all vouchers.'

@@ -78,3 +78,12 @@ export const getAmenityByIdController = async (req, res) => {
         internalServerError(res, error)
     }
 }
+
+export const getTotalAmenityController = async (req, res) => {
+    try {
+        const response = await services.getTotalAmenityService();
+        return ok(res, response)
+    } catch (error) {
+        internalServerError(res, error)
+    }
+}

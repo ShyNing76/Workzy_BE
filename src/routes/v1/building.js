@@ -5,6 +5,26 @@ import { uploadImages } from "../../middlewares/imageGoogleUpload";
 
 const router = express.Router();
 
+
+router.get("/total", verify_token, verify_role(["admin"]), controllers.getTotalBuildingController
+/*
+        #swagger.description = 'Endpoint to get total buildings.'
+        #swagger.summary = 'Get total buildings.'
+        #swagger.responses[200] = {
+            description: 'Building found.'
+        }
+        #swagger.responses[404] = {
+            description: 'Building not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+    );
+
 router.get(
     "/",
     controllers.getBuildingController
@@ -67,6 +87,7 @@ router.get(
 );
 
 router.use(verify_token);
+
 
 router.post(
     "/",

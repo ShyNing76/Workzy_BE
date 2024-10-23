@@ -130,3 +130,12 @@ export const assignWorkspaceToBuildingController = async (req, res) => {
         internalServerError(res, error);
     }
 };
+
+export const getTotalWorkspaceController = async (req, res) => {
+    try {
+        const response = await services.getTotalWorkspaceService(req.user);
+        return ok(res, response)
+    } catch (error) {
+        internalServerError(res, error)
+    }
+};

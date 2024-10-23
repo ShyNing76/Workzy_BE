@@ -343,59 +343,221 @@ export const getTimeBookingService = ({ workspace_id, date }) =>
         }
     });
 
-// export const getTotalPricesInMonthService = () =>
-//     new Promise(async (resolve, reject) => {
-//         try {
-//             const currentYear = new Date().getFullYear();
-//             const currentMonth = new Date().getMonth();
 
-//             const startDate = new Date(
-//                 Date.UTC(currentYear, currentMonth, 1)
-//             ).toISOString();
-//             const endDate = new Date(
-//                 Date.UTC(currentYear, currentMonth + 1, 0, 23, 59, 59)
-//             ).toISOString();
+// Lấy tổng doanh thu trong tháng
+export const getTotalPricesInMonthService = (tokenUser) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const currentYear = new Date().getFullYear();
+            const currentMonth = new Date().getMonth();
 
-//             const totalPrice = await db.Booking.sum("total_price", {
-//                 where: {
-//                     createdAt: {
-//                         [db.Sequelize.Op.between]: [startDate, endDate],
-//                     },
-//                 },
-//                 include: [
-//                     {
-//                         model: db.BookingStatus,
-//                         order: [["createdAt", "DESC"]],
-//                         limit: 1,
-//                         where: {
-//                             status: "completed",
-//                         },
-//                         required: false,
-//                     },
-//                 ],
-//             });
-//             return resolve({
-//                 err: 0,
-//                 message: "Total prices in month found",
-//                 data: totalPrice,
-//             });
-//         } catch (error) {
-//             console.error(error);
-//             return reject(error);
-//         }
-//     });
+            const startDate = new Date(
+                Date.UTC(currentYear, currentMonth, 1)
+            ).toISOString();
+            const endDate = new Date(
+                Date.UTC(currentYear, currentMonth + 1, 0, 23, 59, 59)
+            ).toISOString();
 
-// export const getTotalBookingService = () =>
-//     new Promise(async (resolve, reject) => {
-//         try {
-//             const totalBooking = await db.Booking.count();
-//             return resolve({
-//                 err: 0,
-//                 message: "Total booking found",
-//                 data: totalBooking,
-//             });
-//         } catch (error) {
-//             console.error(error);
-//             return reject(error);
-//         }
-//     });
+            let totalPrice = 0;
+            const commonWhere = {
+                createdAt: {
+                    [db.Sequelize.Op.between]: [startDate, endDate],
+                },
+            };
+            const commonInclude = [
+                {
+                    model: db.BookingStatus,
+                    order: [["createdAt", "DESC"]],
+                    limit: 1,
+                    where: {
+                        status: "completed",
+                    },
+                    required: true,
+                },
+            ];
+
+            if (tokenUser.role_id === "1") {
+                totalPrice = await db.Booking.sum("total_price", {
+                    where: commonWhere,
+                    include: commonInclude,
+                });
+            } else if (tokenUser.role_id === "2") {
+                const manager = await db.Manager.findOne({
+                    where: {
+                        user_id: tokenUser.user_id,
+                    },
+                    attributes: ["manager_id"],
+                });
+                if (!manager) return reject("Manager not found");
+
+                totalPrice = await db.Booking.sum("total_price", {
+                    where: commonWhere,
+                    include: [
+                        ...commonInclude,
+                        {
+                            model: db.Workspace,
+                            attributes: [],
+                            include: [
+                                {
+                                    model: db.Building,
+                                    attributes: [],
+                                    where: {
+                                        manager_id: manager.manager_id,
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                });
+            }
+            return resolve({
+                err: 0,
+                message: "Total prices in month found",
+                data: totalPrice,
+            });
+        } catch (error) {
+            console.error(error);
+            return reject(error);
+        }
+    });
+// Lấy tổng số booking
+export const getTotalBookingService = (tokenUser) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            let totalBooking = 0;
+            if(tokenUser.role_id === "1") {
+                totalBooking = await db.Booking.count();
+            } else if(tokenUser.role_id === "2") {
+                const manager = await db.Manager.findOne({
+                    where: {
+                        user_id: tokenUser.user_id,
+                    },
+                    attributes: ["manager_id"],
+                });
+                if (!manager) return reject("Manager not found");
+
+                totalBooking = await db.Booking.count({
+                    include: [
+                        {
+                            model: db.Workspace,
+                            include: [
+                                {
+                                    model: db.Building,
+                                    where: {
+                                        manager_id: manager.manager_id,
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                });
+            }
+            return resolve({
+                err: 0,
+                message: "Total booking found",
+                data: totalBooking,
+            });
+        } catch (error) {
+            console.error(error);
+            return reject(error);
+        }
+    });
+// lấy 5 booking mới nhất
+export const get5RecentBookingService = (tokenUser) => 
+    new Promise(async (resolve, reject) => {
+        try {
+            let bookings = [];
+            if(tokenUser.role_id === "1") {
+
+                bookings = await db.Booking.findAll({
+                order: [["createdAt", "DESC"]],
+                limit: 5,
+                include: [
+                    {
+                        model: db.BookingStatus,
+                        as: "BookingStatuses",
+                        order: [["createdAt", "DESC"]],
+                        limit: 1,
+                        require: true,
+                    },
+                    {
+                        model: db.Customer,
+                        attributes: ["user_id"],
+                        include: [
+                            {
+                                model: db.User,
+                                attributes: ["name"],
+                            },
+                        ],
+                    },
+                    {
+                        model: db.Workspace,
+                        attributes: ["workspace_name"],
+                        include: [
+                            {
+                                model: db.WorkspaceType,
+                                attributes: ["workspace_type_name"],
+                            },
+                        ],
+                    },
+                ],
+            });
+        } else if(tokenUser.role_id === "2") {
+            const manager = await db.Manager.findOne({
+                where: {
+                    user_id: tokenUser.user_id,
+                },
+                attributes: ["manager_id"],
+            });
+            if (!manager) return reject("Manager not found");
+                bookings = await db.Booking.findAll({
+                order: [["createdAt", "DESC"]],
+                limit: 5,
+                include: [
+                    {
+                        model: db.BookingStatus,
+                        as: "BookingStatuses",
+                        order: [["createdAt", "DESC"]],
+                        limit: 1,
+                        require: true,
+                    },
+                    {
+                        model: db.Customer,
+                        attributes: ["user_id"],
+                        include: [
+                            {
+                                model: db.User,
+                                attributes: ["name"],
+                            },
+                        ],
+                    },
+                    {
+                        model: db.Workspace,
+                        attributes: ["workspace_name"],
+                        include: [
+                            {
+                                model: db.WorkspaceType,
+                                attributes: ["workspace_type_name"],
+                            },
+                            {
+                                model: db.Building,
+                                attributes: ["building_name"],
+                                where: {
+                                    manager_id: manager.manager_id,
+                                },
+                            }
+                        ],
+                    },
+                ],
+            });
+        }
+            resolve({
+                err: 0,
+                message: "5 bookings found",
+                data: bookings,
+            });
+        } catch (error) {
+            console.error("Error while fetching booking:", error);
+            reject(error);
+        }
+    });

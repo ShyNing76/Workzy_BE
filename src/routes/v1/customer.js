@@ -23,6 +23,24 @@ router.get(
      */
 );
 
+router.get("/top5customers", verify_token, verify_role(["admin"]), controller.getTopFiveCustomerController
+    /* #swagger.description = 'Endpoint to get top 5 customers.'
+    #swagger.summary = 'Get top 5 customers.'
+    #swagger.responses[200] = {
+        description: 'Customer found.'
+    }
+    #swagger.responses[404] = {
+        description: 'Customer not found.'
+    }
+    #swagger.responses[500] = {
+        description: 'Internal server error.'
+    }
+    #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
 router.get(
     "/",
     verify_token,
@@ -193,5 +211,6 @@ router.put(
         type: 'integer'
     } */
 );
+
 
 module.exports = router;

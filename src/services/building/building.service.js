@@ -362,6 +362,27 @@ export const deleteBuildingService = (id) =>
         }
     });
 
+//lấy tổng số building
+export const getTotalBuildingService = () => 
+    new Promise(async (resolve, reject) => {
+        try {
+
+            const totalBuilding = await db.Building.count({
+                where: {
+                    status: "active",
+                },
+            });
+            resolve({
+                err: 0,
+                message: "Total building found",
+                data: totalBuilding,
+            });
+        } catch (error) {
+            console.log(error);
+            reject(error);
+        }
+    });
+
 const createBuildingImages = async (images, building_id, t) => {
     const uniqueImages = new Set();
     const newImages = []; // tạo ra mảng mới chứa những ảnh không trùng lặp
