@@ -13,7 +13,7 @@ module.exports = {
         pool: {
             max: 10, // Số lượng kết nối tối đa trong pool
             min: 0,   // Số lượng kết nối tối thiểu trong pool
-            acquire: 30000, // Thời gian tối đa (ms) để lấy kết nối
+            acquire: 60000, // Thời gian tối đa (ms) để lấy kết nối
             idle: 10000     // Thời gian tối đa (ms) để giữ kết nối không hoạt động trước khi giải phóng
         },
     },

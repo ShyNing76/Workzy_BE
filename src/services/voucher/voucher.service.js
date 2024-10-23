@@ -114,3 +114,19 @@ export const deleteVoucherService = (voucher_id) => new Promise(async (resolve, 
         reject(error);
     }
 })
+
+
+// Lấy tổng số voucher
+export const getTotalVoucherService = () => new Promise(async (resolve, reject) => {
+    try {
+        const totalVoucher = await db.Voucher.count();
+        resolve({
+            err: 0,
+            message: "Get total voucher successfully",
+            data: totalVoucher
+        });
+    } catch (error) {
+        console.log(error);
+        reject(error);
+    }
+})

@@ -163,3 +163,22 @@ export const getAmenityByIdService = (id) => new Promise(async (resolve, reject)
         reject(error)
     }
 })
+
+//lấy tổng số amenity
+export const getTotalAmenityService = () => new Promise(async (resolve, reject) => {
+    try {
+        
+        const totalAmenities = await db.Amenity.count({
+            where: {
+                status: "active",
+            },
+        });
+        resolve({
+            err: 0,
+            message: "Got Total Amenity successfully",
+            data: totalAmenities
+        });
+    } catch (error) {
+        reject(error)
+    }
+})

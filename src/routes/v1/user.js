@@ -1,6 +1,6 @@
 import * as controller from "../../controllers";
 import { uploadImage } from "../../middlewares/imageGoogleUpload";
-import { verify_token } from "../../middlewares/verifyToken";
+import { verify_role, verify_token } from "../../middlewares/verifyToken";
 
 const router = require("express").Router();
 
@@ -171,6 +171,19 @@ router.put(
     }
     #swagger.description = 'Update the current customer image.'
     #swagger.summary = 'Update the current image of the customer'
+    #swagger.security = [{
+            "apiKeyAuth": []
+    }] */
+);
+
+router.get(
+    "/total-user",
+    verify_token,
+    verify_role(["admin", "manager"]),
+    controller.getTotalUserController
+    /*
+    #swagger.description = 'Get all users.'
+    #swagger.summary = 'Get all users'
     #swagger.security = [{
             "apiKeyAuth": []
     }] */

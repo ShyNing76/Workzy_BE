@@ -74,3 +74,12 @@ export const deleteVoucherController = async (req, res) => {
         internalServerError(res, error);
     }
 }
+
+export const getTotalVoucherController = async (req, res) => {
+    try {
+        const response = await services.getTotalVoucherService();
+        return ok(res, response);
+    } catch (error) {
+        internalServerError(res, error);
+    }
+}

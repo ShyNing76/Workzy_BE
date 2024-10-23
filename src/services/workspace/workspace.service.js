@@ -233,3 +233,48 @@ export const assignWorkspacetoBuildingService = async (id, building_id) => new P
         reject(error)
     }
 })
+
+//lấy tổng số workspace
+export const getTotalWorkspaceService = async (tokenUser) => new Promise(async (resolve, reject) => {
+    try {
+        console.log(tokenUser.user_id)
+        let totalWorkspace = 0;
+        if(tokenUser.role_id === 1){
+        totalWorkspace = await db.Workspace.count({
+            where: {
+                status: "active",
+            },
+        });
+    } else if(tokenUser.role_id === 2){
+        const manager = await db.User.findOne({
+            where: {
+                user_id: tokenUser.user_id
+            },
+            include:{
+                model: db.Manager,
+                attributes: ["manager_id"]
+            }
+        });
+        if(!manager) return reject("Manager is not exist")
+        totalWorkspace = await db.Workspace.count({
+            where: {
+                status: "active",
+            },
+            include: {
+                model: db.Building,
+                where: {
+                    manager_id: manager.Manager.manager_id
+                }
+            }
+        });
+    }
+        resolve({
+            err: 0,
+            message: "Got total workspace successfully",
+            data: totalWorkspace
+        });
+    } catch (error) {
+        console.log(error)
+        reject(error)
+    }
+})

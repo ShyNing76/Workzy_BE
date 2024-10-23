@@ -88,3 +88,13 @@ export const getNotificationsController = async (req, res) => {
         internalServerError(res, error);
     }
 };
+
+export const getTopFiveCustomerController = async (req, res) => {
+    try {
+        const response = await services.getTopFiveCustomerService();
+        return ok(res, response);
+    } catch (error) {
+        console.log(error);
+        internalServerError(res, error);
+    }
+}

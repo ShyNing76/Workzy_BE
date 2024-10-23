@@ -8,6 +8,25 @@ import {
 
 const router = express.Router();
 
+router.get("/total", verify_token, verify_role(["admin", "manager"]), controllers.getTotalWorkspaceController
+/*
+        #swagger.description = 'Endpoint to get total workspaces.'
+        #swagger.summary = 'get total workspaces.'
+        #swagger.responses[200] = {
+            description: 'toatl Workspaces get successfully.'
+        }
+        #swagger.responses[404] = {
+            description: 'Workspace not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+    );
+
 router.post(
     "/",
     verify_token,

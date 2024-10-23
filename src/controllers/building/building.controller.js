@@ -177,3 +177,13 @@ export const deleteBuildingController = async (req, res) => {
         internalServerError(res, error);
     }
 };
+
+
+export const getTotalBuildingController = async (req, res) => {
+    try {
+        const response = await services.getTotalBuildingService();
+        return ok(res, response);
+    } catch (error) {
+        internalServerError(res, error);
+    }
+}

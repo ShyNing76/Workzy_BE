@@ -108,3 +108,13 @@ export const updateImage = async (req, res) => {
         internalServerError(res, error);
     }
 };
+
+export const getTotalUserController = async (req, res) => {
+    try {
+        const response = await services.getTotalUserService(req.user);
+        // Return the response
+        return ok(res, response);
+    } catch (error) {
+        internalServerError(res, error);
+    }
+}
