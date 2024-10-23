@@ -324,23 +324,6 @@ export const paypalSuccessService = ({ booking_id, order_id }) =>
                 },
                 { transaction: t }
             );
-            const updatedPoints = await db.Customer.update(
-                {
-                    point:
-                        parseInt(booking.Customer.point) +
-                        Math.ceil(
-                            parseInt(booking.total_workspace_price) / 1000
-                        ),
-                },
-                {
-                    where: {
-                        customer_id: booking.Customer.customer_id,
-                    },
-                    transaction: t,
-                }
-            );
-            if (updatedPoints[0] === 0)
-                return reject("Failed to update customer points");
             await sendMail(
                 booking.Customer.User.email,
                 "Booking Payment Successful",
@@ -865,23 +848,6 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
                 parseInt(booking.total_price) +
                 parseInt(booking.total_amenities_price);
             await booking.save({ transaction: t });
-            const updatedPoints = await db.Customer.update(
-                {
-                    point:
-                        parseInt(booking.Customer.point) +
-                        Math.ceil(
-                            parseInt(booking.total_workspace_price) / 1000
-                        ),
-                },
-                {
-                    where: {
-                        customer_id: booking.Customer.customer_id,
-                    },
-                    transaction: t,
-                }
-            );
-            if (updatedPoints[0] === 0)
-                return reject("Failed to update customer points");
             await sendMail(
                 booking.Customer.User.email,
                 "Payment successful",
@@ -1158,6 +1124,27 @@ export const paypalDamageSuccessService = ({ booking_id, order_id }) =>
                 parseInt(booking.total_price) +
                 parseInt(booking.total_broken_price);
             await booking.save({ transaction: t });
+
+            const updatedPoints = await db.Customer.update(
+                {
+                    point:
+                        parseInt(booking.Customer.point) +
+                        Math.ceil(
+                            parseInt(
+                                booking.total_amenities_price +
+                                    booking.total_workspace_price
+                            ) / 1000
+                        ),
+                },
+                {
+                    where: {
+                        customer_id: booking.Customer.customer_id,
+                    },
+                    transaction: t,
+                }
+            );
+            if (updatedPoints[0] === 0)
+                return reject("Failed to update customer points");
 
             await sendMail(
                 booking.Customer.User.email,

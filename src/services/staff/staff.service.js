@@ -482,6 +482,7 @@ export const getBookingStatusService = (id) =>
 
 export const changeBookingStatusService = (booking_id, status) =>
     new Promise(async (resolve, reject) => {
+        const t = await db.sequelize.transaction();
         try {
             const bookingStatus = await db.BookingStatus.findOne({
                 where: {
@@ -516,22 +517,41 @@ export const changeBookingStatusService = (booking_id, status) =>
             });
             if (!booking) return reject("User not found");
             let statusTransitions = {
-                "paid": "usage",
+                paid: "usage",
                 "check-in": "usage",
                 "check-out": "check-amenities",
                 "check-amenities": "completed",
             };
             let changeStatus;
             if (statusTransitions[bookingStatus.status] === status) {
-                const statusesToCreate = bookingStatus.status === "paid"
-                    ? ["check-in", "usage"]
-                    : [statusTransitions[bookingStatus.status]];
+                const statusesToCreate =
+                    bookingStatus.status === "paid"
+                        ? ["check-in", "usage"]
+                        : [statusTransitions[bookingStatus.status]];
                 for (const statusToCreate of statusesToCreate) {
                     changeStatus = await db.BookingStatus.create({
                         booking_status_id: v4(),
                         booking_id: booking_id,
                         status: statusToCreate,
-                    });
+                    }, { transaction: t });
+                }
+
+                if (statusTransitions[bookingStatus.status] === "completed") {
+                    const updatedPoints = await db.Customer.update(
+                        {
+                            point:
+                                parseInt(booking.Customer.point) +
+                                Math.ceil(parseInt(booking.total_price) / 1000),
+                        },
+                        {
+                            where: {
+                                customer_id: booking.Customer.customer_id,
+                            },
+                            transaction: t,
+                        }
+                    );
+                    if (updatedPoints[0] === 0)
+                        return reject("Failed to update customer points");
                 }
 
                 await sendMail(
@@ -543,11 +563,13 @@ export const changeBookingStatusService = (booking_id, status) =>
                 );
             }
             if (!changeStatus) return reject("Failed to update booking status");
+            await t.commit();
             resolve({
                 err: 0,
                 message: "Booking status updated successfully",
             });
         } catch (error) {
+            await t.rollback();
             console.log(error);
             reject(error);
         }
@@ -560,7 +582,7 @@ export const getAmenitiesByBookingIdService = (booking_id) =>
                 db.Booking.findOne({
                     where: {
                         booking_id: booking_id,
-                    }, 
+                    },
                     include: [
                         {
                             model: db.Workspace,
@@ -583,7 +605,7 @@ export const getAmenitiesByBookingIdService = (booking_id) =>
                             order: [["createdAt", "DESC"]],
                             limit: 1,
                             required: true,
-                        }
+                        },
                     ],
                 }),
                 db.BookingAmenities.findAll({
@@ -600,8 +622,7 @@ export const getAmenitiesByBookingIdService = (booking_id) =>
                     ],
                     raw: true,
                     nest: true,
-                })
-       
+                }),
             ]);
 
             if (!booking) return reject("Booking not found");
@@ -609,7 +630,8 @@ export const getAmenitiesByBookingIdService = (booking_id) =>
                 return reject("Booking status is not check-amenities");
             if (booking.BookingStatuses[0].status === "cancelled")
                 return reject("Booking status is cancelled");
-            if(amenitiesOfBooking.length === 0) return reject("No amenities found for the specified booking");
+            if (amenitiesOfBooking.length === 0)
+                return reject("No amenities found for the specified booking");
             console.log(amenitiesOfBooking);
             const amenitiesWorkspace = await db.AmenitiesWorkspace.findAll({
                 where: {
@@ -626,7 +648,8 @@ export const getAmenitiesByBookingIdService = (booking_id) =>
                 raw: true,
                 nest: true,
             });
-            if(!amenitiesWorkspace) return reject("No amenities found for the specified workspace");
+            if (!amenitiesWorkspace)
+                return reject("No amenities found for the specified workspace");
 
             const amenitiesOfBookingList = amenitiesOfBooking.map((amenity) => {
                 return amenity.Amenity.amenity_name;
@@ -635,12 +658,18 @@ export const getAmenitiesByBookingIdService = (booking_id) =>
                 return amenity.Amenities.amenity_name;
             });
 
-            const uniqueAmenities = [...new Set([...amenitiesOfBookingList, ...amenitiesWorkspaceList])];
-            if(uniqueAmenities.length === 0) return reject("No amenities found for the specified booking");
+            const uniqueAmenities = [
+                ...new Set([
+                    ...amenitiesOfBookingList,
+                    ...amenitiesWorkspaceList,
+                ]),
+            ];
+            if (uniqueAmenities.length === 0)
+                return reject("No amenities found for the specified booking");
             resolve({
                 err: 0,
                 message: "Get amenities successfully",
-                data: {uniqueAmenities, booking_id}
+                data: { uniqueAmenities, booking_id },
             });
         } catch (error) {
             console.log(error);
@@ -654,14 +683,14 @@ export const createBrokenAmenitiesBookingService = (amenity_name, booking_id) =>
         try {
             const amenities = await db.Amenity.findAll({
                 where: {
-                    amenity_name: {[Op.in]: amenity_name},
-                    status: "active"
+                    amenity_name: { [Op.in]: amenity_name },
+                    status: "active",
                 },
                 attributes: ["amenity_id", "depreciation_price"],
                 raw: true,
                 nest: true,
             });
-            if(amenities.length === 0) return reject("Amenities not found");
+            if (amenities.length === 0) return reject("Amenities not found");
             const total_broken_price = amenities.reduce((total, amenity) => {
                 return parseInt(total) + parseInt(amenity.depreciation_price);
             }, 0);
@@ -677,7 +706,7 @@ export const createBrokenAmenitiesBookingService = (amenity_name, booking_id) =>
                         order: [["createdAt", "DESC"]],
                         limit: 1,
                         required: true,
-                    }
+                    },
                 ],
             });
             if (!booking) return reject("Booking not found");
@@ -687,15 +716,18 @@ export const createBrokenAmenitiesBookingService = (amenity_name, booking_id) =>
                 return reject("Booking status is cancelled");
 
             booking.total_broken_price = total_broken_price;
-            await booking.save({transaction: t});           
-            
-            await db.BookingStatus.create({
-                booking_status_id: v4(),
-                booking_id: booking_id,
-                status: "damaged-payment",
-            }, {transaction: t});
+            await booking.save({ transaction: t });
+
+            await db.BookingStatus.create(
+                {
+                    booking_status_id: v4(),
+                    booking_id: booking_id,
+                    status: "damaged-payment",
+                },
+                { transaction: t }
+            );
             await t.commit();
-            resolve({   
+            resolve({
                 err: 0,
                 message: "Broken amenities created successfully",
             });
@@ -705,4 +737,3 @@ export const createBrokenAmenitiesBookingService = (amenity_name, booking_id) =>
             reject(error);
         }
     });
-
