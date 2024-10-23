@@ -9,18 +9,24 @@ export const searchBuildingService = ({ location, workspace_type_name }) =>
                 include: {
                     model: db.Workspace,
                     required: true,
-                    where:{
+                    where: {
                         status: "active",
                     },
                     attributes: [],
-                    include: {
-                        model: db.WorkspaceType,
-                        required: true,
-                        attributes: [],
-                        where: {
-                            status: "active",
-                        }
-                    },
+                    include: [
+                        {
+                            model: db.WorkspaceType,
+                            required: true,
+                            attributes: [],
+                            where: {
+                                status: "active",
+                            },
+                        },
+                        {
+                            model: db.BuildingImage,
+                            required: false,
+                        },
+                    ],
                 },
                 attributes: [
                     "building_id",

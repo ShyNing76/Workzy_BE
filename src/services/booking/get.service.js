@@ -36,7 +36,7 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
                   }
                 : {};
 
-            const bookings = await db.Booking.findAll({
+            const bookings = await db.Booking.findAndCountAll({
                 where: {
                     customer_id: customer.customer_id,
                 },
@@ -47,6 +47,7 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
                         where: statusCondition,
                         order: [["createdAt", "DESC"]],
                         limit: 1,
+                        attributes: { exclude: ["booking_id"] },
                         required: false, // Change to false to include bookings without statuses
                     },
                 ],
@@ -58,20 +59,13 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
                 },
             });
 
-            // Filter out bookings that do not have any BookingStatuses
-            const filteredBookings = bookings.filter(
-                (booking) =>
-                    booking.BookingStatuses &&
-                    booking.BookingStatuses.length > 0
-            );
-
-            if (!filteredBookings || filteredBookings.length === 0)
+            if (bookings && bookings.count === 0)
                 return reject("No bookings found");
 
             return resolve({
                 err: 0,
                 message: "Bookings found",
-                data: filteredBookings,
+                data: bookings,
             });
         } catch (error) {
             console.error(error);
@@ -257,11 +251,17 @@ export const addToCalendarService = (booking_id, user_id) =>
                 summary: `Booking at ${booking.data.Workspace.workspace_name}`,
                 description: `Booking details:\n\nWorkspace: ${booking.data.Workspace.workspace_name}\nBooking Type: ${booking.data.BookingType.type}\nStart Time: ${booking.data.start_time_date}\nEnd Time: ${booking.data.end_time_date}`,
                 start: {
-                    dateTime: moment(booking.data.start_time_date, "DD/MM/YYYY HH:mm:ss").toISOString(),
+                    dateTime: moment(
+                        booking.data.start_time_date,
+                        "DD/MM/YYYY HH:mm:ss"
+                    ).toISOString(),
                     timeZone: "Asia/Kolkata",
                 },
                 end: {
-                    dateTime: moment(booking.data.end_time_date, "DD/MM/YYYY HH:mm:ss").toISOString(),
+                    dateTime: moment(
+                        booking.data.end_time_date,
+                        "DD/MM/YYYY HH:mm:ss"
+                    ).toISOString(),
                     timeZone: "Asia/Kolkata",
                 },
                 attendees: [
@@ -276,11 +276,13 @@ export const addToCalendarService = (booking_id, user_id) =>
 
             try {
                 await calendar.events.insert({
-                    auth: oauth2Client, 
+                    auth: oauth2Client,
                     calendarId: "primary",
                     resource: event,
                 });
-                return resolve({err: 0, message: "Event added to Google Calendar"
+                return resolve({
+                    err: 0,
+                    message: "Event added to Google Calendar",
                 });
             } catch (calendarError) {
                 if (
@@ -335,7 +337,7 @@ export const getTimeBookingService = ({ workspace_id, date }) =>
                 message: "Booking found",
                 data: booking,
             });
-        }catch(error){
+        } catch (error) {
             console.error(error);
             return reject(error);
         }
