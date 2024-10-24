@@ -67,7 +67,7 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
                 err: 0,
                 message: "Bookings found",
                 data: {
-                    count: filteredBookings.length,
+                    count: bookings.count,
                     rows: filteredBookings,
                 },
             });
@@ -76,7 +76,6 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
             return reject(error);
         }
     });
-
 export const getAllBookingsService = ({
     page,
     limit,
@@ -87,38 +86,24 @@ export const getAllBookingsService = ({
 }) =>
     new Promise(async (resolve, reject) => {
         try {
-            const tabStatus = {
-                Current: ["usage", "check-out", "check-amenities"],
-                Upcoming: ["paid", "confirmed"],
-                Completed: ["completed"],
-                Cancelled: ["cancelled"],
-            };
-            console.log("🚀 ~ newPromise ~ tabStatus:", tabStatus);
-
-            const statusCondition = status
-                ? {
-                      status: {
-                          [db.Sequelize.Op.in]: tabStatus[status] || [],
-                      },
-                  }
-                : {};
-
             const bookings = await db.Booking.findAndCountAll({
                 where: { ...data },
                 include: [
                     {
                         model: db.BookingStatus,
                         as: "BookingStatuses",
-                        where: statusCondition,
                         order: [["createdAt", "DESC"]],
                         limit: 1,
-                        required: true,
+                        attributes: {
+                            exclude: ["booking_id", "createdAt", "updatedAt"],
+                        },
+                        required: false,
                     },
                     {
                         model: db.Workspace,
                         as: "Workspace",
-                        where: { building_id: building_id || [] },
-                        attributes: { exclude: ["createdAt", "updatedAt"] },
+                        where: building_id ? { building_id } : {},
+                        attributes: ["workspace_name", "workspace_type_id"],
                     },
                     {
                         model: db.Customer,
@@ -127,7 +112,7 @@ export const getAllBookingsService = ({
                         include: {
                             model: db.User,
                             as: "User",
-                            attributes: { exclude: ["createdAt", "updatedAt"] },
+                            attributes: ["name", "email"],
                         },
                     },
                     {
@@ -142,7 +127,6 @@ export const getAllBookingsService = ({
                 attributes: { exclude: ["createdAt", "updatedAt"] },
                 subquery: false,
             });
-            console.log("🚀 ~ newPromise ~ tabStatus:", tabStatus);
 
             if (!bookings || bookings.count === 0)
                 return reject("No bookings found");
