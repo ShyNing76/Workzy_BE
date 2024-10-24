@@ -200,12 +200,15 @@ export const getAmenitiesByBookingIdController = async (req, res) => {
 export const createBrokenAmenitiesBookingController = async (req, res) => {
     try {
         const error = Joi.object({
-            amenity_name: Joi.array().required(),
+            amenities_quantities: Joi.array().items(
+                Joi.object({
+                    amenity_name: Joi.string().required(),
+                    quantity: Joi.number().integer().min(1).required()
+                })).required(),
             booking_id: Joi.string().uuid().required()
-        }).validate({amenity_name: req.body.amenity_name, booking_id: req.body.booking_id}).error;
+        }).validate({amenities_quantities: req.body.amenities_quantities, booking_id: req.body.booking_id}).error;
         if (error) return badRequest(res, error);
-        console.log(req.body.amenity_name)
-        const response = await services.createBrokenAmenitiesBookingService(req.body.amenity_name, req.body.booking_id);
+        const response = await services.createBrokenAmenitiesBookingService(req.body.amenities_quantities, req.body.booking_id);
         return created(res, response)    
     } catch (error) {
         if (error === "Booking not found"

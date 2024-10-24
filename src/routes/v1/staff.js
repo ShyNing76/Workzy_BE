@@ -409,17 +409,35 @@ router.post(
                     schema: {
                         type: 'object',
                         properties: {
-                            amenity_name: {
-                                type: 'array',
-                                items: {
-                                    type: 'string',
-                                    example: 'Amenity Name'
-                                }
-                            },
                             booking_id: {
                                 type: 'string',
                                 format: 'uuid',
-                                example: '123e4567-e89b-12d3-a456-426614174000'
+                                example: '123e4567-e89b-12d3-a456-426614174000',
+                                description: 'Booking ID'
+                            },
+                            amenities_quantities: {
+                                type: 'array',
+                                items: {
+                                    type: 'object',
+                                    properties: {
+                                        amenity_name: {
+                                            type: 'string',
+                                        },
+                                        quantity: {
+                                            type: 'integer',
+                                        }
+                                    }
+                                },
+                                example: [
+                                    {
+                                        amenity_name: 'printer',
+                                        quantity: 1
+                                    },
+                                    {
+                                        amenity_name: 'moniter',
+                                        quantity: 2
+                                    }
+                                ]
                             },
                         }   
                     }

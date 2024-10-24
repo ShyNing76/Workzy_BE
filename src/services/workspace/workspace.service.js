@@ -230,6 +230,11 @@ export const getAllWorkspaceService = ({
             if (min_price && max_price)
                 query.price_per_hour = { [Op.between]: [min_price, max_price] };
             query.status = status || { [Op.ne]: null };
+            query.building_id = building_id
+            ? building_id === "null"
+                ? { [Op.is]: null }
+                : building_id
+            : { [Op.or]: [null, { [Op.ne]: null }] };
             const workspaces = await db.Workspace.findAll({
                 where: query,
                 offset: handleOffset(page, limit),
@@ -242,12 +247,6 @@ export const getAllWorkspaceService = ({
                     {
                         model: db.Building,
                         attributes: ["building_id"],
-                        where: {
-                            building_id: building_id
-                                ? building_id
-                                : { [Op.ne]: null },
-                        },
-                        required: true,
                     },
                     {
                         model: db.WorkspaceType,
