@@ -67,10 +67,11 @@ router.get(
 
 router.use(verify_token);
 
-router.get("/total", 
+router.get(
+    "/total",
     verify_role(["admin", "manager"]),
-    controllers.getTotalBookingController 
-/*
+    controllers.getTotalBookingController
+    /*
         #swagger.description = 'Get total bookings.'
         #swagger.summary = 'Get bookings'
         #swagger.security = [{
@@ -94,12 +95,13 @@ router.get("/total",
             }
         }
     */
-)
+);
 
-router.get("/total-price-of-all-booking-in-month", 
+router.get(
+    "/total-price-of-all-booking-in-month",
     verify_role(["admin", "manager"]),
-    controllers.getTotalPricesInMonthController 
-/*
+    controllers.getTotalPricesInMonthController
+    /*
         #swagger.description = 'Get total bookings.'
         #swagger.summary = 'Get bookings'
         #swagger.security = [{
@@ -123,12 +125,13 @@ router.get("/total-price-of-all-booking-in-month",
             }
         }
     */
-)
+);
 
-router.get("/5recent", 
+router.get(
+    "/5recent",
     verify_role(["admin", "manager"]),
     controllers.get5RecentBookingController
-/*
+    /*
         #swagger.description = 'Get total bookings.'
         #swagger.summary = 'Get bookings'
         #swagger.security = [{
@@ -152,7 +155,7 @@ router.get("/5recent",
             }
         }
     */
-)
+);
 
 router.post(
     "/create",
