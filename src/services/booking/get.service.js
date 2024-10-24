@@ -53,13 +53,14 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
             if (bookings && bookings.count === 0)
                 return reject("No bookings found");
 
-            const filteredBookings = bookings.rows.filter(
-                (booking) =>
-                    booking.BookingStatuses &&
-                    booking.BookingStatuses.length > 0 &&
-                    tabStatus[status].includes(
-                        booking.BookingStatuses[0].status
-                    )
+            const filteredBookings = bookings.rows.filter((booking) =>
+                booking.BookingStatuses &&
+                booking.BookingStatuses.length > 0 &&
+                status
+                    ? tabStatus[status].includes(
+                          booking.BookingStatuses[0].status
+                      )
+                    : true
             );
 
             return resolve({
