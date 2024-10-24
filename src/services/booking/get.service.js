@@ -91,10 +91,12 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
                 );
             });
 
-            const paginatedBookings = filteredBookings.slice(
-                handleOffset(page, limit),
-                handleOffset(page, limit) + handleLimit(limit)
-            );
+            const paginatedBookings = filteredBookings
+                .sort(handleSortOrder(order, "created_at"))
+                .slice(
+                    handleOffset(page, limit),
+                    handleOffset(page, limit) + handleLimit(limit)
+                );
 
             return resolve({
                 err: 0,
@@ -453,13 +455,13 @@ export const getTotalPricesInMonthService = (tokenUser, building_id) =>
                     include: commonInclude,
                 });
             } else if (tokenUser.role_id === 2) {
-                if(!building_id) return reject("Building_id is missing");
+                if (!building_id) return reject("Building_id is missing");
                 const manager = await db.Manager.findOne({
                     where: {
                         user_id: tokenUser.user_id,
                     },
                 });
-                if(!manager) return reject("Manager is not exist");
+                if (!manager) return reject("Manager is not exist");
                 const isManagerBelongToBuilding = await db.Building.findOne({
                     where: {
                         building_id: building_id,
@@ -504,13 +506,13 @@ export const getTotalBookingService = (tokenUser, building_id) =>
                 totalBooking = await db.Booking.count();
                 console.log(totalBooking);
             } else if (tokenUser.role_id === 2) {
-                if(!building_id) return reject("Building_id is missing")
+                if (!building_id) return reject("Building_id is missing");
                 const manager = await db.Manager.findOne({
                     where: {
                         user_id: tokenUser.user_id,
                     },
                 });
-                if(!manager) return reject("Manager is not exist");
+                if (!manager) return reject("Manager is not exist");
                 const isManagerBelongToBuilding = await db.Building.findOne({
                     where: {
                         building_id: building_id,
@@ -590,13 +592,13 @@ export const get5RecentBookingService = (tokenUser, building_id) =>
                     ],
                 });
             } else if (tokenUser.role_id === 2) {
-                if(!building_id) return reject("Building_id is missing")
+                if (!building_id) return reject("Building_id is missing");
                 const manager = await db.Manager.findOne({
                     where: {
                         user_id: tokenUser.user_id,
                     },
                 });
-                if(!manager) return reject("Manager is not exist");
+                if (!manager) return reject("Manager is not exist");
                 const isManagerBelongToBuilding = await db.Building.findOne({
                     where: {
                         building_id: building_id,
@@ -629,8 +631,8 @@ export const get5RecentBookingService = (tokenUser, building_id) =>
                         {
                             model: db.Workspace,
                             attributes: ["workspace_name"],
-                            where:{
-                                building_id: building_id
+                            where: {
+                                building_id: building_id,
                             },
                             include: [
                                 {
