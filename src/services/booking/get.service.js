@@ -76,7 +76,6 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
             return reject(error);
         }
     });
-
 export const getAllBookingsService = ({
     page,
     limit,
@@ -87,37 +86,23 @@ export const getAllBookingsService = ({
 }) =>
     new Promise(async (resolve, reject) => {
         try {
-            const tabStatus = {
-                Current: ["usage", "check-out", "check-amenities"],
-                Upcoming: ["paid", "confirmed"],
-                Completed: ["completed"],
-                Cancelled: ["cancelled"],
-            };
-            console.log("🚀 ~ newPromise ~ tabStatus:", tabStatus);
-
-            const statusCondition = status
-                ? {
-                      status: {
-                          [db.Sequelize.Op.in]: tabStatus[status] || [],
-                      },
-                  }
-                : {};
-
             const bookings = await db.Booking.findAndCountAll({
                 where: { ...data },
                 include: [
                     {
                         model: db.BookingStatus,
                         as: "BookingStatuses",
-                        where: statusCondition,
                         order: [["createdAt", "DESC"]],
                         limit: 1,
-                        required: true,
+                        attributes: {
+                            exclude: ["booking_id", "createdAt", "updatedAt"],
+                        },
+                        required: false,
                     },
                     {
                         model: db.Workspace,
                         as: "Workspace",
-                        where: { building_id: building_id || [] },
+                        where: building_id ? { building_id } : {},
                         attributes: { exclude: ["createdAt", "updatedAt"] },
                     },
                     {
@@ -127,7 +112,7 @@ export const getAllBookingsService = ({
                         include: {
                             model: db.User,
                             as: "User",
-                            attributes: { exclude: ["createdAt", "updatedAt"] },
+                            attributes: ["name", "email"],
                         },
                     },
                     {
