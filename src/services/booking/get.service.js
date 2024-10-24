@@ -253,6 +253,35 @@ export const getBookingByIdService = ({ booking_id, user_id }) =>
         }
     });
 
+export const getAmenitiesBookingByIdService = ({ booking_id }) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const amenities = await db.BookingAmenities.findAll({
+                where: {
+                    booking_id,
+                },
+                attributes: ["quantity", "price", "total_price"],
+                include: [
+                    {
+                        model: db.Amenity,
+                        attributes: ["amenity_name", "image"],
+                    },
+                ],
+            });
+
+            if (!amenities) return reject("No booking found");
+
+            return resolve({
+                err: 0,
+                message: "Amenities found",
+                data: amenities,
+            });
+        } catch (error) {
+            console.error(error);
+            return reject(error);
+        }
+    });
+
 export const addToCalendarService = (booking_id, user_id) =>
     new Promise(async (resolve, reject) => {
         try {
