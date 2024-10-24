@@ -73,6 +73,27 @@ export const getBookingByIdController = async (req, res) => {
     }
 };
 
+export const getAmenitiesBookingByIdController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            booking_id: Joi.string().uuid().required(),
+        }).validate({
+            booking_id: req.params.id,
+        }).error;
+        if (error) return badRequest(res, error.details[0].message);
+
+        const amenities = await services.getAmenitiesBookingByIdService({
+            booking_id: req.params.id,
+        });
+        return ok(res, amenities);
+    } catch (err) {
+        console.error(err);
+        const knownErrors = ["No booking found"];
+        if (knownErrors.includes(err)) return badRequest(res, err);
+        internalServerError(res);
+    }
+};
+
 export const getTimeBookingController = async (req, res) => {
     try {
         const error = Joi.object({
@@ -105,16 +126,21 @@ export const getTotalPricesInMonthController = async (req, res) => {
             building_id: req.query.building_id,
         }).error;
         if (error) return badRequest(res, error.details[0].message);
-        const totalPrice = await services.getTotalPricesInMonthService(req.user, req.query.building_id);
+        const totalPrice = await services.getTotalPricesInMonthService(
+            req.user,
+            req.query.building_id
+        );
         return ok(res, totalPrice);
     } catch (err) {
-        if(err === "Building_id is missing" ||
+        if (
+            err === "Building_id is missing" ||
             err === "Manager does not belong to this building"
-        ) return badRequest(res, err);
+        )
+            return badRequest(res, err);
         console.error(err);
         internalServerError(res);
     }
-}
+};
 
 export const getTotalBookingController = async (req, res) => {
     try {
@@ -124,16 +150,21 @@ export const getTotalBookingController = async (req, res) => {
             building_id: req.query.building_id,
         }).error;
         if (error) return badRequest(res, error.details[0].message);
-        const totalBooking = await services.getTotalBookingService(req.user, req.query.building_id);
+        const totalBooking = await services.getTotalBookingService(
+            req.user,
+            req.query.building_id
+        );
         return ok(res, totalBooking);
     } catch (err) {
-        if(err === "Building_id is missing" ||
+        if (
+            err === "Building_id is missing" ||
             err === "Manager does not belong to this building"
-        ) return badRequest(res, err);
+        )
+            return badRequest(res, err);
         console.error(err);
         internalServerError(res);
     }
-}
+};
 
 export const get5RecentBookingController = async (req, res) => {
     try {
@@ -143,13 +174,18 @@ export const get5RecentBookingController = async (req, res) => {
             building_id: req.query.building_id,
         }).error;
         if (error) return badRequest(res, error.details[0].message);
-        const recentBooking = await services.get5RecentBookingService(req.user, req.query.building_id);
+        const recentBooking = await services.get5RecentBookingService(
+            req.user,
+            req.query.building_id
+        );
         return ok(res, recentBooking);
     } catch (err) {
-        if(err === "Building_id is missing" ||
+        if (
+            err === "Building_id is missing" ||
             err === "Manager does not belong to this building"
-        ) return badRequest(res, err);
+        )
+            return badRequest(res, err);
         console.error(err);
         internalServerError(res);
     }
-}
+};

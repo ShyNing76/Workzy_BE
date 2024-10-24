@@ -22,10 +22,28 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
             if (!customer) return reject("Customer not found");
 
             const tabStatus = {
+                All: [
+                    "check-in",
+                    "usage",
+                    "check-out",
+                    "check-amenities",
+                    "paid",
+                    "confirmed",
+                    "completed",
+                    "cancelled",
+                ],
                 Current: ["check-in", "usage", "check-out", "check-amenities"],
                 Upcoming: ["paid", "confirmed"],
                 Completed: ["completed"],
                 Cancelled: ["cancelled"],
+            };
+
+            const statusCount = {
+                All: 0,
+                Current: 0,
+                Upcoming: 0,
+                Completed: 0,
+                Cancelled: 0,
             };
 
             const bookings = await db.Booking.findAndCountAll({
@@ -40,35 +58,50 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
                         order: [["createdAt", "DESC"]],
                         attributes: { exclude: ["booking_id"] },
                         required: true,
+                        right: true,
                     },
                 ],
-                order: [handleSortOrder(order, "start_time_date")],
-                limit: handleLimit(limit),
-                offset: handleOffset(page, limit),
                 attributes: {
                     exclude: ["createdAt", "updatedAt"],
                 },
+                distinct: true,
+                subquery: false,
             });
 
             if (bookings && bookings.count === 0)
                 return reject("No bookings found");
 
-            const filteredBookings = bookings.rows.filter((booking) =>
-                booking.BookingStatuses &&
-                booking.BookingStatuses.length > 0 &&
-                status
-                    ? tabStatus[status].includes(
-                          booking.BookingStatuses[0].status
-                      )
-                    : true
+            bookings.rows.forEach((booking) => {
+                const status = booking.BookingStatuses[0].status;
+                if (tabStatus.All.includes(status)) statusCount.All += 1;
+                if (tabStatus.Current.includes(status))
+                    statusCount.Current += 1;
+                if (tabStatus.Upcoming.includes(status))
+                    statusCount.Upcoming += 1;
+                if (tabStatus.Completed.includes(status))
+                    statusCount.Completed += 1;
+                if (tabStatus.Cancelled.includes(status))
+                    statusCount.Cancelled += 1;
+            });
+
+            const filteredBookings = bookings.rows.filter((booking) => {
+                if (status === "All") return true;
+                return tabStatus[status].includes(
+                    booking.BookingStatuses[0].status
+                );
+            });
+
+            const paginatedBookings = filteredBookings.slice(
+                handleOffset(page, limit),
+                handleOffset(page, limit) + handleLimit(limit)
             );
 
             return resolve({
                 err: 0,
                 message: "Bookings found",
                 data: {
-                    count: bookings.count,
-                    rows: filteredBookings,
+                    statusCount,
+                    bookings: paginatedBookings,
                 },
             });
         } catch (error) {
@@ -76,6 +109,7 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
             return reject(error);
         }
     });
+
 export const getAllBookingsService = ({
     page,
     limit,
@@ -212,6 +246,35 @@ export const getBookingByIdService = ({ booking_id, user_id }) =>
                 err: 0,
                 message: "Booking found",
                 data: formatBookings,
+            });
+        } catch (error) {
+            console.error(error);
+            return reject(error);
+        }
+    });
+
+export const getAmenitiesBookingByIdService = ({ booking_id }) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const amenities = await db.BookingAmenities.findAll({
+                where: {
+                    booking_id,
+                },
+                attributes: ["quantity", "price", "total_price"],
+                include: [
+                    {
+                        model: db.Amenity,
+                        attributes: ["amenity_name", "image"],
+                    },
+                ],
+            });
+
+            if (!amenities) return reject("No booking found");
+
+            return resolve({
+                err: 0,
+                message: "Amenities found",
+                data: amenities,
             });
         } catch (error) {
             console.error(error);
@@ -403,7 +466,8 @@ export const getTotalPricesInMonthService = (tokenUser, building_id) =>
                         manager_id: manager.manager_id,
                     },
                 });
-                if(!isManagerBelongToBuilding) return reject("Manager does not belong to this building");
+                if (!isManagerBelongToBuilding)
+                    return reject("Manager does not belong to this building");
 
                 totalPrice = await db.Booking.sum("total_price", {
                     where: commonWhere,
@@ -435,10 +499,10 @@ export const getTotalBookingService = (tokenUser, building_id) =>
     new Promise(async (resolve, reject) => {
         try {
             let totalBooking = 0;
-            console.log(tokenUser.role_id)
+            console.log(tokenUser.role_id);
             if (tokenUser.role_id === 1) {
                 totalBooking = await db.Booking.count();
-                console.log(totalBooking)
+                console.log(totalBooking);
             } else if (tokenUser.role_id === 2) {
                 if(!building_id) return reject("Building_id is missing")
                 const manager = await db.Manager.findOne({
@@ -453,7 +517,8 @@ export const getTotalBookingService = (tokenUser, building_id) =>
                         manager_id: manager.manager_id,
                     },
                 });
-                if(!isManagerBelongToBuilding) return reject("Manager does not belong to this building");
+                if (!isManagerBelongToBuilding)
+                    return reject("Manager does not belong to this building");
                 totalBooking = await db.Booking.count({
                     include: [
                         {
@@ -465,7 +530,7 @@ export const getTotalBookingService = (tokenUser, building_id) =>
                         },
                     ],
                 });
-                console.log(totalBooking)
+                console.log(totalBooking);
             }
             return resolve({
                 err: 0,
@@ -538,7 +603,8 @@ export const get5RecentBookingService = (tokenUser, building_id) =>
                         manager_id: manager.manager_id,
                     },
                 });
-                if(!isManagerBelongToBuilding) return reject("Manager does not belong to this building");
+                if (!isManagerBelongToBuilding)
+                    return reject("Manager does not belong to this building");
                 bookings = await db.Booking.findAll({
                     order: [["createdAt", "DESC"]],
                     limit: 5,

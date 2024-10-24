@@ -323,6 +323,56 @@ router.get(
     */
 );
 
+router.get(
+    "/get-amenities/:id",
+    verify_role(["customer"]),
+    controllers.getAmenitiesBookingByIdController
+    /* 
+        #swagger.description = 'Get amenities booking by ID for the authenticated customer.'
+        #swagger.summary = 'Get amenities booking by ID'
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['id'] = {
+            in: 'path',
+            required: true,
+            type: 'string',
+            format: 'uuid',
+            description: 'Booking ID'
+        }
+        #swagger.responses[200] = {
+            description: 'Amenities booking retrieved successfully',
+            schema: {
+                err: 0,
+                message: 'Amenities booking retrieved successfully',
+                data: {
+                    booking_id: '123e4567-e89b-12d3-a456-426614174000',
+                    amenities: [
+                        {
+                            amenity_id: '123e4567-e89b-12d3-a456-426614174000',
+                            quantity: 1
+                        }
+                    ]
+                }
+            }
+        }
+        #swagger.responses[404] = {
+            description: 'Amenities booking not found',
+            schema: {
+                err: 1,
+                message: 'Amenities booking not found'
+            }
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error',
+            schema: {
+                err: 1,
+                message: 'An error occurred while processing your request'
+            }
+        }
+    */
+)
+
 router.put(
     "/cancel/:id",
     verify_role(["customer"]),
