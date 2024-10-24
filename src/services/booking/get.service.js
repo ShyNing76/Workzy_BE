@@ -64,6 +64,7 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
                 attributes: {
                     exclude: ["createdAt", "updatedAt"],
                 },
+                order: [handleSortOrder(order, "created_at")],
                 distinct: true,
                 subquery: false,
             });
@@ -85,14 +86,13 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
             });
 
             const filteredBookings = bookings.rows.filter((booking) => {
-                if (status === "All") return true;
+                if (status || status === "All") return true;
                 return tabStatus[status].includes(
                     booking.BookingStatuses[0].status
                 );
             });
 
             const paginatedBookings = filteredBookings
-                .sort(handleSortOrder(order, "created_at"))
                 .slice(
                     handleOffset(page, limit),
                     handleOffset(page, limit) + handleLimit(limit)
