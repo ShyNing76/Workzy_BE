@@ -370,7 +370,7 @@ export const getTimeBookingService = ({ workspace_id, date }) =>
     });
 
 // Lấy tổng doanh thu trong tháng
-export const getTotalPricesInMonthService = (tokenUser) =>
+export const getTotalPricesInMonthService = (tokenUser, building_id) =>
     new Promise(async (resolve, reject) => {
         try {
             const currentYear = new Date().getFullYear();
@@ -392,8 +392,7 @@ export const getTotalPricesInMonthService = (tokenUser) =>
             const commonInclude = [
                 {
                     model: db.BookingStatus,
-                    order: [["createdAt", "DESC"]],
-                    limit: 1,
+                    attributes: [],
                     where: {
                         status: "completed",
                     },
@@ -407,13 +406,14 @@ export const getTotalPricesInMonthService = (tokenUser) =>
                     include: commonInclude,
                 });
             } else if (tokenUser.role_id === 2) {
-                const manager = await db.Manager.findOne({
+                if(!building_id) return reject("Building_id is missing");
+                const isManagerBelongToBuilding = await db.Building.findOne({
                     where: {
-                        user_id: tokenUser.user_id,
+                        manager_id: tokenUser.user_id,
+                        building_id: building_id,
                     },
-                    attributes: ["manager_id"],
                 });
-                if (!manager) return reject("Manager not found");
+                if(!isManagerBelongToBuilding) return reject("Manager does not belong to this building");
 
                 totalPrice = await db.Booking.sum("total_price", {
                     where: commonWhere,
@@ -427,7 +427,7 @@ export const getTotalPricesInMonthService = (tokenUser) =>
                                     model: db.Building,
                                     attributes: [],
                                     where: {
-                                        manager_id: manager.manager_id,
+                                        building_id: building_id,
                                     },
                                 },
                             ],
@@ -446,21 +446,23 @@ export const getTotalPricesInMonthService = (tokenUser) =>
         }
     });
 // Lấy tổng số booking
-export const getTotalBookingService = (tokenUser) =>
+export const getTotalBookingService = (tokenUser, building_id) =>
     new Promise(async (resolve, reject) => {
         try {
             let totalBooking = 0;
+            console.log(tokenUser.role_id)
             if (tokenUser.role_id === 1) {
                 totalBooking = await db.Booking.count();
+                console.log(totalBooking)
             } else if (tokenUser.role_id === 2) {
-                const manager = await db.Manager.findOne({
+                if(!building_id) return reject("Building_id is missing")
+                const isManagerBelongToBuilding = await db.Building.findOne({
                     where: {
-                        user_id: tokenUser.user_id,
+                        manager_id: tokenUser.user_id,
+                        building_id: building_id,
                     },
-                    attributes: ["manager_id"],
                 });
-                if (!manager) return reject("Manager not found");
-
+                if(!isManagerBelongToBuilding) return reject("Manager does not belong to this building");
                 totalBooking = await db.Booking.count({
                     include: [
                         {
@@ -469,13 +471,14 @@ export const getTotalBookingService = (tokenUser) =>
                                 {
                                     model: db.Building,
                                     where: {
-                                        manager_id: manager.manager_id,
+                                        building_id: building_id,
                                     },
                                 },
                             ],
                         },
                     ],
                 });
+                console.log(totalBooking)
             }
             return resolve({
                 err: 0,
@@ -488,7 +491,7 @@ export const getTotalBookingService = (tokenUser) =>
         }
     });
 // lấy 5 booking mới nhất
-export const get5RecentBookingService = (tokenUser) =>
+export const get5RecentBookingService = (tokenUser, building_id) =>
     new Promise(async (resolve, reject) => {
         try {
             let bookings = [];
@@ -535,13 +538,14 @@ export const get5RecentBookingService = (tokenUser) =>
                     ],
                 });
             } else if (tokenUser.role_id === 2) {
-                const manager = await db.Manager.findOne({
+                if(!building_id) return reject("Building_id is missing")
+                const isManagerBelongToBuilding = await db.Building.findOne({
                     where: {
-                        user_id: tokenUser.user_id,
+                        manager_id: tokenUser.user_id,
+                        building_id: building_id,
                     },
-                    attributes: ["manager_id"],
                 });
-                if (!manager) return reject("Manager not found");
+                if(!isManagerBelongToBuilding) return reject("Manager does not belong to this building");
                 bookings = await db.Booking.findAll({
                     order: [["createdAt", "DESC"]],
                     limit: 5,
@@ -575,7 +579,7 @@ export const get5RecentBookingService = (tokenUser) =>
                                     model: db.Building,
                                     attributes: ["building_name"],
                                     where: {
-                                        manager_id: manager.manager_id,
+                                        building_id: building_id
                                     },
                                 },
                             ],

@@ -82,40 +82,49 @@ import { Op } from "sequelize";
 // totalPricesInMonth();
 
 function getTotalBookingByManager() {
-    const rating = db.Review.findAll({
-        attributes: ["rating"],
-        limit: 5,
-        order: [["rating", "DESC"]], // Changed 'Order' to 'order'
+    const booking = db.Booking.findAll({
+        attributes: ["workspace_id"],
         include: [
             {
-                model: db.Booking,
-                attributes: ["booking_id"],
-                required: true,
-            },
-        ],
-    }).then(ratings => { // Added .then to handle the resolved promise
-        const bookings = db.Booking.findAll({
-            where: {
-                booking_id: { [Op.in]: ratings.map(r => r.booking_id) } // Use 'ratings' instead of 'rating'
-            },
-            attributes: ["workspace_id"],
-        }).then(bookings => { // Added .then to handle the resolved promise
-            const top5WorkspaceReview = db.Workspace.count({
+                model: db.BookingStatus,
+                order: [["createdAt", "DESC"]],
+                limit: 1,
                 where: {
-                    workspace_id: { [Op.in]: bookings.map(b => b.workspace_id) }, // Use 'bookings' instead of 'bookings'
-                    status: "active",
+                    status: {[Op.in]: ["confirmed", "paid", "check-in", "completed", "check-out", "check-amenities", "damaged-payment"]},
                 },
-                limit: 5,
-            })
-            .then(result => {
-                console.log("Total Workspaces not in bookings: " + result);
-            }).catch(error => {
-                console.error("Error while fetching total workspaces:", error);
-            });
-        });
-    }).catch(error => {
-        console.error("Error while fetching ratings:", error); // Added error handling for ratings
+                required: false,
+            },{
+                model: db.Workspace,
+                required: true,
+                include: [
+                    {
+                        model: db.Building,
+                        required: true,
+                        attributes: ["building_id"],
+                        where: {
+                            building_id: "48ef4ba5-5a39-4d0b-a860-bb264fe364c1",
+                        },
+                    },
+                ],
+            }
+        ],
+    })
+    
+        .then((booking) => {
+            const bookedWorkspaceIds = booking.map(b => b.workspace_id);
+    const totalWorkspaces = db.Workspace.count({
+        where: {
+            workspace_id: {
+                [Op.notIn]: bookedWorkspaceIds,
+            },
+        },
+    }).then((result) => {
+        console.log("Total workspaces: " + result);
+    }).catch((error) => {
+        console.error("Error fetching total workspaces: ", error);
     });
-}
-
+        }).catch((error) => {
+            console.error("Error fetching total price: ", error);
+        });
+    }
 getTotalBookingByManager();

@@ -9,6 +9,7 @@ router.get("/total", verify_token, verify_role(["admin", "manager"]), controller
 /*
         #swagger.description = 'Endpoint to get total workspaces.'
         #swagger.summary = 'get total workspaces.'
+         #swagger.parameters['building_id'] = { description: 'Building ID.' }
         #swagger.responses[200] = {
             description: 'toatl Workspaces get successfully.'
         }
@@ -24,6 +25,29 @@ router.get("/total", verify_token, verify_role(["admin", "manager"]), controller
      */
     );
 
+router.get("/total-usage-workspace", 
+    verify_token, 
+    verify_role(["manager"]), 
+    controllers.getTotalUsageWorkspacesController
+    /*
+        #swagger.description = 'Endpoint to get total usage workspaces.'
+        #swagger.summary = 'get total usage workspaces.'
+        #swagger.parameters['building_id'] = { description: 'Building ID.' }
+        #swagger.responses[200] = {
+            description: 'total Workspaces get successfully.'
+        }
+        #swagger.responses[404] = {
+            description: 'Workspace not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        */
+);
+
 router.get("/total-workspace-not-in-booking", 
     verify_token, 
     verify_role(["manager"]), 
@@ -31,6 +55,7 @@ router.get("/total-workspace-not-in-booking",
 /*
         #swagger.description = 'Endpoint to get total workspaces not in booking.'
         #swagger.summary = 'get total workspaces not in booking.'
+        #swagger.parameters['building_id'] = { description: 'Building ID.' }
         #swagger.responses[200] = {
             description: 'toatl Workspaces get successfully.'
         }
@@ -53,6 +78,7 @@ router.get("/top5ratingworkspace",
     /*
         #swagger.description = 'Endpoint to get top 5 rating workspace.'
         #swagger.summary = 'get top 5 rating workspace.'
+        #swagger.parameters['building_id'] = { description: 'Building ID.' }
         #swagger.responses[200] = {
             description: 'toatl Workspaces get successfully.'
         }

@@ -179,7 +179,7 @@ router.put(
 router.get(
     "/total-user",
     verify_token,
-    verify_role(["admin", "manager"]),
+    verify_role(["admin"]),
     controller.getTotalUserController
     /*
     #swagger.description = 'Get all users.'

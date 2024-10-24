@@ -153,16 +153,46 @@ export const unassignWorkspaceToBuildingController = async (req, res) => {
 
 export const getTotalWorkspaceController = async (req, res) => {
     try {
-        const response = await services.getTotalWorkspaceService(req.user);
+        const error = Joi.object({
+            building_id: Joi.string().uuid(),
+        }).validate({
+            building_id: req.query.building_id,
+        }).error;
+        if (error) return badRequest(res, error.details[0].message);
+        const response = await services.getTotalWorkspaceService(req.user, req.query.building_id);
         return ok(res, response)
     } catch (error) {
+        if(error === "Building is required" ||
+            error === "Manager does not belong to this building"
+        ) return badRequest(res, error);
         internalServerError(res, error)
     }
 };
 
 export const getTotalWorkspaceNotInBookingController = async (req, res) => {
     try {
-        const response = await services.getTotalWorkspaceNotInBookingService();
+        const error = Joi.object({
+            building_id: Joi.string().uuid().required(),
+        }).validate({
+            building_id: req.query.building_id,
+        }).error;
+        if (error) return badRequest(res, error.details[0].message);
+        const response = await services.getTotalWorkspaceNotInBookingService(req.query.building_id);
+        return ok(res, response);
+    } catch (error) {
+        internalServerError(res, error);
+    }
+}
+
+export const getTotalUsageWorkspacesController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            building_id: Joi.string().uuid().required(),
+        }).validate({
+            building_id: req.query.building_id,
+        }).error;
+        if (error) return badRequest(res, error.details[0].message);
+        const response = await services.getTotalUsageWorkspacesService(req.query.building_id);
         return ok(res, response);
     } catch (error) {
         internalServerError(res, error);

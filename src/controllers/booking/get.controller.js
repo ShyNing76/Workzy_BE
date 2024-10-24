@@ -99,9 +99,18 @@ export const getTimeBookingController = async (req, res) => {
 
 export const getTotalPricesInMonthController = async (req, res) => {
     try {
-        const totalPrice = await services.getTotalPricesInMonthService(req.user);
+        const error = Joi.object({
+            building_id: Joi.string().uuid(),
+        }).validate({
+            building_id: req.query.building_id,
+        }).error;
+        if (error) return badRequest(res, error.details[0].message);
+        const totalPrice = await services.getTotalPricesInMonthService(req.user, req.query.building_id);
         return ok(res, totalPrice);
     } catch (err) {
+        if(err === "Building_id is missing" ||
+            err === "Manager does not belong to this building"
+        ) return badRequest(res, err);
         console.error(err);
         internalServerError(res);
     }
@@ -109,9 +118,18 @@ export const getTotalPricesInMonthController = async (req, res) => {
 
 export const getTotalBookingController = async (req, res) => {
     try {
-        const totalBooking = await services.getTotalBookingService(req.user);
+        const error = Joi.object({
+            building_id: Joi.string().uuid(),
+        }).validate({
+            building_id: req.query.building_id,
+        }).error;
+        if (error) return badRequest(res, error.details[0].message);
+        const totalBooking = await services.getTotalBookingService(req.user, req.query.building_id);
         return ok(res, totalBooking);
     } catch (err) {
+        if(err === "Building_id is missing" ||
+            err === "Manager does not belong to this building"
+        ) return badRequest(res, err);
         console.error(err);
         internalServerError(res);
     }
@@ -119,9 +137,18 @@ export const getTotalBookingController = async (req, res) => {
 
 export const get5RecentBookingController = async (req, res) => {
     try {
-        const recentBooking = await services.get5RecentBookingService(req.user);
+        const error = Joi.object({
+            building_id: Joi.string().uuid(),
+        }).validate({
+            building_id: req.query.building_id,
+        }).error;
+        if (error) return badRequest(res, error.details[0].message);
+        const recentBooking = await services.get5RecentBookingService(req.user, req.query.building_id);
         return ok(res, recentBooking);
     } catch (err) {
+        if(err === "Building_id is missing" ||
+            err === "Manager does not belong to this building"
+        ) return badRequest(res, err);
         console.error(err);
         internalServerError(res);
     }

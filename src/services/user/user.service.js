@@ -203,57 +203,37 @@ export const updateImage = (updateFields) =>
     });
 
 //lấy tổng số user theo role
-export const getTotalUserService = (tokenUser) =>
+export const getTotalUserService = () =>
     new Promise(async (resolve, reject) => {
         try {
-            let manager = 0;
-            let staff = 0;
-            let customer = 0;
-            if(tokenUser.role_id === 1){
-                manager = await db.User.count({
-                    where: {
-                        role_id: 2,
-                        status: "active",
-                    },
-                });
-                staff = await db.User.count({
-                    where: {
-                        role_id: 3,
-                        status: "active",
-                    },
-                });
-                customer = await db.User.count({
-                    where: {
-                        role_id: 4,
-                        status: "active",
-                    },
-                });
-            } else if(tokenUser.role_id === 2){ {
-                staff = await db.User.count({
-                    where: {
-                        role_id: 3,
-                        status: "active",
-                    },
-                });      
-                customer = await db.User.count({
-                    where: {
-                        role_id: 4,
-                        status: "active",
-                    },
-                });                
-            }
-        }
+
+            const manager = await db.User.count({
+                where: {
+                    role_id: 2,
+                    status: "active",
+                },
+            });
+            const staff = await db.User.count({
+                where: {
+                    role_id: 3,
+                    status: "active",
+                },
+            });
+            const customer = await db.User.count({
+                where: {
+                    role_id: 4,
+                    status: "active",
+                },
+            });
+            
             resolve({
                 err: 0,
                 message: "Get all user successful",
-                data: tokenUser.role_id === 1 ? {
-                    manager : manager? manager : 0,
-                    staff: staff? staff : 0,
-                    customer : customer? customer : 0,
-                } : {
-                    staff: staff? staff : 0,
-                    customer : customer? customer : 0,
-                },
+                data: {
+                    manager,
+                    staff,
+                    customer,
+                }
             });
         } catch (error) {
             console.log(error);

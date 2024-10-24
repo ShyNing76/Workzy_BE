@@ -111,7 +111,7 @@ export const updateImage = async (req, res) => {
 
 export const getTotalUserController = async (req, res) => {
     try {
-        const response = await services.getTotalUserService(req.user);
+        const response = await services.getTotalUserService();
         // Return the response
         return ok(res, response);
     } catch (error) {

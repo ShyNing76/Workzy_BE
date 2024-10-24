@@ -851,6 +851,11 @@ router.get(
     /*
         #swagger.description = 'Get total bookings.'
         #swagger.summary = 'Get bookings'
+        #swagger.parameters['building_id'] = {
+            type: 'string',
+            format: 'uuid',
+            description: 'Building Id'
+        }
         #swagger.security = [{
             "apiKeyAuth": []
         }]
@@ -881,6 +886,11 @@ router.get(
     /*
         #swagger.description = 'Get total bookings.'
         #swagger.summary = 'Get bookings'
+                #swagger.parameters['building_id'] = {
+            type: 'string',
+            format: 'uuid',
+            description: 'Building Id'
+        }
         #swagger.security = [{
             "apiKeyAuth": []
         }]
@@ -911,6 +921,11 @@ router.get(
     /*
         #swagger.description = 'Get total bookings.'
         #swagger.summary = 'Get bookings'
+        #swagger.parameters['building_id'] = {
+            type: 'string',
+            format: 'uuid',
+            description: 'Building Id'
+        }
         #swagger.security = [{
             "apiKeyAuth": []
         }]
