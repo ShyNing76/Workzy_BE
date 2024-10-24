@@ -12,6 +12,7 @@ import {
 export const getBookingService = ({ page, limit, order, status, ...data }) =>
     new Promise(async (resolve, reject) => {
         try {
+            console.log(order);
             const customer = await db.Customer.findOne({
                 where: {
                     user_id: data.user_id,
@@ -21,20 +22,11 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
             if (!customer) return reject("Customer not found");
 
             const tabStatus = {
-                Current: ["check-in", "usage"],
+                Current: ["check-in", "usage", "check-out", "check-amenities"],
                 Upcoming: ["paid", "confirmed"],
-                "Check-out": ["check-out", "check-amenities"],
                 Completed: ["completed"],
                 Cancelled: ["cancelled"],
             };
-
-            const statusCondition = status
-                ? {
-                      status: {
-                          [db.Sequelize.Op.in]: tabStatus[status] || [],
-                      },
-                  }
-                : {};
 
             const bookings = await db.Booking.findAndCountAll({
                 where: {
@@ -44,11 +36,10 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
                     {
                         model: db.BookingStatus,
                         as: "BookingStatuses",
-                        where: statusCondition,
-                        order: [["createdAt", "DESC"]],
                         limit: 1,
+                        order: [["createdAt", "DESC"]],
                         attributes: { exclude: ["booking_id"] },
-                        required: false, // Change to false to include bookings without statuses
+                        required: true,
                     },
                 ],
                 order: [handleSortOrder(order, "start_time_date")],
@@ -62,10 +53,22 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
             if (bookings && bookings.count === 0)
                 return reject("No bookings found");
 
+            const filteredBookings = bookings.rows.filter(
+                (booking) =>
+                    booking.BookingStatuses &&
+                    booking.BookingStatuses.length > 0 &&
+                    tabStatus[status].includes(
+                        booking.BookingStatuses[0].status
+                    )
+            );
+
             return resolve({
                 err: 0,
                 message: "Bookings found",
-                data: bookings,
+                data: {
+                    count: filteredBookings.length,
+                    rows: filteredBookings,
+                },
             });
         } catch (error) {
             console.error(error);
@@ -107,7 +110,7 @@ export const getAllBookingsService = ({
                         where: statusCondition,
                         order: [["createdAt", "DESC"]],
                         limit: 1,
-                        required: false,
+                        required: true,
                     },
                     {
                         model: db.Workspace,
@@ -309,6 +312,9 @@ export const getTimeBookingService = ({ workspace_id, date }) =>
         try {
             const startOfDay = moment(date).startOf("day").toISOString();
             const endOfDay = moment(date).endOf("day").toISOString();
+
+            console.log(startOfDay, endOfDay);
+            
             const booking = await db.Booking.findAll({
                 where: {
                     workspace_id,
@@ -342,7 +348,6 @@ export const getTimeBookingService = ({ workspace_id, date }) =>
             return reject(error);
         }
     });
-
 
 // Lấy tổng doanh thu trong tháng
 export const getTotalPricesInMonthService = (tokenUser) =>
@@ -463,7 +468,7 @@ export const getTotalBookingService = (tokenUser) =>
         }
     });
 // lấy 5 booking mới nhất
-export const get5RecentBookingService = (tokenUser) => 
+export const get5RecentBookingService = (tokenUser) =>
     new Promise(async (resolve, reject) => {
         try {
             let bookings = [];
@@ -512,46 +517,46 @@ export const get5RecentBookingService = (tokenUser) =>
             });
             if (!manager) return reject("Manager not found");
                 bookings = await db.Booking.findAll({
-                order: [["createdAt", "DESC"]],
-                limit: 5,
-                include: [
-                    {
-                        model: db.BookingStatus,
-                        as: "BookingStatuses",
-                        order: [["createdAt", "DESC"]],
-                        limit: 1,
-                        require: true,
-                    },
-                    {
-                        model: db.Customer,
-                        attributes: ["user_id"],
-                        include: [
-                            {
-                                model: db.User,
-                                attributes: ["name"],
-                            },
-                        ],
-                    },
-                    {
-                        model: db.Workspace,
-                        attributes: ["workspace_name"],
-                        include: [
-                            {
-                                model: db.WorkspaceType,
-                                attributes: ["workspace_type_name"],
-                            },
-                            {
-                                model: db.Building,
-                                attributes: ["building_name"],
-                                where: {
-                                    manager_id: manager.manager_id,
+                    order: [["createdAt", "DESC"]],
+                    limit: 5,
+                    include: [
+                        {
+                            model: db.BookingStatus,
+                            as: "BookingStatuses",
+                            order: [["createdAt", "DESC"]],
+                            limit: 1,
+                            require: true,
+                        },
+                        {
+                            model: db.Customer,
+                            attributes: ["user_id"],
+                            include: [
+                                {
+                                    model: db.User,
+                                    attributes: ["name"],
                                 },
-                            }
-                        ],
-                    },
-                ],
-            });
-        }
+                            ],
+                        },
+                        {
+                            model: db.Workspace,
+                            attributes: ["workspace_name"],
+                            include: [
+                                {
+                                    model: db.WorkspaceType,
+                                    attributes: ["workspace_type_name"],
+                                },
+                                {
+                                    model: db.Building,
+                                    attributes: ["building_name"],
+                                    where: {
+                                        manager_id: manager.manager_id,
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                });
+            }
             resolve({
                 err: 0,
                 message: "5 bookings found",

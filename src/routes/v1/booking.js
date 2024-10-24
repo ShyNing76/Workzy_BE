@@ -256,12 +256,12 @@ router.get(
         #swagger.parameters['page'] = { description: 'Page number' }
         #swagger.parameters['limit'] = { description: 'Number of items per page' }
         #swagger.parameters['order'] = {
-            description: 'Order by start_time, end_time, total_price',
+            description: 'Order by start_time, end_time, total_price, createdAt, updatedAt',
             '@schema': {
                 type: 'array',
                 items: {
                     type: 'string',
-                    pattern: '^(start_time|end_time|total_price|asc|desc)$',
+                    pattern: '^(start_time|end_time|total_price|createdAt|updatedAt|asc|desc)$',
                     example: 'start_time'
                 }
             },
@@ -316,12 +316,12 @@ router.get(
         #swagger.parameters['page'] = { description: 'Page number' }
         #swagger.parameters['limit'] = { description: 'Number of items per page' }
         #swagger.parameters['order'] = {
-            description: 'Order by start_time, end_time, total_price',
+            description: 'Order by start_time, end_time, total_price, createdAt, updatedAt',
             '@schema': {
                 type: 'array',
                 items: {
                     type: 'string',
-                    pattern: '^(start_time|end_time|total_price|asc|desc)$',
+                    pattern: '^(start_time|end_time|total_price|createdAt|updatedAt|asc|desc)$',
                     example: 'start_time'
                 }
             },
