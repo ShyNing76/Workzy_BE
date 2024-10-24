@@ -403,7 +403,8 @@ export const unassignWorkspacetoBuildingService = async ({workspace_ids, buildin
         }
     });
 
-export const getTotalWorkspaceService = async (tokenUser, building_id) => {
+export const getTotalWorkspaceService = async (tokenUser, building_id) => 
+    new Promise(async (resolve, reject) => {
     try {
         let totalWorkspaces = 0;
         if(tokenUser.role_id === 1) {
@@ -414,12 +415,19 @@ export const getTotalWorkspaceService = async (tokenUser, building_id) => {
             });
         } else if(tokenUser.role_id === 2) {
             if(!building_id) return reject("Building is required");
-            const isManagerBelongToBuilding = await db.Building.findOne({
+            const manager = await db.Manager.findOne({
                 where: {
-                    manager_id: tokenUser.user_id,
-                    building_id: building_id,
+                    user_id: tokenUser.user_id,
                 },
             });
+            if(!manager) return reject("Manager is not exist");
+            const isManagerBelongToBuilding = await db.Building.findOne({
+                where: {
+                    building_id: building_id,
+                    manager_id: manager.manager_id,
+                },
+            });
+            console.log(isManagerBelongToBuilding);
             if(!isManagerBelongToBuilding) return reject("Manager does not belong to this building");
             totalWorkspaces = await db.Workspace.count({
                 where: {
@@ -436,45 +444,41 @@ export const getTotalWorkspaceService = async (tokenUser, building_id) => {
                 ],
             });
         }
-        return {
+        resolve ({
             err: 0,
             message: "Got Total Workspace successfully",
             data: totalWorkspaces,
-        };
-    } catch (error) {
-        console.log(error);
-        return error;
-    }
-}
+        });
+        } catch (error) {
+            console.log(error);
+            reject(error);
+        }
+    });
 
-export const getTotalUsageWorkspacesService = async (building_id) => {
+export const getTotalUsageWorkspacesService = async (building_id) => 
     new Promise(async (resolve, reject) => {
     try {
-        const booking = db.Booking.findAll({
+        const booking = await db.Booking.findAll({
+            attributes: ["workspace_id"],
             include: [
                 {
                     model: db.BookingStatus,
-                    required: true,
                     attributes: ["status"],
+                    required: true,
                     where: {
                         status: "usage",
                     },
                 },{
                     model: db.Workspace,
-                    required: true,
-                    include: [
-                        {
-                            model: db.Building,
-                            required: true,
-                            attributes: ["building_id"],
-                            where: {
-                                building_id: building_id,
-                            },
-                        },
-                    ],
+                    atrributes: [],
+                    required: false,
+                    where: {
+                        building_id: building_id,
+                    },
                 }
             ],
         });
+        if(booking.length === 0) return reject("No Usage Workspace Exist");
         const totalUsageWorkspaces = new Set();
         for (let i = 0; i < booking.length; i++) {
             totalUsageWorkspaces.add(booking[i].workspace_id);
@@ -489,9 +493,8 @@ export const getTotalUsageWorkspacesService = async (building_id) => {
         reject(error);
     }
     });
-}
 
-export const getTotalWorkspaceNotInBookingService = async (building_id) => {
+export const getTotalWorkspaceNotInBookingService = async (building_id) => 
     new Promise(async (resolve, reject) => {
     try {
         const booking = await db.Booking.findAll({
@@ -502,22 +505,15 @@ export const getTotalWorkspaceNotInBookingService = async (building_id) => {
                     order: [["createdAt", "DESC"]],
                     limit: 1,
                     where: {
-                        status: {[Op.in]: ["confirmed", "paid", "check-in", "completed", "check-out", "check-amenities", "damaged-payment"]},
+                        status: {[Op.in]: ["confirmed", "paid", "check-in", "completed", "check-out", "check-amenities", "damaged-payment", "usage"]},
                     },
-                    required: false,
+                    required: true,
                 },{
                     model: db.Workspace,
                     required: true,
-                    include: [
-                        {
-                            model: db.Building,
-                            required: true,
-                            attributes: ["building_id"],
-                            where: {
-                                building_id: building_id,
-                            },
-                        },
-                    ],
+                    where: {
+                        building_id: building_id,
+                    },
                 }
             ],
         });
@@ -527,6 +523,7 @@ export const getTotalWorkspaceNotInBookingService = async (building_id) => {
                 workspace_id: {
                     [Op.notIn]: bookedWorkspaceIds,
                 },
+                building_id: building_id,
             },
         });
         resolve({
@@ -539,9 +536,9 @@ export const getTotalWorkspaceNotInBookingService = async (building_id) => {
         reject(error);
     }
     });
-}
 
-export const getTop5WorkspaceReviewService = async () => {
+
+export const getTop5WorkspaceReviewService = async () => 
     new Promise(async (resolve, reject) => {
     try {
         const rating = await db.Review.findAll({
@@ -579,4 +576,4 @@ export const getTop5WorkspaceReviewService = async () => {
         reject(error);
     }
     });
-}
+

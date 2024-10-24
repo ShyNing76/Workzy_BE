@@ -82,48 +82,27 @@ import { Op } from "sequelize";
 // totalPricesInMonth();
 
 function getTotalBookingByManager() {
-    const booking = db.Booking.findAll({
-        attributes: ["workspace_id"],
+    const totalBooking = db.Booking.findAll({
         include: [
             {
-                model: db.BookingStatus,
-                order: [["createdAt", "DESC"]],
-                limit: 1,
-                where: {
-                    status: {[Op.in]: ["confirmed", "paid", "check-in", "completed", "check-out", "check-amenities", "damaged-payment"]},
-                },
-                required: false,
-            },{
                 model: db.Workspace,
                 required: true,
                 include: [
                     {
                         model: db.Building,
                         required: true,
-                        attributes: ["building_id"],
                         where: {
-                            building_id: "48ef4ba5-5a39-4d0b-a860-bb264fe364c1",
+                            building_id: "7acbfb16-9583-40a9-b353-c52456dc444d",
                         },
                     },
                 ],
-            }
-        ],
-    })
-    
-        .then((booking) => {
-            const bookedWorkspaceIds = booking.map(b => b.workspace_id);
-    const totalWorkspaces = db.Workspace.count({
-        where: {
-            workspace_id: {
-                [Op.notIn]: bookedWorkspaceIds,
             },
-        },
+        ],
     }).then((result) => {
-        console.log("Total workspaces: " + result);
+        for (let i = 0; i < result.length; i++) {
+            console.log("Booking: " + result[i].workspace_id);
+        }
     }).catch((error) => {
-        console.error("Error fetching total workspaces: ", error);
-    });
-        }).catch((error) => {
             console.error("Error fetching total price: ", error);
         });
     }

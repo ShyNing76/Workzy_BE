@@ -11,7 +11,7 @@ router.get("/total", verify_token, verify_role(["admin", "manager"]), controller
         #swagger.summary = 'get total workspaces.'
          #swagger.parameters['building_id'] = { description: 'Building ID.' }
         #swagger.responses[200] = {
-            description: 'toatl Workspaces get successfully.'
+            description: 'total Workspaces get successfully.'
         }
         #swagger.responses[404] = {
             description: 'Workspace not found.'
@@ -57,7 +57,7 @@ router.get("/total-workspace-not-in-booking",
         #swagger.summary = 'get total workspaces not in booking.'
         #swagger.parameters['building_id'] = { description: 'Building ID.' }
         #swagger.responses[200] = {
-            description: 'toatl Workspaces get successfully.'
+            description: 'total Workspaces get successfully.'
         }
         #swagger.responses[404] = {
             description: 'Workspace not found.'
@@ -80,7 +80,7 @@ router.get("/top5ratingworkspace",
         #swagger.summary = 'get top 5 rating workspace.'
         #swagger.parameters['building_id'] = { description: 'Building ID.' }
         #swagger.responses[200] = {
-            description: 'toatl Workspaces get successfully.'
+            description: 'total Workspaces get successfully.'
         }
         #swagger.responses[404] = {
             description: 'Workspace not found.'

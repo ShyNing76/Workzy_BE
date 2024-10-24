@@ -391,10 +391,16 @@ export const getTotalPricesInMonthService = (tokenUser, building_id) =>
                 });
             } else if (tokenUser.role_id === 2) {
                 if(!building_id) return reject("Building_id is missing");
+                const manager = await db.Manager.findOne({
+                    where: {
+                        user_id: tokenUser.user_id,
+                    },
+                });
+                if(!manager) return reject("Manager is not exist");
                 const isManagerBelongToBuilding = await db.Building.findOne({
                     where: {
-                        manager_id: tokenUser.user_id,
                         building_id: building_id,
+                        manager_id: manager.manager_id,
                     },
                 });
                 if(!isManagerBelongToBuilding) return reject("Manager does not belong to this building");
@@ -405,16 +411,11 @@ export const getTotalPricesInMonthService = (tokenUser, building_id) =>
                         ...commonInclude,
                         {
                             model: db.Workspace,
+                            required: false,
                             attributes: [],
-                            include: [
-                                {
-                                    model: db.Building,
-                                    attributes: [],
-                                    where: {
-                                        building_id: building_id,
-                                    },
-                                },
-                            ],
+                            where: {
+                                building_id: building_id,
+                            },
                         },
                     ],
                 });
@@ -440,10 +441,16 @@ export const getTotalBookingService = (tokenUser, building_id) =>
                 console.log(totalBooking)
             } else if (tokenUser.role_id === 2) {
                 if(!building_id) return reject("Building_id is missing")
+                const manager = await db.Manager.findOne({
+                    where: {
+                        user_id: tokenUser.user_id,
+                    },
+                });
+                if(!manager) return reject("Manager is not exist");
                 const isManagerBelongToBuilding = await db.Building.findOne({
                     where: {
-                        manager_id: tokenUser.user_id,
                         building_id: building_id,
+                        manager_id: manager.manager_id,
                     },
                 });
                 if(!isManagerBelongToBuilding) return reject("Manager does not belong to this building");
@@ -451,14 +458,10 @@ export const getTotalBookingService = (tokenUser, building_id) =>
                     include: [
                         {
                             model: db.Workspace,
-                            include: [
-                                {
-                                    model: db.Building,
-                                    where: {
-                                        building_id: building_id,
-                                    },
-                                },
-                            ],
+                            required: false,
+                            where: {
+                                building_id: building_id,
+                            },
                         },
                     ],
                 });
@@ -523,10 +526,16 @@ export const get5RecentBookingService = (tokenUser, building_id) =>
                 });
             } else if (tokenUser.role_id === 2) {
                 if(!building_id) return reject("Building_id is missing")
+                const manager = await db.Manager.findOne({
+                    where: {
+                        user_id: tokenUser.user_id,
+                    },
+                });
+                if(!manager) return reject("Manager is not exist");
                 const isManagerBelongToBuilding = await db.Building.findOne({
                     where: {
-                        manager_id: tokenUser.user_id,
                         building_id: building_id,
+                        manager_id: manager.manager_id,
                     },
                 });
                 if(!isManagerBelongToBuilding) return reject("Manager does not belong to this building");
@@ -554,17 +563,13 @@ export const get5RecentBookingService = (tokenUser, building_id) =>
                         {
                             model: db.Workspace,
                             attributes: ["workspace_name"],
+                            where:{
+                                building_id: building_id
+                            },
                             include: [
                                 {
                                     model: db.WorkspaceType,
                                     attributes: ["workspace_type_name"],
-                                },
-                                {
-                                    model: db.Building,
-                                    attributes: ["building_name"],
-                                    where: {
-                                        building_id: building_id
-                                    },
                                 },
                             ],
                         },
