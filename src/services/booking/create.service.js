@@ -67,7 +67,7 @@ export const createBookingService = (data) =>
                 notification_id: v4(),
                 customer_id: customer.customer_id,
                 type: "booking",
-                description: `Booking confirmed for workspace ${workspace.workspace_name}`,
+                description: `Booking confirmed for workspace ${workspace.workspace_n}`,
             };
 
             await await Promise.all([
