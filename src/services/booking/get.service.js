@@ -22,6 +22,7 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
             if (!customer) return reject("Customer not found");
 
             const tabStatus = {
+                All: ["check-in", "usage", "check-out", "check-amenities", "paid", "confirmed", "completed", "cancelled"],
                 Current: ["check-in", "usage", "check-out", "check-amenities"],
                 Upcoming: ["paid", "confirmed"],
                 Completed: ["completed"],
@@ -62,12 +63,12 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
                       )
                     : true
             );
-
+           
             return resolve({
                 err: 0,
                 message: "Bookings found",
                 data: {
-                    count: bookings.count,
+                    count: filteredBookings.length,
                     rows: filteredBookings,
                 },
             });
