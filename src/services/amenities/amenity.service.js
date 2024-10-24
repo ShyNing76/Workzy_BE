@@ -120,7 +120,7 @@ export const getAllAmenityService = ({page, limit, order, amenity_name, status, 
         const amenities = await db.Amenity.findAndCountAll({
             where: {
                 amenity_name: {
-                    [Op.substring]: amenity_name || ""
+                    [Op.iLike]: `%${amenity_name || ""}%`
                 },
                 ...query, 
             },
@@ -128,7 +128,7 @@ export const getAllAmenityService = ({page, limit, order, amenity_name, status, 
             limit: handleLimit(limit),
             order: [handleSortOrder(order, "amenity_name")],
             attributes: {
-                exclude: ["createdAt", "updatedAt"]
+            exclude: ["createdAt", "updatedAt"]
             },
         });
         if(amenities.count === 0) return reject("No Amenity Exist")
