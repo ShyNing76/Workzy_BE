@@ -314,16 +314,10 @@ export const getTimeBookingService = ({ workspace_id, date }) =>
             const endOfDay = moment(date).endOf("day").toISOString();
 
             console.log(startOfDay, endOfDay);
-            
+
             const booking = await db.Booking.findAll({
                 where: {
                     workspace_id,
-                    start_time_date: {
-                        [db.Sequelize.Op.between]: [startOfDay, endOfDay],
-                    },
-                    end_time_date: {
-                        [db.Sequelize.Op.between]: [startOfDay, endOfDay],
-                    },
                 },
                 attributes: ["booking_id", "start_time_date", "end_time_date"],
                 include: [
@@ -338,10 +332,33 @@ export const getTimeBookingService = ({ workspace_id, date }) =>
 
             if (!booking) return reject("Booking not found");
 
+            console.log(
+                "🚀 ~ newPromise ~ startOfDay, endOfDay:",
+                startOfDay,
+                endOfDay
+            );
+
+            const filteredBooking = booking.filter(
+                (book) =>
+                    moment(startOfDay).isBetween(
+                        book.start_time_date,
+                        book.end_time_date
+                    ) ||
+                    moment(endOfDay).isBetween(
+                        book.start_time_date,
+                        book.end_time_date
+                    ) ||
+                    moment(book.start_time_date).isBetween(
+                        startOfDay,
+                        endOfDay
+                    ) ||
+                    moment(book.end_time_date).isBetween(startOfDay, endOfDay)
+            );
+
             return resolve({
                 err: 0,
                 message: "Booking found",
-                data: booking,
+                data: filteredBooking,
             });
         } catch (error) {
             console.error(error);
@@ -430,9 +447,9 @@ export const getTotalBookingService = (tokenUser) =>
     new Promise(async (resolve, reject) => {
         try {
             let totalBooking = 0;
-            if(tokenUser.role_id === 1) {
+            if (tokenUser.role_id === 1) {
                 totalBooking = await db.Booking.count();
-            } else if(tokenUser.role_id === 2) {
+            } else if (tokenUser.role_id === 2) {
                 const manager = await db.Manager.findOne({
                     where: {
                         user_id: tokenUser.user_id,
@@ -472,50 +489,56 @@ export const get5RecentBookingService = (tokenUser) =>
     new Promise(async (resolve, reject) => {
         try {
             let bookings = [];
-            if(tokenUser.role_id === 1) {
+            if (tokenUser.role_id === 1) {
                 bookings = await db.Booking.findAll({
-                attributes: ["booking_id", "start_time_date", "end_time_date", "total_price", "createdAt"],
-                order: [["createdAt", "DESC"]],
-                limit: 5,
-                include: [
-                    {
-                        model: db.BookingStatus,
-                        as: "BookingStatuses",
-                        order: [["createdAt", "DESC"]],
-                        limit: 1,
-                        attributes: ["status"],
-                        require: true,
+                    attributes: [
+                        "booking_id",
+                        "start_time_date",
+                        "end_time_date",
+                        "total_price",
+                        "createdAt",
+                    ],
+                    order: [["createdAt", "DESC"]],
+                    limit: 5,
+                    include: [
+                        {
+                            model: db.BookingStatus,
+                            as: "BookingStatuses",
+                            order: [["createdAt", "DESC"]],
+                            limit: 1,
+                            attributes: ["status"],
+                            require: true,
+                        },
+                        {
+                            model: db.Customer,
+                            attributes: ["user_id"],
+                            include: [
+                                {
+                                    model: db.User,
+                                    attributes: ["name"],
+                                },
+                            ],
+                        },
+                        {
+                            model: db.Workspace,
+                            attributes: ["workspace_name"],
+                            include: [
+                                {
+                                    model: db.WorkspaceType,
+                                    attributes: ["workspace_type_name"],
+                                },
+                            ],
+                        },
+                    ],
+                });
+            } else if (tokenUser.role_id === 2) {
+                const manager = await db.Manager.findOne({
+                    where: {
+                        user_id: tokenUser.user_id,
                     },
-                    {
-                        model: db.Customer,
-                        attributes: ["user_id"],
-                        include: [
-                            {
-                                model: db.User,
-                                attributes: ["name"],
-                            },
-                        ],
-                    },
-                    {
-                        model: db.Workspace,
-                        attributes: ["workspace_name"],
-                        include: [
-                            {
-                                model: db.WorkspaceType,
-                                attributes: ["workspace_type_name"],
-                            },
-                        ],
-                    },
-                ],
-            });
-        } else if(tokenUser.role_id === 2) {
-            const manager = await db.Manager.findOne({
-                where: {
-                    user_id: tokenUser.user_id,
-                },
-                attributes: ["manager_id"],
-            });
-            if (!manager) return reject("Manager not found");
+                    attributes: ["manager_id"],
+                });
+                if (!manager) return reject("Manager not found");
                 bookings = await db.Booking.findAll({
                     order: [["createdAt", "DESC"]],
                     limit: 5,
