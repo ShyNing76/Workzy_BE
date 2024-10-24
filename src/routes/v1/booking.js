@@ -67,93 +67,6 @@ router.get(
 
 router.use(verify_token);
 
-router.get("/total", 
-    verify_role(["admin", "manager"]),
-    controllers.getTotalBookingController 
-/*
-        #swagger.description = 'Get total bookings.'
-        #swagger.summary = 'Get bookings'
-        #swagger.security = [{
-            "apiKeyAuth": []
-        }]
-        #swagger.responses[200] = {
-            description: 'Bookings retrieved successfully',
-            schema: {
-                err: 0,
-                message: 'Bookings retrieved successfully',
-                data: {
-                    total: 10
-                }
-            }
-        }
-        #swagger.responses[500] = {
-            description: 'Internal server error',
-            schema: {
-                err: 1,
-                message: 'An error occurred while processing your request'
-            }
-        }
-    */
-)
-
-router.get("/total-price-of-all-booking-in-month", 
-    verify_role(["admin", "manager"]),
-    controllers.getTotalPricesInMonthController 
-/*
-        #swagger.description = 'Get total bookings.'
-        #swagger.summary = 'Get bookings'
-        #swagger.security = [{
-            "apiKeyAuth": []
-        }]
-        #swagger.responses[200] = {
-            description: 'Bookings retrieved successfully',
-            schema: {
-                err: 0,
-                message: 'Bookings retrieved successfully',
-                data: {
-                    total: 10
-                }
-            }
-        }
-        #swagger.responses[500] = {
-            description: 'Internal server error',
-            schema: {
-                err: 1,
-                message: 'An error occurred while processing your request'
-            }
-        }
-    */
-)
-
-router.get("/5recent", 
-    verify_role(["admin", "manager"]),
-    controllers.get5RecentBookingController
-/*
-        #swagger.description = 'Get total bookings.'
-        #swagger.summary = 'Get bookings'
-        #swagger.security = [{
-            "apiKeyAuth": []
-        }]
-        #swagger.responses[200] = {
-            description: 'Bookings retrieved successfully',
-            schema: {
-                err: 0,
-                message: 'Bookings retrieved successfully',
-                data: {
-                    total: 10
-                }
-            }
-        }
-        #swagger.responses[500] = {
-            description: 'Internal server error',
-            schema: {
-                err: 1,
-                message: 'An error occurred while processing your request'
-            }
-        }
-    */
-)
-
 router.post(
     "/create",
     verify_role(["customer"]),
@@ -235,7 +148,66 @@ router.post(
 );
 
 router.get(
+    "/customer",
+    verify_role(["customer"]),
+    controllers.getBookingController
+    /*
+        #swagger.description = 'Get all bookings for the authenticated customer.'
+        #swagger.summary = 'Get bookings'
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.parameters['page'] = { description: 'Page number' }
+        #swagger.parameters['limit'] = { description: 'Number of items per page' }
+        #swagger.parameters['order'] = {
+            description: 'Order by start_time, end_time, total_price, createdAt, updatedAt',
+            '@schema': {
+                type: 'array',
+                items: {
+                    type: 'string',
+                    pattern: '^(start_time|end_time|total_price|createdAt|updatedAt|asc|desc)$',
+                    example: 'start_time'
+                }
+            },
+            required: false,
+            explode: true
+        }
+        #swagger.parameters['status'] = {
+            description: 'Filter by booking status (Current, Upcoming, Check-out, Completed, Cancelled)',
+            type: 'string',
+            pattern: '^(Current|Upcoming|Check-out|Completed|Cancelled)$',
+            required: false
+        }
+        #swagger.responses[200] = {
+            description: 'Bookings retrieved successfully',
+            schema: {
+                err: 0,
+                message: 'Bookings retrieved successfully',
+                data: [
+                    {
+                        booking_id: '123e4567-e89b-12d3-a456-426614174000',
+                        workspace_id: '123e4567-e89b-12d3-a456-426614174000',
+                        start_time: '2023-10-01T14:00:00Z',
+                        end_time: '2023-10-01T16:00:00Z',
+                        total_price: 50.00
+                    }
+                ]
+            }
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error',
+            schema: {
+                err: 1,
+                message: 'An error occurred while processing your request'
+            }
+        }
+    */
+);
+
+
+router.get(
     "/get",
+    verify_token,
     verify_role(["admin", "manager", "staff"]),
     controllers.getAllBookingsController
     /*
@@ -277,63 +249,6 @@ router.get(
         #swagger.security = [{
             "apiKeyAuth": []
         }]
-        #swagger.responses[200] = {
-            description: 'Bookings retrieved successfully',
-            schema: {
-                err: 0,
-                message: 'Bookings retrieved successfully',
-                data: [
-                    {
-                        booking_id: '123e4567-e89b-12d3-a456-426614174000',
-                        workspace_id: '123e4567-e89b-12d3-a456-426614174000',
-                        start_time: '2023-10-01T14:00:00Z',
-                        end_time: '2023-10-01T16:00:00Z',
-                        total_price: 50.00
-                    }
-                ]
-            }
-        }
-        #swagger.responses[500] = {
-            description: 'Internal server error',
-            schema: {
-                err: 1,
-                message: 'An error occurred while processing your request'
-            }
-        }
-    */
-);
-
-router.get(
-    "/customer",
-    verify_role(["customer"]),
-    controllers.getBookingController
-    /*
-        #swagger.description = 'Get all bookings for the authenticated customer.'
-        #swagger.summary = 'Get bookings'
-        #swagger.security = [{
-            "apiKeyAuth": []
-        }]
-        #swagger.parameters['page'] = { description: 'Page number' }
-        #swagger.parameters['limit'] = { description: 'Number of items per page' }
-        #swagger.parameters['order'] = {
-            description: 'Order by start_time, end_time, total_price, createdAt, updatedAt',
-            '@schema': {
-                type: 'array',
-                items: {
-                    type: 'string',
-                    pattern: '^(start_time|end_time|total_price|createdAt|updatedAt|asc|desc)$',
-                    example: 'start_time'
-                }
-            },
-            required: false,
-            explode: true
-        }
-        #swagger.parameters['status'] = {
-            description: 'Filter by booking status (Current, Upcoming, Check-out, Completed, Cancelled)',
-            type: 'string',
-            pattern: '^(Current|Upcoming|Check-out|Completed|Cancelled)$',
-            required: false
-        }
         #swagger.responses[200] = {
             description: 'Bookings retrieved successfully',
             schema: {
@@ -928,4 +843,95 @@ router.post(
         }
     */
 );
+
+router.get(
+    "/total",
+    verify_role(["admin", "manager"]),
+    controllers.getTotalBookingController
+    /*
+        #swagger.description = 'Get total bookings.'
+        #swagger.summary = 'Get bookings'
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.responses[200] = {
+            description: 'Bookings retrieved successfully',
+            schema: {
+                err: 0,
+                message: 'Bookings retrieved successfully',
+                data: {
+                    total: 10
+                }
+            }
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error',
+            schema: {
+                err: 1,
+                message: 'An error occurred while processing your request'
+            }
+        }
+    */
+);
+
+router.get(
+    "/total-price-of-all-booking-in-month",
+    verify_role(["admin", "manager"]),
+    controllers.getTotalPricesInMonthController
+    /*
+        #swagger.description = 'Get total bookings.'
+        #swagger.summary = 'Get bookings'
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.responses[200] = {
+            description: 'Bookings retrieved successfully',
+            schema: {
+                err: 0,
+                message: 'Bookings retrieved successfully',
+                data: {
+                    total: 10
+                }
+            }
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error',
+            schema: {
+                err: 1,
+                message: 'An error occurred while processing your request'
+            }
+        }
+    */
+);
+
+router.get(
+    "/5recent",
+    verify_role(["admin", "manager"]),
+    controllers.get5RecentBookingController
+    /*
+        #swagger.description = 'Get total bookings.'
+        #swagger.summary = 'Get bookings'
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.responses[200] = {
+            description: 'Bookings retrieved successfully',
+            schema: {
+                err: 0,
+                message: 'Bookings retrieved successfully',
+                data: {
+                    total: 10
+                }
+            }
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error',
+            schema: {
+                err: 1,
+                message: 'An error occurred while processing your request'
+            }
+        }
+    */
+);
+
 module.exports = router;

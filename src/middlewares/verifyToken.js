@@ -25,7 +25,9 @@ export const verify_token = (req, res, next) => {
     });
 };
 
-export const verify_role = (allowedRoles) => {
+export const verify_role = (roles) => {
+    const allowedRoles = [...roles]; // Copy mảng roles để tránh shared reference
+
     return (req, res, next) => {
         console.log(allowedRoles);
 
@@ -39,7 +41,11 @@ export const verify_role = (allowedRoles) => {
         const userRole = role_ids[req.user.role_id];
 
         if (!userRole || !allowedRoles.includes(userRole)) {
-            return notAuthorized("Unauthorized", res, false);
+            return notAuthorized(
+                `Access denied. Required roles: ${allowedRoles.join(", ")}`,
+                res,
+                false
+            );
         } else {
             next();
         }

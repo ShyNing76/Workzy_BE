@@ -93,6 +93,7 @@ export const getAllBookingsService = ({
                 Completed: ["completed"],
                 Cancelled: ["cancelled"],
             };
+            console.log("🚀 ~ newPromise ~ tabStatus:", tabStatus);
 
             const statusCondition = status
                 ? {
@@ -141,6 +142,7 @@ export const getAllBookingsService = ({
                 attributes: { exclude: ["createdAt", "updatedAt"] },
                 subquery: false,
             });
+            console.log("🚀 ~ newPromise ~ tabStatus:", tabStatus);
 
             if (!bookings || bookings.count === 0)
                 return reject("No bookings found");
