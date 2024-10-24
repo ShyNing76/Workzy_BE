@@ -82,33 +82,40 @@ import { Op } from "sequelize";
 // totalPricesInMonth();
 
 function getTotalBookingByManager() {
-    const totalAmenities = db.Amenity.count({
-        where: {
-            status: "active",
-        },
-        include:[
+    const rating = db.Review.findAll({
+        attributes: ["rating"],
+        limit: 5,
+        order: [["rating", "DESC"]], // Changed 'Order' to 'order'
+        include: [
             {
-                model: db.AmenitiesWorkspace,
+                model: db.Booking,
+                attributes: ["booking_id"],
                 required: true,
             },
-            {
-                model: db.Workspace,
-                required: true,
-            }
-        ]
-    })
-            .then(result => {
-                console.log("Total Amenities: " + result);
-                for (let i = 0; i < result.length; i++) {
-                    console.log("Amenity Name: " + result[i].amenity_name);
-                    console.log("Original Price: " + result[i].original_price);
-                    console.log("Rent Price: " + result[i].rent_price);
-                    console.log("Workspace Name: " + result[i].Workspace.workspace_name);
-                }
+        ],
+    }).then(ratings => { // Added .then to handle the resolved promise
+        const bookings = db.Booking.findAll({
+            where: {
+                booking_id: { [Op.in]: ratings.map(r => r.booking_id) } // Use 'ratings' instead of 'rating'
+            },
+            attributes: ["workspace_id"],
+        }).then(bookings => { // Added .then to handle the resolved promise
+            const top5WorkspaceReview = db.Workspace.count({
+                where: {
+                    workspace_id: { [Op.in]: bookings.map(b => b.workspace_id) }, // Use 'bookings' instead of 'bookings'
+                    status: "active",
+                },
+                limit: 5,
             })
-            .catch(error => {
-                console.error("Error fetching total booking: ", error);
+            .then(result => {
+                console.log("Total Workspaces not in bookings: " + result);
+            }).catch(error => {
+                console.error("Error while fetching total workspaces:", error);
             });
+        });
+    }).catch(error => {
+        console.error("Error while fetching ratings:", error); // Added error handling for ratings
+    });
 }
 
 getTotalBookingByManager();
