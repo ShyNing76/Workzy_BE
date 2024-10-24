@@ -67,7 +67,7 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
                 err: 0,
                 message: "Bookings found",
                 data: {
-                    count: filteredBookings.length,
+                    count: bookings.count,
                     rows: filteredBookings,
                 },
             });
