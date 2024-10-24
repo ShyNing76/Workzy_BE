@@ -151,9 +151,10 @@ export const getAllStaffService = ({
                     );
                 }
             });
+            if(!staffs) return reject("No Staff Exist");
             resolve({
-                err: staffs.count > 0 ? 0 : 1,
-                message: staffs.count > 0 ? "Got" : "No Staff Exist",
+                err: 0,
+                message: "Got",
                 data: staffs,
             });
         } catch (error) {
@@ -677,13 +678,16 @@ export const getAmenitiesByBookingIdService = (booking_id) =>
         }
     });
 
-export const createBrokenAmenitiesBookingService = (amenity_name, booking_id) =>
+export const createBrokenAmenitiesBookingService = (amenities_quantities, booking_id) =>
     new Promise(async (resolve, reject) => {
         const t = await db.sequelize.transaction();
         try {
+            const amenitiesName = amenities_quantities.map((amenity) => {
+                return amenity.amenity_name;
+            });
             const amenities = await db.Amenity.findAll({
                 where: {
-                    amenity_name: { [Op.in]: amenity_name },
+                    amenity_name: { [Op.in]: amenitiesName },
                     status: "active",
                 },
                 attributes: ["amenity_id", "depreciation_price"],
@@ -694,7 +698,6 @@ export const createBrokenAmenitiesBookingService = (amenity_name, booking_id) =>
             const total_broken_price = amenities.reduce((total, amenity) => {
                 return parseInt(total) + parseInt(amenity.depreciation_price);
             }, 0);
-            console.log(total_broken_price);
             const booking = await db.Booking.findOne({
                 where: {
                     booking_id: booking_id,
@@ -715,7 +718,16 @@ export const createBrokenAmenitiesBookingService = (amenity_name, booking_id) =>
             if (booking.BookingStatuses[0].status === "cancelled")
                 return reject("Booking status is cancelled");
 
+            const quantities = amenities_quantities.map((amenity) => {
+                return amenity.quantity;
+            });
+
+            const amenitiesData = amenities_quantities.map((amenity, index) => (
+                `${amenity.amenity_name}: ${quantities[index]}`
+            )).join('|'); 
+            booking.total_price = parseInt(total_broken_price) + parseInt(booking.total_price);
             booking.total_broken_price = total_broken_price;
+            booking.report_damage_ameninites = amenitiesData;
             await booking.save({ transaction: t });
 
             await db.BookingStatus.create(
@@ -737,3 +749,4 @@ export const createBrokenAmenitiesBookingService = (amenity_name, booking_id) =>
             reject(error);
         }
     });
+
