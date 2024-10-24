@@ -577,13 +577,12 @@ export const paypalCheckoutAmenitiesService = ({
             const quantities = addAmenities.map((amenity) => amenity.quantity);
             console.log("🚀 ~ newPromise ~ quantities:", quantities);
 
-            const amenitiesMap = addAmenities.addAmenities.reduce(
-                (map, amenity) => {
-                    map[amenity.amenity_id] = amenity.quantity;
-                    return map;
-                },
-                {}
-            );
+            const amenitiesMap = addAmenities.reduce((map, amenity) => {
+                map[amenity.amenity_id] = amenity.quantity;
+                return map;
+            }, {});
+
+            console.log("🚀 ~ newPromise ~ amenitiesMap:", amenitiesMap);
 
             // Check if all amenities are valid
             const amenities = await db.Amenity.findAll({
@@ -595,6 +594,8 @@ export const paypalCheckoutAmenitiesService = ({
             });
             if (amenities.length === 0)
                 return reject("No valid amenities found");
+
+            console.log(amenities);
 
             // Calculate the total amount for all items correctly
             const totalAmenitiesPrice = amenities.reduce((total, amenity) => {
