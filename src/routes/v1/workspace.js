@@ -24,6 +24,50 @@ router.get("/total", verify_token, verify_role(["admin", "manager"]), controller
      */
     );
 
+router.get("/total-workspace-not-in-booking", 
+    verify_token, 
+    verify_role(["manager"]), 
+    controllers.getTotalWorkspaceNotInBookingController
+/*
+        #swagger.description = 'Endpoint to get total workspaces not in booking.'
+        #swagger.summary = 'get total workspaces not in booking.'
+        #swagger.responses[200] = {
+            description: 'toatl Workspaces get successfully.'
+        }
+        #swagger.responses[404] = {
+            description: 'Workspace not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
+router.get("/top5ratingworkspace", 
+    verify_token, 
+    verify_role(["manager"]), 
+    controllers.getTop5WorkspaceReviewController
+    /*
+        #swagger.description = 'Endpoint to get top 5 rating workspace.'
+        #swagger.summary = 'get top 5 rating workspace.'
+        #swagger.responses[200] = {
+            description: 'toatl Workspaces get successfully.'
+        }
+        #swagger.responses[404] = {
+            description: 'Workspace not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+)
+
 router.post(
     "/",
     verify_token,
@@ -302,7 +346,7 @@ router.get(
      */
 );
 router.put(
-    "/assign/:id",
+    "/assign/:building_id",
     verify_token,
     controllers.assignWorkspaceToBuildingController
     /*
@@ -315,19 +359,70 @@ router.put(
                     schema: {
                         type: 'object',
                         properties: {
-                            building_id: {
-                                type: 'string',
-                                format: 'uuid',
-                                example: '621ca0c8-e3ad-4bd8-9df5-eafe998b5b04'
+                            workspace_ids: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    format: 'uuid',
+                                    example: '621ca0c8-e3ad-4bd8-9df5-eafe998b5b04'
+                                },
+                                description: 'Array of workspace IDs'
                             }
                         },
-                        required: ['building_id']
+                        required: ['workspace_ids']
                     }
                 }
             }
         }
         #swagger.responses[200] = {
             description: 'Workspace assigned successfully.'
+        }
+        #swagger.responses[400] = {
+            description: 'Invalid data.'
+        }
+        #swagger.responses[404] = {
+            description: 'Workspace not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
+router.put(
+    "/unassign/:building_id",
+    verify_token,
+    controllers.unassignWorkspaceToBuildingController
+    /*
+        #swagger.description = 'Endpoint to unallocated a workspace from building.'
+        #swagger.summary = 'Unassign a workspace from building.' 
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            workspace_ids: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    format: 'uuid',
+                                    example: '621ca0c8-e3ad-4bd8-9df5-eafe998b5b04'
+                                },
+                                description: 'Array of workspace IDs'
+                            }
+                        },
+                        required: ['workspace_ids']
+                    }
+                }
+            }
+        }
+        #swagger.responses[200] = {
+            description: 'Workspace unallocated successfully.'
         }
         #swagger.responses[400] = {
             description: 'Invalid data.'

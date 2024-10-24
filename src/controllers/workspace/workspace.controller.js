@@ -114,17 +114,37 @@ export const getWorkspaceByIdController = async (req, res) => {
 export const assignWorkspaceToBuildingController = async (req, res) => {
     try {
         const error = Joi.object({
-            id: Joi.required(),
+            workspace_ids: Joi.array().required(),
             building_id: Joi.required(),
         }).validate({
-            id: req.params.id,
-            building_id: req.body.building_id,
+            workspace_ids: req.body.workspace_ids,
+            building_id: req.params.building_id,
         }).error;
         if (error) return badRequest(res, error);
-        const response = await services.assignWorkspacetoBuildingService(
-            req.params.id,
-            req.body.building_id
-        );
+        const response = await services.assignWorkspacetoBuildingService({
+            building_id: req.params.building_id,
+            workspace_ids: req.body.workspace_ids
+        });
+        return ok(res, response);
+    } catch (error) {
+        internalServerError(res, error);
+    }
+};
+
+export const unassignWorkspaceToBuildingController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            workspace_ids: Joi.array().required(),
+            building_id: Joi.required(),
+        }).validate({
+            workspace_ids: req.body.workspace_ids,
+            building_id: req.params.building_id,
+        }).error;
+        if (error) return badRequest(res, error);
+        const response = await services.unassignWorkspacetoBuildingService({
+            building_id: req.params.building_id,
+            workspace_ids: req.body.workspace_ids
+        });
         return ok(res, response);
     } catch (error) {
         internalServerError(res, error);
@@ -139,3 +159,21 @@ export const getTotalWorkspaceController = async (req, res) => {
         internalServerError(res, error)
     }
 };
+
+export const getTotalWorkspaceNotInBookingController = async (req, res) => {
+    try {
+        const response = await services.getTotalWorkspaceNotInBookingService();
+        return ok(res, response);
+    } catch (error) {
+        internalServerError(res, error);
+    }
+}
+
+export const getTop5WorkspaceReviewController = async (req, res) => {
+    try {
+        const response = await services.getTop5WorkspaceReviewService();
+        return ok(res, response);
+    } catch (error) {
+        internalServerError(res, error);
+    }
+}

@@ -469,7 +469,7 @@ export const get5RecentBookingService = (tokenUser) =>
             let bookings = [];
             if(tokenUser.role_id === 1) {
                 bookings = await db.Booking.findAll({
-                attributes: ["booking_id", "start_time_date", "end_time_date", "total_price"],
+                attributes: ["booking_id", "start_time_date", "end_time_date", "total_price", "createdAt"],
                 order: [["createdAt", "DESC"]],
                 limit: 5,
                 include: [
@@ -483,7 +483,7 @@ export const get5RecentBookingService = (tokenUser) =>
                     },
                     {
                         model: db.Customer,
-                        attributes: [],
+                        attributes: ["user_id"],
                         include: [
                             {
                                 model: db.User,

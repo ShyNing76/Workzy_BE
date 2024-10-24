@@ -229,6 +229,12 @@ export const getTotalUserService = (tokenUser) =>
                     },
                 });
             } else if(tokenUser.role_id === 2){ {
+                staff = await db.User.count({
+                    where: {
+                        role_id: 3,
+                        status: "active",
+                    },
+                });      
                 customer = await db.User.count({
                     where: {
                         role_id: 4,
@@ -245,6 +251,7 @@ export const getTotalUserService = (tokenUser) =>
                     staff: staff? staff : 0,
                     customer : customer? customer : 0,
                 } : {
+                    staff: staff? staff : 0,
                     customer : customer? customer : 0,
                 },
             });
