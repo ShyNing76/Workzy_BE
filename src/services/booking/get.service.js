@@ -103,7 +103,7 @@ export const getAllBookingsService = ({
                         model: db.Workspace,
                         as: "Workspace",
                         where: building_id ? { building_id } : {},
-                        attributes: { exclude: ["createdAt", "updatedAt"] },
+                        attributes: ["workspace_name", "workspace_type_id"],
                     },
                     {
                         model: db.Customer,
@@ -127,7 +127,6 @@ export const getAllBookingsService = ({
                 attributes: { exclude: ["createdAt", "updatedAt"] },
                 subquery: false,
             });
-            console.log("🚀 ~ newPromise ~ tabStatus:", tabStatus);
 
             if (!bookings || bookings.count === 0)
                 return reject("No bookings found");
