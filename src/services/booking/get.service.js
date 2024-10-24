@@ -61,9 +61,6 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
                         right: true,
                     },
                 ],
-                attributes: {
-                    exclude: ["createdAt", "updatedAt"],
-                },
                 order: [handleSortOrder(order, "created_at")],
                 distinct: true,
                 subquery: false,
@@ -92,11 +89,10 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
                 );
             });
 
-            const paginatedBookings = filteredBookings
-                .slice(
-                    handleOffset(page, limit),
-                    handleOffset(page, limit) + handleLimit(limit)
-                );
+            const paginatedBookings = filteredBookings.slice(
+                handleOffset(page, limit),
+                handleOffset(page, limit) + handleLimit(limit)
+            );
 
             return resolve({
                 err: 0,
