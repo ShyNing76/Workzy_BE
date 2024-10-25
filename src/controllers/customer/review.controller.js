@@ -58,7 +58,7 @@ export const getReviewByIdController = async (req, res) => {
         return ok(res, response);
     } catch (error) {
         if (error === "No Review Found") return badRequest(res, error);
-        innerServerError(res, error);
+        internalServerError(res, error);
     }
 }
 
@@ -74,6 +74,6 @@ export const getReviewByBookingIdController = async (req, res) => {
         return ok(res, response);
     } catch (error) {
         if (error === "No Review Found") return badRequest(res, error);
-        innerServerError(res, error);
+        internalServerError(res, error);
     }
 }

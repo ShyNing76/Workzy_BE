@@ -200,11 +200,7 @@ export const getReviewByBookingIdService = (booking_id, user_id) =>
             });
 
             if (!review) return reject("No Review Found");
-
-            delete review.Booking.Customer;
-            delete review.Booking;
-
-            review = resolve({
+            resolve({
                 err: 0,
                 message: "Got",
                 data: review,

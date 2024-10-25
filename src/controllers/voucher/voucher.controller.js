@@ -79,9 +79,9 @@ export const checkVoucherController = async (req, res) => {
     try {
         const error = Joi.object({
             voucher_code: Joi.string().required()
-        }).validate(req.body).error;
+        }).validate({voucher_code: req.params.voucher_code}).error;
         if(error) return badRequest(res, error);
-        const response = await services.checkVoucherService(req.body);
+        const response = await services.getVoucherByCodeService(req.params.voucher_code);
         return ok(res, response);
     } catch (error) {
         if(error === "Voucher not found") return badRequest(res, error);

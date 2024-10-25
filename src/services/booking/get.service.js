@@ -420,6 +420,36 @@ export const getTimeBookingService = ({ workspace_id, date }) =>
         }
     });
 
+export const getRevenueIn8daysService = (tokenUser, building_id) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const currentDay = new Date().getDate();
+
+            const startDate = new Date(new Date().setDate(currentDay - 7)).setHours(0, 0, 0, 0);
+            const endDate = new Date(new Date().setDate(currentDay)).setHours(23, 59, 59, 999);
+            const revenue = await db.Booking.findAll({
+                where: {
+                    createdAt: {
+                        [db.Sequelize.Op.between]: [startDate, endDate],
+                    },
+                },
+                include: [
+                    {
+                        model: db.BookingStatus,
+                        attributes: [],
+                        where: {
+                            status: "completed",
+                        },
+                        required: true,
+                    },
+                ],
+            });
+        } catch (error) {
+            console.error(error);
+            return reject(error);
+        }
+    });
+
 // Lấy tổng doanh thu trong tháng
 export const getTotalPricesInMonthService = (tokenUser, building_id) =>
     new Promise(async (resolve, reject) => {

@@ -82,25 +82,21 @@ import { Op } from "sequelize";
 // totalPricesInMonth();
 
 function getTotalBookingByManager() {
-    const amenities = db.BookingAmenities.findAll({
-        where: { booking_id: "d8e9c5d0-55f3-47ac-a1f6-58d224dd80ff" },
-        attributes: ["amenity_id", "quantity", "price", "total_price"],
-        include: [
-            {
-                model: db.Amenity,
-                attributes: ["amenity_name"],
-            },
-        ],
-    })
-    .then((result) => {
-        for (let i = 0; i < result.length; i++) {
-            console.log("Amenity: " + result[i].Amenity.amenity_name);
-            console.log("Quantity: " + result[i].quantity);
-            console.log("Price: " + result[i].price);
-            console.log("Total Price: " + result[i].total_price);
-        }
-    }).catch((error) => {
-            console.error("Error fetching total price: ", error);
-        });
-    }
+    const currentDate = new Date(); // Lưu trữ ngày hiện tại một lần
+
+    const startDate = new Date(currentDate); // Tạo một đối tượng Date mới từ currentDate
+    startDate.setDate(currentDate.getDate() - 7); // Giảm 7 ngày
+    startDate.setHours(0, 0, 0, 0); // Đặt giờ, phút, giây và mili giây về 0
+
+    const endDate = new Date(currentDate); // Tạo một đối tượng Date mới từ currentDate
+    endDate.setHours(23, 59, 59, 999); // Đặt giờ, phút, giây và mili giây cho ngày kết thúc
+
+    // Chuyển đổi sang múi giờ Việt Nam
+    const options = { timeZone: 'Asia/Ho_Chi_Minh', timeZoneName: 'short' };
+    const startDateVN = startDate.toLocaleString('vi-VN', options);
+    const endDateVN = endDate.toLocaleString('vi-VN', options);
+
+    console.log("Start Date: " + startDateVN);
+    console.log("End Date: " + endDateVN);
+}
 getTotalBookingByManager();
