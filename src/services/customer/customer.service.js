@@ -307,27 +307,11 @@ export const getNotificationsService = ({ page, limit, order, ...query }) =>
 export const getPointService = (tokenUser) =>
     new Promise(async (resolve, reject) => {
         try {
-            const user = await db.User.findOne({
+            const user = await db.Customer.findOne({
                 where: {
                     user_id: tokenUser.user_id,
                 },
-                attributes: [],
-                include: [
-                    {
-                        model: db.Customer,
-                        attributes: {
-                            exclude: [
-                                "customer_id",
-                                "user_id",
-                                "createdAt",
-                                "updatedAt",
-                            ],
-                        },
-                        required: true,
-                    },
-                ],
-                raw: true,
-                nest: true,
+                attributes: ["point"],
             });
 
             if (!user) {
@@ -337,7 +321,7 @@ export const getPointService = (tokenUser) =>
             resolve({
                 err: 0,
                 message: "Get point successful",
-                data: user.Customer.point,
+                data: user.point,
             });
         } catch (error) {
             reject(error);
