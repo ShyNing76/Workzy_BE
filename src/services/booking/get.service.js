@@ -446,7 +446,7 @@ export const getRevenueIn8DaysService = (tokenUser, building_id) =>
             let totalRevenue = {};
             let result = [];
             if(tokenUser.role_id === 1) {
-            const revenue = await db.Booking.findAll({
+            const bookings = await db.Booking.findAll({
                 where: {
                     createdAt: { 
                         [db.Sequelize.Op.between]: [formattedEightDaysAgo, formattedCurrentDate],
@@ -462,7 +462,7 @@ export const getRevenueIn8DaysService = (tokenUser, building_id) =>
                     },
                 ],
             });
-            totalRevenue = revenue.reduce((acc, booking) => {
+            totalRevenue = bookings.reduce((acc, booking) => {
                 const date = moment(booking.createdAt).format('YYYY-MM-DD'); // Định dạng ngày
                 if (!acc[date]) {
                     acc[date] = 0;
@@ -493,12 +493,12 @@ export const getRevenueIn8DaysService = (tokenUser, building_id) =>
             const isManagerBelongToBuilding = await db.Building.findOne({
                 where: {
                     building_id: building_id,
-                    manager_id: manager.manager_id,
+                    manager_id: manager.Manager.manager_id,
                 },
             });
             if (!isManagerBelongToBuilding)
                 return reject("Manager does not belong to this building");
-            const revenue = await db.Booking.findAll({
+            const bookings = await db.Booking.findAll({
                 where: {
                     createdAt: { 
                         [db.Sequelize.Op.between]: [formattedEightDaysAgo, formattedCurrentDate],
@@ -522,6 +522,19 @@ export const getRevenueIn8DaysService = (tokenUser, building_id) =>
                     },
                 ],
             });
+            totalRevenue = bookings.reduce((acc, booking) => {
+                const date = moment(booking.createdAt).format('YYYY-MM-DD'); // Định dạng ngày
+                if (!acc[date]) {
+                    acc[date] = 0;
+                }
+                acc[date] += parseInt(booking.total_price); // Cộng dồn total_price
+                return acc;
+            }, {});
+            result = Object.entries(totalRevenue).map(([date, total_price]) => ({
+                date,
+                total_price,
+            })
+            )
         }
         resolve({
             err: 0,
