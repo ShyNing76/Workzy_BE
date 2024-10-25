@@ -6,6 +6,7 @@ export const createBookingService = (data) =>
     new Promise(async (resolve, reject) => {
         const t = await db.sequelize.transaction();
         try {
+            console.log(data);
             const [customer, workspace, bookingType] = await Promise.all([
                 db.Customer.findOne({ where: { user_id: data.user_id } }),
                 db.Workspace.findOne({
@@ -14,9 +15,9 @@ export const createBookingService = (data) =>
                         status: "active",
                     },
                 }),
-                db.BookingType.findOne({ where: { type: data.type } }),
+                db.BookingType.findOne({ where: { type: data.type }, raw: true, nest: true }),
             ]);
-
+            
             if (!customer || !workspace || !bookingType) {
                 return reject(
                     `${
@@ -28,7 +29,6 @@ export const createBookingService = (data) =>
                     } not found`
                 );
             }
-
             const checkAvailability = await checkRoomAvailability({
                 workspace_id: workspace.workspace_id,
                 start_time: data.start_time,
@@ -40,12 +40,21 @@ export const createBookingService = (data) =>
                     "Workspace is already booked for the selected time period"
                 );
             }
-
+            const voucher = await db.Voucher.findOne({
+                where: {
+                    voucher_id: data.voucher_id,
+                },
+            });
+            if(voucher){
+                voucher.quantity = parseInt(voucher.quantity) - 1;
+                await voucher.save({ transaction: t });
+            }
             const booking = {
                 booking_id: v4(),
                 customer_id: customer.customer_id,
                 booking_type_id: bookingType.booking_type_id,
                 workspace_id: workspace.workspace_id,
+                voucher_id: voucher ? voucher.voucher_id : null,
                 workspace_price:
                     bookingType.type === "Hourly"
                         ? workspace.price_per_hour
@@ -56,7 +65,6 @@ export const createBookingService = (data) =>
                 total_price: data.total_price,
                 start_time_date: data.start_time,
                 end_time_date: data.end_time,
-                voucher_id: data.voucher_id,
             };
 
             const bookingStatus = {
@@ -68,7 +76,7 @@ export const createBookingService = (data) =>
                 notification_id: v4(),
                 customer_id: customer.customer_id,
                 type: "booking",
-                description: `Booking confirmed for workspace ${workspace.workspace_n}`,
+                description: `Booking confirmed for workspace ${workspace.workspace_name}`,
             };
 
             await await Promise.all([

@@ -231,6 +231,17 @@ router.get(
             type: 'string',
             format: 'uuid',
         }
+        #swagger.parameters['bookingType'] = {
+            in: 'query',
+            description: 'Filter by bookingType',
+            type: 'enum',
+            enum: ['Hourly', 'Daily', 'Monthly'],
+        }
+        #swagger.parameters['location'] = {
+            in: 'query',
+            description: 'Filter by location',
+            type: 'enum',
+        }
         #swagger.parameters['page'] = { description: 'Page number' }
         #swagger.parameters['limit'] = { description: 'Number of items per page' }
         #swagger.parameters['order'] = {
