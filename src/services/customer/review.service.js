@@ -19,6 +19,12 @@ export const createReviewService = async (data) =>
                         order: [["createdAt", "DESC"]],
                         limit: 1,
                     },
+                    {
+                        model: db.Workspace,
+                        as: "Workspace",
+                        attributes: ["workspace_name"],
+                        required: true,
+                    }
                 ],
             });
 
