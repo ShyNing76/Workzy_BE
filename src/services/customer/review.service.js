@@ -161,7 +161,7 @@ export const getReviewByIdService = (review_id) =>
         }
     });
 
-export const getReviewByBookingIdService = (booking_id) =>
+export const getReviewByBookingIdService = (booking_id, user_id) =>
     new Promise(async (resolve, reject) => {
         try {
             const review = await db.Review.findOne({
@@ -171,10 +171,34 @@ export const getReviewByBookingIdService = (booking_id) =>
                 attributes: {
                     exclude: ["createdAt", "updatedAt"],
                 },
+                include: [
+                    {
+                        model: db.Booking,
+                        as: "Booking",
+                        required: true,
+                        attributes: ["booking_id"],
+                        include: [
+                            {
+                                model: db.Customer,
+                                as: "Customer",
+                                attributes: ["user_id"],
+                                required: true,
+                                where: {
+                                    user_id: user_id,
+                                },
+                            },
+                        ],
+                    },
+                ],
                 raw: true,
             });
+
             if (!review) return reject("No Review Found");
-            resolve({
+
+            delete review.Booking.Customer;
+            delete review.Booking;
+
+            review = resolve({
                 err: 0,
                 message: "Got",
                 data: review,
