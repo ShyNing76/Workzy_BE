@@ -118,6 +118,31 @@ export const getTimeBookingController = async (req, res) => {
     }
 };
 
+export const getRevenueIn8DaysController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            building_id: Joi.string().uuid(),
+        }).validate({
+            building_id: req.query.building_id,
+        }).error;
+        if (error) return badRequest(res, error.details[0].message);
+        const revenue = await services.getRevenueIn8DaysService(
+            req.user,
+            req.query.building_id
+        );
+        return ok(res, revenue);
+    } catch (err) {
+        if (
+            err === "Building_id is missing" ||
+            err === "Manager does not belong to this building"
+        )
+            return badRequest(res, err);
+        console.error(err);
+        internalServerError(res);
+    }
+};
+
+
 export const getTotalPricesInMonthController = async (req, res) => {
     try {
         const error = Joi.object({

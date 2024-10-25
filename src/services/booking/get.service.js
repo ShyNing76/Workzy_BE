@@ -434,18 +434,20 @@ export const getTimeBookingService = ({ workspace_id, date }) =>
         }
     });
 
-export const getRevenueIn8daysService = (tokenUser, building_id) =>
+export const getRevenueIn8DaysService = (tokenUser, building_id) =>
     new Promise(async (resolve, reject) => {
         try {
-            const currentDate = new Date(); // Ngày hiện tại
             const eightDaysAgo = new Date(currentDate); // Tạo một bản sao của ngày hiện tại
             eightDaysAgo.setDate(currentDate.getDate() - 8); // Lấy ngày 8 ngày trước
             eightDaysAgo.setHours(0, 0, 0, 0); // Đặt giờ, phút, giây và mili giây về 00:00:00.000
             const formattedEightDaysAgo = moment(eightDaysAgo).format("YYYY-MM-DD HH:mm:ss.SSS Z"); // Định dạng theo yêu cầu
-            const revenue = await db.Booking.findAll({
+            const formattedCurrentDate = moment(currentDate).format("YYYY-MM-DD HH:mm:ss.SSS Z"); // Định dạng theo yêu cầu
+            let revenue = {};
+            if(tokenUser.role_id === 1) {
+            revenue = db.Booking.findAll({
                 where: {
-                    createdAt: {
-                        [db.Sequelize.Op.lte]: formattedEightDaysAgo,
+                    createdAt: { 
+                        [db.Sequelize.Op.between]: [formattedEightDaysAgo, formattedCurrentDate],
                     },
                 },
                 include: [
@@ -455,10 +457,62 @@ export const getRevenueIn8daysService = (tokenUser, building_id) =>
                         where: {
                             status: "completed",
                         },
-                        required: true,
                     },
                 ],
             });
+        } else if(tokenUser.role_id === 2) {
+            if (!building_id) return reject("Building_id is missing");
+            const manager = await db.User.findOne({
+                where: {
+                    user_id: tokenUser.user_id,
+                },
+                attributes: ["user_id"],
+                include: [
+                    {
+                        model: db.Manager,
+                        attributes: ["manager_id"],
+                    },
+                ],
+            });
+            if (!manager) return reject("Manager is not exist");
+            const isManagerBelongToBuilding = await db.Building.findOne({
+                where: {
+                    building_id: building_id,
+                    manager_id: manager.manager_id,
+                },
+            });
+            if (!isManagerBelongToBuilding)
+                return reject("Manager does not belong to this building");
+            revenue = db.Booking.findAll({
+                where: {
+                    createdAt: { 
+                        [db.Sequelize.Op.between]: [formattedEightDaysAgo, formattedCurrentDate],
+                    },
+                },
+                include: [
+                    {
+                        model: db.BookingStatus,
+                        attributes: [],
+                        where: {
+                            status: "completed",
+                        },
+                    },
+                    {
+                        model: db.Workspace,
+                        required: false,
+                        attributes: [],
+                        where: {
+                            building_id: building_id,
+                        },
+                    },
+                ],
+            });
+        }
+        resolve({
+            err: 0,
+            message: "Revenue found",
+            data: revenue,
+        });
         } catch (error) {
             console.error(error);
             return reject(error);

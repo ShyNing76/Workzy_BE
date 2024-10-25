@@ -83,10 +83,32 @@ import { Op } from "sequelize";
 
 function getTotalBookingByManager() {
     const currentDate = new Date(); // Ngày hiện tại
-    const eightDaysAgo = new Date(currentDate); // Tạo một bản sao của ngày hiện tại
-    eightDaysAgo.setDate(currentDate.getDate() - 8); // Lấy ngày 8 ngày trước
-    eightDaysAgo.setHours(0, 0, 0, 0); // Đặt giờ, phút, giây và mili giây về 00:00:00.000
-    const formattedDate = moment(eightDaysAgo).format("YYYY-MM-DD HH:mm:ss.SSS Z"); // Định dạng theo yêu cầu
-    console.log("Ngày 8 ngày trước (00:00): " + formattedDate); // In ra ngày đã định dạng
+            const eightDaysAgo = new Date(currentDate); // Tạo một bản sao của ngày hiện tại
+            eightDaysAgo.setDate(currentDate.getDate() - 8); // Lấy ngày 8 ngày trước
+            eightDaysAgo.setHours(0, 0, 0, 0); // Đặt giờ, phút, giây và mili giây về 00:00:00.000
+            const formattedEightDaysAgo = moment(eightDaysAgo).format("YYYY-MM-DD HH:mm:ss.SSS Z"); // Định dạng theo yêu cầu
+            const formattedCurrentDate = moment(currentDate).format("YYYY-MM-DD HH:mm:ss.SSS Z"); // Định dạng theo yêu cầu
+            const revenue = db.Booking.findAll({
+                where: {
+                    createdAt: { 
+                        [db.Sequelize.Op.between]: [formattedEightDaysAgo, formattedCurrentDate],
+                    },
+                },
+                include: [
+                    {
+                        model: db.BookingStatus,
+                        attributes: [],
+                        where: {
+                            status: "completed",
+                        },
+                    },
+                ],
+            }).then(result => {
+                for (let i = 0; i < result.length; i++) {
+                    console.log("Booking: " + result[i].total_price);
+            }}
+            ).catch(error => {
+                console.error("Error while fetching booking:", error);
+            });
 }
 getTotalBookingByManager();
