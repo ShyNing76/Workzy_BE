@@ -82,12 +82,12 @@ import { Op } from "sequelize";
 // totalPricesInMonth();
 
 function getTotalBookingByManager() {
-    const currentDate = new Date(); // Ngày hiện tại
-            const eightDaysAgo = new Date(currentDate); // Tạo một bản sao của ngày hiện tại
-            eightDaysAgo.setDate(currentDate.getDate() - 8); // Lấy ngày 8 ngày trước
-            eightDaysAgo.setHours(0, 0, 0, 0); // Đặt giờ, phút, giây và mili giây về 00:00:00.000
-            const formattedEightDaysAgo = moment(eightDaysAgo).format("YYYY-MM-DD HH:mm:ss.SSS Z"); // Định dạng theo yêu cầu
-            const formattedCurrentDate = moment(currentDate).format("YYYY-MM-DD HH:mm:ss.SSS Z"); // Định dạng theo yêu cầu
+    const currentDate = new Date(); // Lấy ngày hiện tại
+    const eightDaysAgo = new Date(currentDate); // Tạo một bản sao của ngày hiện tại
+    eightDaysAgo.setDate(currentDate.getDate() - 8); // Lấy ngày 8 ngày trước
+    eightDaysAgo.setHours(0, 0, 0, 0); // Đặt giờ, phút, giây và mili giây về 00:00:00.000
+    const formattedEightDaysAgo = moment(eightDaysAgo).toISOString(); // Định dạng theo yêu cầu
+    const formattedCurrentDate = moment(currentDate).toISOString(); // Định dạng theo yêu cầu
             const revenue = db.Booking.findAll({
                 where: {
                     createdAt: { 

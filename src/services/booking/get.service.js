@@ -437,14 +437,16 @@ export const getTimeBookingService = ({ workspace_id, date }) =>
 export const getRevenueIn8DaysService = (tokenUser, building_id) =>
     new Promise(async (resolve, reject) => {
         try {
+            const currentDate = new Date(); // Lấy ngày hiện tại
             const eightDaysAgo = new Date(currentDate); // Tạo một bản sao của ngày hiện tại
             eightDaysAgo.setDate(currentDate.getDate() - 8); // Lấy ngày 8 ngày trước
             eightDaysAgo.setHours(0, 0, 0, 0); // Đặt giờ, phút, giây và mili giây về 00:00:00.000
-            const formattedEightDaysAgo = moment(eightDaysAgo).format("YYYY-MM-DD HH:mm:ss.SSS Z"); // Định dạng theo yêu cầu
-            const formattedCurrentDate = moment(currentDate).format("YYYY-MM-DD HH:mm:ss.SSS Z"); // Định dạng theo yêu cầu
-            let revenue = {};
+            const formattedEightDaysAgo = moment(eightDaysAgo).toISOString(); // Định dạng theo yêu cầu
+            const formattedCurrentDate = moment(currentDate).toISOString(); // Định dạng theo yêu cầu
+            let totalRevenue = {};
+            let result = [];
             if(tokenUser.role_id === 1) {
-            revenue = db.Booking.findAll({
+            const revenue = await db.Booking.findAll({
                 where: {
                     createdAt: { 
                         [db.Sequelize.Op.between]: [formattedEightDaysAgo, formattedCurrentDate],
@@ -460,6 +462,19 @@ export const getRevenueIn8DaysService = (tokenUser, building_id) =>
                     },
                 ],
             });
+            totalRevenue = revenue.reduce((acc, booking) => {
+                const date = moment(booking.createdAt).format('YYYY-MM-DD'); // Định dạng ngày
+                if (!acc[date]) {
+                    acc[date] = 0;
+                }
+                acc[date] += parseInt(booking.total_price); // Cộng dồn total_price
+                return acc;
+            }, {});
+            result = Object.entries(totalRevenue).map(([date, total_price]) => ({
+                date,
+                total_price,
+            })
+            )
         } else if(tokenUser.role_id === 2) {
             if (!building_id) return reject("Building_id is missing");
             const manager = await db.User.findOne({
@@ -483,7 +498,7 @@ export const getRevenueIn8DaysService = (tokenUser, building_id) =>
             });
             if (!isManagerBelongToBuilding)
                 return reject("Manager does not belong to this building");
-            revenue = db.Booking.findAll({
+            const revenue = await db.Booking.findAll({
                 where: {
                     createdAt: { 
                         [db.Sequelize.Op.between]: [formattedEightDaysAgo, formattedCurrentDate],
@@ -511,7 +526,7 @@ export const getRevenueIn8DaysService = (tokenUser, building_id) =>
         resolve({
             err: 0,
             message: "Revenue found",
-            data: revenue,
+            data: result,
         });
         } catch (error) {
             console.error(error);
@@ -755,3 +770,4 @@ export const get5RecentBookingService = (tokenUser, building_id) =>
             reject(error);
         }
     });
+
