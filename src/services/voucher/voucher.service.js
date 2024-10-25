@@ -115,6 +115,20 @@ export const deleteVoucherService = (voucher_id) => new Promise(async (resolve, 
     }
 })
 
+export const getVoucherByCodeService = (voucher_code) => new Promise(async (resolve, reject) => {
+    try {
+        const voucher = await db.Voucher.findOne({where: {voucher_code}});
+        if(!voucher) return reject("Voucher not found");
+        resolve({
+            err: 0,
+            message: "Get voucher by code successfully",
+            data: voucher
+        });
+    } catch (error) {
+        reject(error);
+    }
+})
+
 
 // Lấy tổng số voucher
 export const getTotalVoucherService = () => new Promise(async (resolve, reject) => {
