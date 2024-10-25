@@ -69,7 +69,7 @@ export const updateProfile = (updateFields) =>
                 message: "Update profile successful",
             });
         } catch (error) {
-            console.err(error);
+            console.error(error);
             reject(error);
         }
     });
