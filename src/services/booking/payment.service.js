@@ -327,23 +327,58 @@ export const paypalSuccessService = ({ booking_id, order_id }) =>
             );
             await sendMail(
                 booking.Customer.User.email,
-                "Booking Payment Successful",
+                "Payment Successful",
                 `
-                    <h1>Booking Payment Successful</h1>
-                    <p>Dear ${booking.Customer.User.name},</p>
-                    <p>Your booking has been confirmed with the following details:</p>
-                    <ul>
-                        <li>Booking ID: ${booking.booking_id}</li>
-                        <li>Workspace: ${booking.Workspace.workspace_name}</li>
-                        <li>Start Time: ${new Date(
-                            booking.start_time
-                        ).toLocaleString()}</li>
-                        <li>End Time: ${new Date(
-                            booking.end_time
-                        ).toLocaleString()}</li>
-                        <li>Total Price: $${booking.total_price}</li>
-                    </ul>
-                    <p>Thank you for choosing our service!</p>
+                <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border: 1px solid #eaeaea; border-radius: 10px;">
+                  <!-- Header with logo -->
+                  <div style="text-align: center; margin-bottom: 20px;">
+                    <img src="https://workzy.vercel.app/WORKZY_SMALL_LOGO.png" alt="Workzy Logo" style="width: 120px;">
+                  </div>
+            
+                  <h2 style="text-align: center; color: #28a745; font-size: 24px; margin-bottom: 10px;">Payment Successful</h2>
+                  <p style="text-align: center; font-size: 16px; color: #555;">Dear <strong>${booking.Customer.User.name}</strong>,</p>
+                  <p style="text-align: center; font-size: 16px; color: #555;">Thank you for using Workzy! Your payment has been successfully processed. Below are the details of your booking:</p>
+            
+                  <!-- Booking Details -->
+                  <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); margin-top: 20px;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                      <tr style="background-color: #f7f7f7;">
+                        <td style="padding: 12px; font-weight: bold;">Booking ID:</td>
+                        <td style="padding: 12px;">${booking.booking_id}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 12px; font-weight: bold;">Workspace:</td>
+                        <td style="padding: 12px;">${booking.Workspace.workspace_name}</td>
+                      </tr>
+                      <tr style="background-color: #f7f7f7;">
+                        <td style="padding: 12px; font-weight: bold;">Start Time:</td>
+                        <td style="padding: 12px;">${moment(booking.start_time_date).format("dddd, MMMM Do YYYY, h:mm A")}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 12px; font-weight: bold;">End Time:</td>
+                        <td style="padding: 12px;">${moment(booking.end_time_date).format("dddd, MMMM Do YYYY, h:mm A")}</td>
+                      </tr>
+                      <tr style="background-color: #f7f7f7;">
+                        <td style="padding: 12px; font-weight: bold; color: #28a745;">Total Price:</td>
+                        <td style="padding: 12px; color: #28a745;">$${booking.total_price}</td>
+                      </tr>
+                    </table>
+                  </div>
+            
+                  <!-- Success Message -->
+                  <p style="text-align: center; font-size: 16px; color: #555; margin-top: 20px;">
+                    Your payment has been successfully processed and your booking is confirmed. We look forward to welcoming you!
+                  </p>
+            
+                  <!-- Button to View Booking -->
+                  <div style="text-align: center; margin-top: 30px;">
+                    <a href="https://yourwebsite.com/track-booking/${booking.booking_id}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-size: 16px;">View Booking</a>
+                  </div>
+            
+                  <!-- Footer -->
+            <p style="text-align: center; font-size: 14px; color: #777; margin-top: 30px;">If you have any questions, feel free to contact our support team at <strong>support@workzy.com</strong>.</p>
+                  <p style="text-align: center; font-size: 12px; color: #999;">© 2024 Workzy. All rights reserved.</p>
+                </div>
                 `
             );
 
@@ -574,8 +609,6 @@ export const paypalCheckoutAmenitiesService = ({
             const amenitiesId = addAmenities.map(
                 (amenity) => amenity.amenity_id
             );
-            const quantities = addAmenities.map((amenity) => amenity.quantity);
-            console.log("🚀 ~ newPromise ~ quantities:", quantities);
 
             const amenitiesMap = addAmenities.reduce((map, amenity) => {
                 map[amenity.amenity_id] = amenity.quantity;
@@ -595,8 +628,6 @@ export const paypalCheckoutAmenitiesService = ({
             if (amenities.length === 0)
                 return reject("No valid amenities found");
 
-            console.log(amenities);
-
             // Calculate the total amount for all items correctly
             const totalAmenitiesPrice = amenities.reduce((total, amenity) => {
                 return (
@@ -604,7 +635,7 @@ export const paypalCheckoutAmenitiesService = ({
                     amenity.rent_price * amenitiesMap[amenity.amenity_id]
                 );
             }, 0);
-
+            console.log("🚀 ~ newPromise ~ totalAmenitiesPrice:", totalAmenitiesPrice);
             if (total_amenities_price !== totalAmenitiesPrice)
                 return reject("Total amenities price mismatch");
 
@@ -637,18 +668,18 @@ export const paypalCheckoutAmenitiesService = ({
 
             const request = new paypal.orders.OrdersCreateRequest();
             const amount = await convertVNDToUSD(total_amenities_price);
-
+            console.log("🚀 ~ newPromise ~ amount", amount);
             // Calculate the total amount for all items correctly
-            const itemsPromises = amenities.map(async (amenity, index) => {
+            const itemsPromises = amenities.map(async (amenity) => {
                 const convertedValue = await convertVNDToUSD(
                     amenity.rent_price
                 );
                 const convertedTotal = await convertVNDToUSD(
-                    amenity.rent_price * quantities[index]
+                    amenity.rent_price * amenitiesMap[amenity.amenity_id]
                 );
                 return {
                     name: amenity.amenity_name,
-                    quantity: quantities[index],
+                    quantity: amenitiesMap[amenity.amenity_id],
                     unit_amount: {
                         currency_code: "USD",
                         value: convertedValue,
@@ -705,8 +736,8 @@ export const paypalCheckoutAmenitiesService = ({
                 { where: { payment_id: payment.payment_id }, transaction: t }
             );
             // Create booking amenities
-            const bookingAmenities = amenities.map((amenity, index) => {
-                const quantity = quantities[index];
+            const bookingAmenities = amenities.map((amenity) => {
+                const quantity = amenitiesMap[amenity.amenity_id];
                 const bookingAmenity = {
                     booking_id: booking.booking_id,
                     amenity_id: amenity.amenity_id,
@@ -794,11 +825,16 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
                         include: [
                             {
                                 model: db.User,
-                                attributes: ["email"],
+                                attributes: ["email", "name"],
                                 required: true,
                             },
                         ],
                     },
+                    {
+                        model: db.Workspace,
+                        attributes: ["workspace_name"],
+                        required: true,
+                    }
                 ],
             });
             if (!booking) {
@@ -816,6 +852,17 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
 
             if (booking.BookingStatuses[0].status === "cancelled")
                 return reject("Booking already cancelled");
+
+            const amenities = await db.BookingAmenities.findAll({
+                where: { booking_id },
+                attributes: ["amenity_id", "quantity", "price", "total_price"],
+                include: [
+                    {
+                        model: db.Amenity,
+                        attributes: ["amenity_name"],
+                    },
+                ],
+            });
 
             const amount = await convertVNDToUSD(booking.total_amenities_price);
             const request = new paypal.orders.OrdersCaptureRequest(order_id);
@@ -862,10 +909,92 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
             await booking.save({ transaction: t });
             await sendMail(
                 booking.Customer.User.email,
-                "Payment successful",
-                "Thank you for your payment. Enjoy your workspace."
-            );
+                "Payment Successful",
+                `
+                    <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border: 1px solid #eaeaea; border-radius: 10px;">
+                    <!-- Header with logo -->
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <img src="https://workzy.vercel.app/WORKZY_SMALL_LOGO.png" alt="Workzy Logo" style="width: 120px;">
+                    </div>
 
+                    <h2 style="text-align: center; color: #28a745; font-size: 24px; margin-bottom: 10px;">Payment Successful</h2>
+                    <p style="text-align: center; font-size: 16px; color: #555;">Dear <strong>${
+                        booking.Customer.User.name
+                    }</strong>,</p>
+                    <p style="text-align: center; font-size: 16px; color: #555;">Thank you for using Workzy! Your payment has been successfully processed. Below are the details of your booking:</p>
+
+                    <!-- Booking Details -->
+                    <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); margin-top: 20px;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 14px; border: 1px solid #eaeaea; border-radius: 10px;">
+                        <tr style="background-color: #f0f0f0;">
+                            <td style="padding: 12px; font-weight: bold; border-bottom: 1px solid #eaeaea;">Booking ID:</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #eaeaea; text-align: right;">${
+                                booking.booking_id
+                            }</td>
+                        </tr>
+
+                        <!-- Amenities Section in Table Format -->
+                        <tr style="background-color: #f0f0f0;">
+                            <td style="padding: 12px; font-weight: bold; border-bottom: 1px solid #eaeaea;" colspan="2">Amenities:</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                            <table style="width: 100%; border: 1px solid #eaeaea; font-size: 14px;">
+                                <thead>
+                                <tr style="background-color: #f7f7f7;">
+                                    <th style="padding: 10px; text-align: left;">Name</th>
+                                    <th style="padding: 10px; text-align: center;">Quantity</th>
+                                    <th style="padding: 10px; text-align: center;">Price per Unit</th>
+                                    <th style="padding: 10px; text-align: right;">Total</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                ${amenities
+                                    .map(
+                                        (amenity) => `
+                                        <tr>
+                                            <td style="padding: 10px; text-align: left; background-color: #fafafa;">${
+                                            amenity.Amenity.amenity_name
+                                            }</td>
+                                            <td style="padding: 10px; text-align: center; background-color: #fafafa;">${
+                                            amenity.quantity
+                                            }</td>
+                                            <td style="padding: 10px; text-align: center; background-color: #fafafa;">${amenity.price} VNĐ</td>
+                                            <td style="padding: 10px; text-align: right; background-color: #fafafa;">${amenity.total_price} VNĐ</td>
+                                        </tr>
+                                    `
+                                    )
+                                    .join("")}
+                                </tbody>
+                            </table>
+                            </td>
+                        </tr>
+                        <!-- End Amenities Section -->
+
+                        <tr style="background-color: #f0f0f0;">
+                            <td style="padding: 12px; font-weight: bold; color: #28a745; border-bottom: 1px solid #eaeaea;">Total Price:</td>
+                            <td style="padding: 12px; color: #28a745; border-bottom: 1px solid #eaeaea; text-align: right;">$${booking.total_price} VNĐ</td>
+                        </tr>
+                        </table>
+                    </div>
+
+                    <!-- Success Message -->
+                    <p style="text-align: center; font-size: 16px; color: #555; margin-top: 20px;">
+                        Your payment has been successfully processed and your booking is confirmed. We look forward to welcoming you!
+                    </p>
+
+                    <!-- Button to View Booking -->
+                    <div style="text-align: center; margin-top: 30px;">
+                        <a href="https://workzy.vercel.app/user/booking" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-size: 16px;">View Booking</a>
+                    </div>
+
+                    <!-- Footer -->
+                    <p style="text-align: center; font-size: 14px; color: #777; margin-top: 30px;">If you have any questions, feel free to contact our support team at <strong>support@workzy.com</strong>.</p>
+                    <p style="text-align: center; font-size: 12px; color: #999;">© 2024 Workzy. All rights reserved.</p>
+                    </div>
+                `
+            );
+              
             await db.Notification.create({
                 notification_id: v4(),
                 customer_id: booking.Customer.customer_id,
@@ -1062,9 +1191,14 @@ export const paypalDamageSuccessService = ({ booking_id, order_id }) =>
                             },
                         ],
                     },
+                    {
+                        model: db.Workspace,
+                        as: "Workspace",
+                        attributes: ["workspace_name"],
+                        required: true,
+                    }
                 ],
             });
-
             if (!booking) {
                 return reject("Booking not found");
             }
@@ -1150,7 +1284,7 @@ export const paypalDamageSuccessService = ({ booking_id, order_id }) =>
                 },
                 {
                     where: {
-                        customer_id: booking.Customer.customer_id,
+                        customer_id: booking.customer_id,
                     },
                     transaction: t,
                 }
@@ -1158,15 +1292,84 @@ export const paypalDamageSuccessService = ({ booking_id, order_id }) =>
             if (updatedPoints[0] === 0)
                 return reject("Failed to update customer points");
 
+            const report_damage_ameninites =
+            booking.report_damage_ameninites.split("|");
+            let amenitiesMap = report_damage_ameninites
+                .map((amenity) => {
+                    const [name, quantity, price] = amenity.split(":");
+                    return `<tr>
+                        <td style="padding: 12px;">${name}</td>
+                        <td style="padding: 12px; text-align: center;">${quantity}</td>
+                        <td style="padding: 12px; text-align: right;">${price} VNĐ</td>
+                    </tr>`;
+                }).join(""); // Join the array into a single string
+    
             await sendMail(
-                booking.Customer.User.email,
-                "Payment successful",
-                "Thank you for using the service at Workzy."
+                "tranngvietquang04@gmail.com",
+                "Payment Successful",
+                `
+                <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border: 1px solid #eaeaea; border-radius: 10px;">
+                <!-- Header with logo -->
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <img src="https://workzy.vercel.app/WORKZY_SMALL_LOGO.png" alt="Workzy Logo" style="width: 120px;">
+                </div>
+        
+                <h2 style="text-align: center; color: #28a745; font-size: 24px; margin-bottom: 5px;">Payment Successful</h2>
+                <p style="text-align: center; font-size: 16px; color: #555; margin-bottom: 10px;">Dear <strong>${booking.Customer.User.name}</strong>,</p>
+                <p style="text-align: center; font-size: 16px; color: #555; margin-bottom: 20px;">Thank you for using Workzy! Your payment has been successfully processed. Below are the details of your booking:</p>
+        
+                <!-- Combined Booking Details -->
+                <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);">
+                    <!-- Booking ID Table -->
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin: 0;">
+                        <tr style="background-color: #f7f7f7;">
+                            <td style="padding: 12px; font-weight: bold;">Booking ID:</td>
+                            <td style="padding: 12px; text-align: right;">${booking.booking_id}</td>
+                        </tr>
+                    </table>
+        
+                    <!-- Amenities Table -->
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin: 0;">
+                        <thead>
+                            <tr style="background-color: #f7f7f7;">
+                                <th style="padding: 12px; font-weight: bold; text-align: left;">Amenity</th>
+                                <th style="padding: 12px; font-weight: bold; text-align: center;">Quantity</th>
+                                <th style="padding: 12px; font-weight: bold; text-align: right;">Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${amenitiesMap}
+                        </tbody>
+                    </table>
+        
+                    <!-- Total Price Table -->
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin: 0;">
+                        <tr style="background-color: #f7f7f7;">
+                            <td style="padding: 12px; font-weight: bold; color: #28a745;">Total Price:</td>
+                            <td style="padding: 12px; color: #28a745; text-align: right;">${booking.total_price} VNĐ</td>
+                        </tr>
+                    </table>
+                </div>
+        
+                <!-- Success Message -->
+                <p style="text-align: center; font-size: 16px; color: #555; margin-top: 10px; margin-bottom: 20px;">
+                    Your payment has been successfully processed, and your booking is confirmed. We look forward to welcoming you!
+                </p>
+        
+                <!-- Button to View Booking -->
+                <div style="text-align: center; margin-top: 10px; margin-bottom: 20px;">
+                    <a href="https://yourwebsite.com/track-booking/${booking.booking_id}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-size: 16px;">View Booking</a>
+                </div>
+        
+                <!-- Footer -->
+                <p style="text-align: center; font-size: 14px; color: #777; margin-top: 10px; margin-bottom: 5px;">If you have any questions, feel free to contact our support team at <strong>support@workzy.com</strong>.</p>
+                <p style="text-align: center; font-size: 12px; color: #999; margin-bottom: 0;">© 2024 Workzy. All rights reserved.</p>
+                </div>
+                `
             );
-
             await db.Notification.create({
                 notification_id: v4(),
-                customer_id: customer.customer_id,
+                customer_id: booking.customer_id,
                 type: "booking",
                 description: `Order successfully paid for damage payment ${booking_id}`,
             });

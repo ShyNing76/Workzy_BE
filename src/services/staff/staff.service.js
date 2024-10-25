@@ -613,7 +613,7 @@ export const getAmenitiesByBookingIdService = (booking_id) =>
                     where: {
                         booking_id: booking_id,
                     },
-                    attributes: [],
+                    attributes: ["quantity"],
                     include: [
                         {
                             model: db.Amenity,
@@ -638,7 +638,7 @@ export const getAmenitiesByBookingIdService = (booking_id) =>
                 where: {
                     workspace_id: booking.Workspace.workspace_id,
                 },
-                attributes: [],
+                attributes: ["quantity"],
                 include: [
                     {
                         model: db.Amenity,
@@ -653,28 +653,29 @@ export const getAmenitiesByBookingIdService = (booking_id) =>
                 return reject("No amenities found for the specified workspace");
 
             const amenitiesOfBookingList = amenitiesOfBooking.map((amenity) => {
-                return amenity.Amenity.amenity_name;
+                return {
+                    amenity_name: amenity.Amenity.amenity_name,
+                    quantity: amenity.quantity,
+                };
             });
             const amenitiesWorkspaceList = amenitiesWorkspace.map((amenity) => {
-                return amenity.Amenities.amenity_name;
+                return {
+                    amenity_name: amenity.Amenities.amenity_name,
+                    quantity: amenity.quantity
+                };
             });
             const countMap = {};
             [...amenitiesOfBookingList, ...amenitiesWorkspaceList].forEach((amenity) => {
-                countMap[amenity] = (countMap[amenity] || 0) + 1;
+                countMap[amenity.amenity_name] = (countMap[amenity.amenity_name] || 0) + amenity.quantity;
             });
-            const uniqueAmenities = [
-                ...new Set([
-                    ...amenitiesOfBookingList,
-                    ...amenitiesWorkspaceList,
-                ]),
-            ];
-            const uniqueAmenitiesWithQuantity = uniqueAmenities.map((amenity) => {
+            const uniqueAmenitiesWithQuantity = Object.keys(countMap).map((amenityName) => {
                 return {
-                    amenity_name: amenity,
-                    quantity: countMap[amenity],
+                    amenity_name: amenityName,
+                    quantity: countMap[amenityName],
                 };
             });
-            if (uniqueAmenities.length === 0)
+            console.log(uniqueAmenitiesWithQuantity);
+            if (uniqueAmenitiesWithQuantity.length === 0)
                 return reject("No amenities found for the specified booking");
             resolve({
                 err: 0,

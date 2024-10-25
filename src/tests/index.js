@@ -82,23 +82,22 @@ import { Op } from "sequelize";
 // totalPricesInMonth();
 
 function getTotalBookingByManager() {
-    const workspaces = db.Workspace.findAll({
-        where: {
-            building_id: { [Op.is]: null }
-        },
-        attributes: {
-            exclude: ["building_id", "createdAt", "updatedAt"],
-        },
+    const amenities = db.BookingAmenities.findAll({
+        where: { booking_id: "d8e9c5d0-55f3-47ac-a1f6-58d224dd80ff" },
+        attributes: ["amenity_id", "quantity", "price", "total_price"],
         include: [
             {
-                model: db.Building,
-                attributes: ["building_id"],                
+                model: db.Amenity,
+                attributes: ["amenity_name"],
             },
         ],
     })
     .then((result) => {
         for (let i = 0; i < result.length; i++) {
-            console.log("Workspace: " + result[i].dataValues.workspace_id);
+            console.log("Amenity: " + result[i].Amenity.amenity_name);
+            console.log("Quantity: " + result[i].quantity);
+            console.log("Price: " + result[i].price);
+            console.log("Total Price: " + result[i].total_price);
         }
     }).catch((error) => {
             console.error("Error fetching total price: ", error);
