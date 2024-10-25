@@ -6,7 +6,7 @@ export const createBookingService = (data) =>
     new Promise(async (resolve, reject) => {
         const t = await db.sequelize.transaction();
         try {
-            const [customer, workspace, bookingType] = await Promise.all([
+            const [customer, workspace, voucher, bookingType] = await Promise.all([
                 db.Customer.findOne({ where: { user_id: data.user_id } }),
                 db.Workspace.findOne({
                     where: {
@@ -15,15 +15,18 @@ export const createBookingService = (data) =>
                     },
                 }),
                 db.BookingType.findOne({ where: { type: data.type } }),
+                db.Voucher.findOne({ where: { voucher_id: data.voucher_id } }),
             ]);
 
-            if (!customer || !workspace || !bookingType) {
+            if (!customer || !workspace || !bookingType || !voucher) {
                 return reject(
                     `${
                         !customer
                             ? "Customer"
                             : !workspace
                             ? "Workspace"
+                            : !voucher
+                            ? "Voucher"
                             : "Booking type"
                     } not found`
                 );
@@ -40,12 +43,14 @@ export const createBookingService = (data) =>
                     "Workspace is already booked for the selected time period"
                 );
             }
-
+            voucher.quantity = parseInt(voucher.quantity) - 1;
+            await voucher.save({ transaction: t });
             const booking = {
                 booking_id: v4(),
                 customer_id: customer.customer_id,
                 booking_type_id: bookingType.booking_type_id,
                 workspace_id: workspace.workspace_id,
+                voucher_id: data.voucher_id,
                 workspace_price:
                     bookingType.type === "Hourly"
                         ? workspace.price_per_hour
@@ -56,7 +61,6 @@ export const createBookingService = (data) =>
                 total_price: data.total_price,
                 start_time_date: data.start_time,
                 end_time_date: data.end_time,
-                voucher_id: data.voucher_id,
             };
 
             const bookingStatus = {
