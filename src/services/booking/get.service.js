@@ -136,7 +136,7 @@ export const getAllBookingsService = ({
                         model: db.Workspace,
                         as: "Workspace",
                         where: building_id ? { building_id } : {},
-                        attributes: ["workspace_name", "workspace_type_id"],
+                        attributes: ["workspace_name", "workspace_type_id", "building_id"],
                     },
                     {
                         model: db.Customer,

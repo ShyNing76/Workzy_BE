@@ -56,7 +56,11 @@ router.post(
     */
 );
 
-router.delete("/delete/:review_id", verify_token, verify_role(["admin", "manager"]), controllers.deleteReviewController
+router.delete(
+    "/delete/:review_id",
+    verify_token,
+    verify_role(["admin", "manager"]),
+    controllers.deleteReviewController
     /*
         #swagger.description = 'Endpoint to remove a review.'
         #swagger.summary = 'Remove a review.'
@@ -107,6 +111,29 @@ router.get(
         #swagger.description = 'Get a review by ID.'
         #swagger.summary = 'Get a review by ID.'
         #swagger.parameters['id'] = { description: 'Review ID.' }
+        #swagger.responses[200] = {
+            description: 'Review found.'
+        }
+        #swagger.responses[404] = {
+            description: 'Review not found.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
+
+router.get(
+    "/booking/:id",
+    verify_token,
+    controllers.getReviewByBookingIdController
+    /*
+        #swagger.description = 'Get a review by booking ID.'
+        #swagger.summary = 'Get a review by booking ID.'
+        #swagger.parameters['id'] = { description: 'Booking ID.' }
         #swagger.responses[200] = {
             description: 'Review found.'
         }

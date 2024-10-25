@@ -109,6 +109,12 @@ router.post(
                             total_price: {
                                 type: 'number',
                                 example: 500000
+                            },
+                            voucher_id: {
+                                type: 'string',
+                                format: 'uuid',
+                                example: '123e4567-ed89-12d3-a456-426614174000',
+                                description: 'Voucher ID'
                             }
                         }
                     }
