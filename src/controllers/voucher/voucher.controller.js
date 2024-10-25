@@ -75,6 +75,20 @@ export const deleteVoucherController = async (req, res) => {
     }
 }
 
+export const checkVoucherController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            voucher_code: Joi.string().required()
+        }).validate(req.body).error;
+        if(error) return badRequest(res, error);
+        const response = await services.checkVoucherService(req.body);
+        return ok(res, response);
+    } catch (error) {
+        if(error === "Voucher not found") return badRequest(res, error);
+        internalServerError(res, error);
+    }
+}
+
 export const getTotalVoucherController = async (req, res) => {
     try {
         const response = await services.getTotalVoucherService();

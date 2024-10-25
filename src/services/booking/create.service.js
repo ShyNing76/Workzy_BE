@@ -56,6 +56,7 @@ export const createBookingService = (data) =>
                 total_price: data.total_price,
                 start_time_date: data.start_time,
                 end_time_date: data.end_time,
+                voucher_id: data.voucher_id,
             };
 
             const bookingStatus = {

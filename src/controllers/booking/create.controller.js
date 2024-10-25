@@ -16,6 +16,7 @@ export const createBookingController = async (req, res) => {
             end_time: Joi.required(),
             total_price: Joi.number().min(0).required(),
             type: booking_type,
+            voucher_id: Joi.string().allow(null),
         }).validate({
             user_id: req.user.user_id,
             workspace_id: req.body.workspace_id,
@@ -23,6 +24,7 @@ export const createBookingController = async (req, res) => {
             start_time: req.body.start_time,
             end_time: req.body.end_time,
             total_price: req.body.total_price,
+            voucher_id: req.body.voucher_id,
         }).error;
         if (error) return badRequest(res, error.details[0].message);
 

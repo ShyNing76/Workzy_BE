@@ -61,3 +61,19 @@ export const getReviewByIdController = async (req, res) => {
         innerServerError(res, error);
     }
 }
+
+export const getReviewByBookingIdController = async (req, res) => {
+    try {
+        const error = Joi.object({
+            id: Joi.required()
+        }).validate({
+            id: req.params.id
+        }).error;
+        if (error) return badRequest(res, error);
+        const response = await services.getReviewByBookingIdService(req.params.id, req.user.user_id);
+        return ok(res, response);
+    } catch (error) {
+        if (error === "No Review Found") return badRequest(res, error);
+        innerServerError(res, error);
+    }
+}

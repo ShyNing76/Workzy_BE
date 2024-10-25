@@ -1,14 +1,15 @@
 import express from "express";
 import * as controllers from "../../controllers";
-import {
-    verify_role,
-    verify_token,
-} from "../../middlewares/verifyToken";
+import { verify_role, verify_token } from "../../middlewares/verifyToken";
 
 const router = express.Router();
 
-router.get("/total", verify_token, verify_role(["admin"]), controllers.getTotalVoucherController
-     /*
+router.get(
+    "/total",
+    verify_token,
+    verify_role(["admin"]),
+    controllers.getTotalVoucherController
+    /*
         #swagger.description = 'Endpoint to get total vouchers.'
         #swagger.summary = 'Get total vouchers.'
         #swagger.responses[200] = {
@@ -26,7 +27,10 @@ router.get("/total", verify_token, verify_role(["admin"]), controllers.getTotalV
      */
 );
 
-router.get("/", verify_token, controllers.getAllVoucherController
+router.get(
+    "/",
+    verify_token,
+    controllers.getAllVoucherController
     /*
         #swagger.description = 'Endpoint to get all vouchers.'
         #swagger.summary = 'Get all vouchers.'
@@ -48,7 +52,10 @@ router.get("/", verify_token, controllers.getAllVoucherController
         }]
      */
 );
-router.get("/:voucher_id", verify_token, controllers.getVoucherByIdController
+router.get(
+    "/:voucher_id",
+    verify_token,
+    controllers.getVoucherByIdController
     /*
         #swagger.description = 'Endpoint to get a voucher by ID.'
         #swagger.summary = 'Get a voucher by ID.'
@@ -130,8 +137,12 @@ router.post(
     */
 );
 
-router.put("/:voucher_id", verify_token, verify_role(["admin"]), controllers.updateVoucherController
-/*
+router.put(
+    "/:voucher_id",
+    verify_token,
+    verify_role(["admin"]),
+    controllers.updateVoucherController
+    /*
         #swagger.description = 'Endpoint to update a voucher.'
         #swagger.summary = 'Update a voucher.'
         #swagger.parameters['voucher_id'] = { description: 'Voucher ID.' }
@@ -191,9 +202,13 @@ router.put("/:voucher_id", verify_token, verify_role(["admin"]), controllers.upd
             "apiKeyAuth": []
         }]
      */
-    );
-router.put("/:voucher_id", verify_token, verify_role(["admin"]), controllers.deleteVoucherController
- /*
+);
+router.put(
+    "/:voucher_id",
+    verify_token,
+    verify_role(["admin"]),
+    controllers.deleteVoucherController
+    /*
         #swagger.description = 'Endpoint to remove a voucher.'
         #swagger.summary = 'Remove a voucher.'
         #swagger.parameters['voucher_id'] = { description: 'Voucher ID.' }
@@ -212,6 +227,29 @@ router.put("/:voucher_id", verify_token, verify_role(["admin"]), controllers.del
             "apiKeyAuth": []
         }]
      */
-    );
+);
+
+router.get(
+    "/valid/:voucher_code",
+    verify_token,
+    controllers.checkVoucherController
+    /*
+        #swagger.description = 'Endpoint to check a voucher.'
+        #swagger.summary = 'Check a voucher.'
+        #swagger.parameters['voucher_code'] = { description: 'Voucher code.' }
+        #swagger.responses[200] = {
+            description: 'Voucher is valid.'
+        }
+        #swagger.responses[404] = {
+            description: 'Voucher is invalid.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+     */
+);
 
 module.exports = router;

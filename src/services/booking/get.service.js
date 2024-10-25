@@ -12,7 +12,6 @@ import {
 export const getBookingService = ({ page, limit, order, status, ...data }) =>
     new Promise(async (resolve, reject) => {
         try {
-            console.log(order);
             const customer = await db.Customer.findOne({
                 where: {
                     user_id: data.user_id,
@@ -82,8 +81,10 @@ export const getBookingService = ({ page, limit, order, status, ...data }) =>
                     statusCount.Cancelled += 1;
             });
 
+            status = status || "All";
+
             const filteredBookings = bookings.rows.filter((booking) => {
-                if (status || status === "All") return true;
+                if (status === "All") return true;
                 return tabStatus[status].includes(
                     booking.BookingStatuses[0].status
                 );
@@ -135,7 +136,7 @@ export const getAllBookingsService = ({
                         model: db.Workspace,
                         as: "Workspace",
                         where: building_id ? { building_id } : {},
-                        attributes: ["workspace_name", "workspace_type_id"],
+                        attributes: ["workspace_name", "workspace_type_id", "building_id"],
                     },
                     {
                         model: db.Customer,
@@ -372,6 +373,11 @@ export const getTimeBookingService = ({ workspace_id, date }) =>
                     {
                         model: db.BookingStatus,
                         attributes: ["status"],
+                        where: {
+                            status: {
+                                [db.Sequelize.Op.ne]: "cancelled",
+                            },
+                        },
                         limit: 1,
                         order: [["createdAt", "desc"]],
                     },
