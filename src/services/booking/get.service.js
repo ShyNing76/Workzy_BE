@@ -115,6 +115,8 @@ export const getAllBookingsService = ({
     order,
     status,
     building_id,
+    location,
+    bookingType,
     ...data
 }) =>
     new Promise(async (resolve, reject) => {
@@ -133,10 +135,22 @@ export const getAllBookingsService = ({
                         required: false,
                     },
                     {
+                        model: db.BookingType,
+                        as: "BookingType",
+                        attributes: ["type"],
+                        where: bookingType ? { type: bookingType } : {},
+                    },
+                    {
                         model: db.Workspace,
                         as: "Workspace",
                         where: building_id ? { building_id } : {},
                         attributes: ["workspace_name", "workspace_type_id", "building_id"],
+                        include: {
+                            model: db.Building,
+                            as: "Building",
+                            attributes: ["building_name", "location"],
+                            where: location ? { location } : {},
+                        },
                     },
                     {
                         model: db.Customer,
