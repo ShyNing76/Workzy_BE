@@ -327,7 +327,7 @@ export const paypalSuccessService = ({ booking_id, order_id }) =>
             );
 
             await sendMail(
-                "tronglhqe180185@fpt.edu.vn",
+                booking.Customer.User.email,
                 "Booking Payment Successful",
                 `
                     <div style="font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; background-color: #f4f4f4;">
