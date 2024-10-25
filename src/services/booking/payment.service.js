@@ -117,7 +117,7 @@ export const paypalCheckoutService = ({ booking_id, user_id }) =>
                 },
                 transaction: t,
             });
-            if (!created) return reject("Payment created failed");
+            if (!payment) return reject("Payment created failed");
 
             const [transaction, createdTransaction] =
                 await db.Transaction.findOrCreate({
@@ -129,7 +129,7 @@ export const paypalCheckoutService = ({ booking_id, user_id }) =>
                     transaction: t,
                 });
 
-            if (!createdTransaction) return reject("Transaction not found");
+            if (!transaction) return reject("Transaction not found");
 
             const request = new paypal.orders.OrdersCreateRequest();
             const amount = await convertVNDToUSD(booking.total_price);
@@ -327,7 +327,7 @@ export const paypalSuccessService = ({ booking_id, order_id }) =>
             );
 
             await sendMail(
-                booking.Customer.User.email,
+                "tronglhqe180185@fpt.edu.vn",
                 "Booking Payment Successful",
                 `
                     <div style="font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; background-color: #f4f4f4;">
@@ -371,9 +371,9 @@ export const paypalSuccessService = ({ booking_id, order_id }) =>
                         </tr>
                         <tr style="background-color: #f9f9f9;">
                             <td style="padding: 12px; font-weight: bold; border-bottom: 1px solid #ddd;">Total Price:</td>
-                            <td style="padding: 12px; border-bottom: 1px solid #ddd; color: #4CAF50;">${booking.total_price.toFixed(
-                                2
-                            )} VNĐ</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #ddd; color: #4CAF50;">${
+                                booking.total_price
+                            } VNĐ</td>
                         </tr>
                         </table>
                     </div>
@@ -384,9 +384,7 @@ export const paypalSuccessService = ({ booking_id, order_id }) =>
 
                     <!-- Call to action button -->
                     <div style="text-align: center; margin-top: 30px;">
-                        <a href="https://workzy.vercel.app/user/booking/${
-                            booking.booking_id
-                        }" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-size: 16px;">Track Your Booking</a>
+                        <a href="https://workzy.vercel.app/user/booking/" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-size: 16px;">Track Your Booking</a>
                     </div>
 
                     <!-- Footer -->
