@@ -658,19 +658,28 @@ export const getAmenitiesByBookingIdService = (booking_id) =>
             const amenitiesWorkspaceList = amenitiesWorkspace.map((amenity) => {
                 return amenity.Amenities.amenity_name;
             });
-
+            const countMap = {};
+            [...amenitiesOfBookingList, ...amenitiesWorkspaceList].forEach((amenity) => {
+                countMap[amenity] = (countMap[amenity] || 0) + 1;
+            });
             const uniqueAmenities = [
                 ...new Set([
                     ...amenitiesOfBookingList,
                     ...amenitiesWorkspaceList,
                 ]),
             ];
+            const uniqueAmenitiesWithQuantity = uniqueAmenities.map((amenity) => {
+                return {
+                    amenity_name: amenity,
+                    quantity: countMap[amenity],
+                };
+            });
             if (uniqueAmenities.length === 0)
                 return reject("No amenities found for the specified booking");
             resolve({
                 err: 0,
                 message: "Get amenities successfully",
-                data: { uniqueAmenities, booking_id },
+                data: { uniqueAmenitiesWithQuantity, booking_id },
             });
         } catch (error) {
             console.log(error);
