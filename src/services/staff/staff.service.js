@@ -699,7 +699,7 @@ export const createBrokenAmenitiesBookingService = (amenities_quantities, bookin
                     amenity_name: { [Op.in]: amenitiesName },
                     status: "active",
                 },
-                attributes: ["amenity_id", "depreciation_price"],
+                attributes: ["amenity_id", "depreciation_price", "amenity_name"],
                 raw: true,
                 nest: true,
             });
@@ -731,9 +731,10 @@ export const createBrokenAmenitiesBookingService = (amenities_quantities, bookin
                 return amenity.quantity;
             });
 
-            const amenitiesData = amenities_quantities.map((amenity, index) => (
-                `${amenity.amenity_name}: ${quantities[index]}`
+            const amenitiesData = amenities.map((amenity, index) => (
+                `${amenity.amenity_name}: ${quantities[index]}: ${amenity.depreciation_price}`
             )).join('|'); 
+            console.log(amenitiesData);
             booking.total_price = parseInt(total_broken_price) + parseInt(booking.total_price);
             booking.total_broken_price = total_broken_price;
             booking.report_damage_ameninites = amenitiesData;
