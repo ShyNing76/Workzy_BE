@@ -82,21 +82,11 @@ import { Op } from "sequelize";
 // totalPricesInMonth();
 
 function getTotalBookingByManager() {
-    const currentDate = new Date(); // Lưu trữ ngày hiện tại một lần
-
-    const startDate = new Date(currentDate); // Tạo một đối tượng Date mới từ currentDate
-    startDate.setDate(currentDate.getDate() - 7); // Giảm 7 ngày
-    startDate.setHours(0, 0, 0, 0); // Đặt giờ, phút, giây và mili giây về 0
-
-    const endDate = new Date(currentDate); // Tạo một đối tượng Date mới từ currentDate
-    endDate.setHours(23, 59, 59, 999); // Đặt giờ, phút, giây và mili giây cho ngày kết thúc
-
-    // Chuyển đổi sang múi giờ Việt Nam
-    const options = { timeZone: 'Asia/Ho_Chi_Minh', timeZoneName: 'short' };
-    const startDateVN = startDate.toLocaleString('vi-VN', options);
-    const endDateVN = endDate.toLocaleString('vi-VN', options);
-
-    console.log("Start Date: " + startDateVN);
-    console.log("End Date: " + endDateVN);
+    const currentDate = new Date(); // Ngày hiện tại
+    const eightDaysAgo = new Date(currentDate); // Tạo một bản sao của ngày hiện tại
+    eightDaysAgo.setDate(currentDate.getDate() - 8); // Lấy ngày 8 ngày trước
+    eightDaysAgo.setHours(0, 0, 0, 0); // Đặt giờ, phút, giây và mili giây về 00:00:00.000
+    const formattedDate = moment(eightDaysAgo).format("YYYY-MM-DD HH:mm:ss.SSS Z"); // Định dạng theo yêu cầu
+    console.log("Ngày 8 ngày trước (00:00): " + formattedDate); // In ra ngày đã định dạng
 }
 getTotalBookingByManager();

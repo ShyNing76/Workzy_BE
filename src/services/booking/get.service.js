@@ -423,14 +423,15 @@ export const getTimeBookingService = ({ workspace_id, date }) =>
 export const getRevenueIn8daysService = (tokenUser, building_id) =>
     new Promise(async (resolve, reject) => {
         try {
-            const currentDay = new Date().getDate();
-
-            const startDate = new Date(new Date().setDate(currentDay - 7)).setHours(0, 0, 0, 0);
-            const endDate = new Date(new Date().setDate(currentDay)).setHours(23, 59, 59, 999);
+            const currentDate = new Date(); // Ngày hiện tại
+            const eightDaysAgo = new Date(currentDate); // Tạo một bản sao của ngày hiện tại
+            eightDaysAgo.setDate(currentDate.getDate() - 8); // Lấy ngày 8 ngày trước
+            eightDaysAgo.setHours(0, 0, 0, 0); // Đặt giờ, phút, giây và mili giây về 00:00:00.000
+            const formattedEightDaysAgo = moment(eightDaysAgo).format("YYYY-MM-DD HH:mm:ss.SSS Z"); // Định dạng theo yêu cầu
             const revenue = await db.Booking.findAll({
                 where: {
                     createdAt: {
-                        [db.Sequelize.Op.between]: [startDate, endDate],
+                        [db.Sequelize.Op.lte]: formattedEightDaysAgo,
                     },
                 },
                 include: [
