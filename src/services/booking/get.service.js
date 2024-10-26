@@ -470,11 +470,16 @@ export const getRevenueIn8DaysService = (tokenUser, building_id) =>
                 acc[date] += parseInt(booking.total_price); // Cộng dồn total_price
                 return acc;
             }, {});
-            result = Object.entries(totalRevenue).map(([date, total_price]) => ({
-                date,
-                total_price,
+            const days = [];
+            for (let d = moment(eightDaysAgo); d.isBefore(moment(currentDate)); d.add(1, 'days')) {
+                days.push(d.format('YYYY-MM-DD'));
+            }
+            days.forEach(day => {
+                result.push({
+                    date: day,
+                    total_price: totalRevenue[day] || 0,
+                });
             })
-            )
         } else if(tokenUser.role_id === 2) {
             if (!building_id) return reject("Building_id is missing");
             const manager = await db.User.findOne({
@@ -530,11 +535,16 @@ export const getRevenueIn8DaysService = (tokenUser, building_id) =>
                 acc[date] += parseInt(booking.total_price); // Cộng dồn total_price
                 return acc;
             }, {});
-            result = Object.entries(totalRevenue).map(([date, total_price]) => ({
-                date,
-                total_price,
+            const days = [];
+            for (let d = moment(eightDaysAgo); d.isBefore(moment(currentDate)); d.add(1, 'days')) {
+                days.push(d.format('YYYY-MM-DD'));
+            }
+            days.forEach(day => {
+                result.push({
+                    date: day,
+                    total_price: totalRevenue[day] || 0,
+                });
             })
-            )
         }
         resolve({
             err: 0,
