@@ -138,6 +138,13 @@ const checkBookingStatus = async () => {
     logger.info("---------------------------------");
 };
 
+const checkTimeOutBooking = async () => {
+    logger.info("---------------------------------");
+    logger.info("Starting checkTimeOutBooking job");
+    const tenMinutesAgo = moment().subtract(10, "minutes").toISOString();
+    
+};
+
 const job = new CronJob("*/2 * * * *", checkBookingStatus, null, true, "UTC");
 
 export default job;

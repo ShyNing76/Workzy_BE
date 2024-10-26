@@ -1,108 +1,140 @@
 const moment = require("moment");
-import db from "../models";
-import { Op } from "sequelize";
-// function cancelBooking(bookingDate) {
-//     const currentDate = moment().format("YYYY-MM-DD HH:mm:ss");
-//     console.log("Current Date: " + currentDate);
+const db = require("../models");
+const { Op } = require("sequelize");
+const Sequelize = require("sequelize");
+const { sendMail } = require("../utils/sendMail");
 
-//     const start_time_date = moment(bookingDate).format("YYYY-MM-DD HH:mm:ss");
-//     console.log("Start Time Date: " + start_time_date);
-//     const diff = moment(currentDate).diff(moment(start_time_date), "days");
+function checkTimeOutBooking() {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const tenMinutesAgo = moment()
+                .subtract(10, "minutes")
+                .toISOString();
 
-//     if (diff > 1) {
-//         console.log(
-//             "You are late by " +
-//                 diff +
-//                 " days. Booking canceled but cannot refund."
-//         );
-//     } else {
-//         console.log("You are on time. Booking confirmed.");
-//     }
+            console.log("Ten minutes ago:", tenMinutesAgo);
 
-//     console.log("Difference in days: " + diff);
-// }
+            const overdueBookings = await db.BookingStatus.findAll({
+                attributes: [
+                    "booking_id",
+                    [
+                        Sequelize.fn("ARRAY_AGG", Sequelize.col("status")),
+                        "statusArray",
+                    ],
+                ],
+                include: [
+                    {
+                        model: db.Booking,
+                        where: {
+                            end_time_date: {
+                                [Op.lte]: tenMinutesAgo,
+                            },
+                        },
+                    },
+                ],
+                group: ["BookingStatus.booking_id", "Booking.booking_id"],
+                raw: true,
+                nest: true,
+            });
 
-// // Example usage
-// cancelBooking("2024-11-20T12:00:00Z");
+            let overdueBookingCount = 0;
+            overdueBookings.forEach(async (booking) => {
+                if (
+                    booking.statusArray &&
+                    booking.statusArray.includes("paid", "check-in", "usage") &&
+                    !booking.statusArray.includes("cancelled") &&
+                    !booking.statusArray.includes("completed")
+                ) {
+                    console.log("Booking change complete", booking.booking_id);
 
-// function totalPricesInMonth() {
-//     const currentYear = new Date().getFullYear(); // Lấy năm hiện tại
-//     const currentMonth = new Date().getMonth(); // Lấy tháng hiện tại (0-11)
-    
-//      // Ngày đầu tháng (UTC)
-//      const startDate = new Date(Date.UTC(currentYear, currentMonth, 1)).toISOString();
-//      // Ngày cuối tháng (UTC)
-//      const endDate = new Date(Date.UTC(currentYear, currentMonth + 1, 0, 23, 59, 59)).toISOString();
-    
-//     console.log("Start Date: " + startDate);
-//     console.log("End Date: " + endDate);
-    
-//     const booking = db.Booking.findAll({
-//         include: [
-//             {
-//                 model: db.BookingStatus,
-//                 order: [["createdAt", "DESC"]],
-//                 limit: 1,
-//                 where: {
-//                     status: "completed",
-//                 },
-//                 required: false,
-//             },
-//         ],
-//     }).then(result => {
-//         console.log("Booking: " + result);
-//     }).catch(error => {
-//         console.error("Error while fetching booking:", error);
-//     });
+                    const customer = await db.Booking.findOne({
+                        where: { booking_id: booking.booking_id },
+                        include: [
+                            {
+                                model: db.Customer,
+                                include: [db.User],
+                            },
+                        ],
+                    });
 
-//     const totalPrice = db.Booking.sum("total_price", {
-//         where: {
-//             createdAt: {
-//                 [Op.between]: [startDate, endDate],
-//             },
-//         },
-//         include: [
-//             {
-//                 model: db.BookingStatus,
-//                 order: [["createdAt", "DESC"]],
-//                 limit: 1,
-//                 where: {
-//                     status: "completed",
-//                 },
-//                 required: false,
-//             },
-//         ],
-//     }).then(result => {
-//         console.log("Total Price: " + result);
-//     }).catch(error => {
-//         console.error("Error fetching total price: ", error);
-//     });
-// }
+                    console.log("Customer retrieved:", customer);
 
-// totalPricesInMonth();
+                    await sendMail(
+                        customer.Customer.User.email,
+                        "Booking will expire soon",
+                        `
+                        <div style="font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; background-color: #f4f4f4;">
+                            <!-- Header with logo -->
+                            <div style="text-align: center; padding-bottom: 20px;">
+                                <img src="https://workzy.vercel.app/WORKZY_SMALL_LOGO.png" alt="Company Logo" style="width: 150px;">
+                            </div>
 
-function getTotalBookingByManager() {
-    const booking = db.Booking.findAll({
-        include: [
-            {
-                model: db.BookingStatus,
-                order: [["createdAt", "DESC"]],
-                // limit: 1,
-                required: false,
-            },
-        ],
-    }).then(result => {
-        console.log("Booking: " + result);
-        for (let i = 0; i < result.length; i++) {
-            console.log("Booking ID: " + result[i].booking_id);
-            console.log("Total Price: " + result[i].total_price);
-            console.log("Status: " + result[i].BookingStatuses);
-            for (let j = 0; j < result[i].BookingStatuses.length; j++) {
-                console.log("Status: " + result[i].BookingStatuses[j].status);
-            }
+                            <h2 style="text-align: center; color: #dc3545; font-size: 24px; font-weight: bold; letter-spacing: 1px;">Booking Cancellation</h2>
+                            <p style="text-align: center; font-size: 16px; color: #555;">Dear <strong>${
+                                customer.Customer.User.name
+                            }</strong>,</p>
+                            <p style="text-align: center; font-size: 16px; color: #555;">We regret to inform you that your booking has been cancelled due to non-payment within the allowed time. Below are the details of the booking:</p>
+                            
+                            <!-- Booking Details -->
+                            <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 15px rgba(0, 0, 0, 0.05); margin-top: 20px;">
+                                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                                <tr style="background-color: #f9f9f9;">
+                                    <td style="padding: 12px; font-weight: bold; border-bottom: 1px solid #ddd;">Booking ID:</td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #ddd;">${
+                                        booking.booking_id
+                                    }</td>
+                                </tr>
+                                <tr style="background-color: #f9f9f9;">
+                                    <td style="padding: 12px; font-weight: bold; border-bottom: 1px solid #ddd;">Original Booking Date:</td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #ddd;">${moment(
+                                        booking.start_time_date
+                                    ).format("dddd, MMMM Do YYYY, h:mm A")}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px; font-weight: bold; border-bottom: 1px solid #ddd;">Cancellation Date:</td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #ddd;">${moment(
+                                        booking.end_time_date
+                                    ).format("dddd, MMMM Do YYYY, h:mm A")}</td>
+                                </tr>
+                                </table>
+                            </div>
+
+                            <!-- Payment Timeout Notice -->
+                            <p style="text-align: center; font-size: 16px; color: #555; margin-top: 20px;">
+                                Unfortunately, we did not receive your payment within the required time. As a result, your booking has been cancelled automatically.
+                            </p>
+
+                            <!-- Call to action button -->
+                            <div style="text-align: center; margin-top: 30px;">
+                                <a href="https://workzy.vercel.app/" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-size: 16px;">Book Again</a>
+                            </div>
+
+                            <!-- Footer -->
+                            <p style="text-align: center; font-size: 14px; color: #777; margin-top: 30px;">If you have any questions, feel free to contact our support team at <strong>support@yourwebsite.com</strong> or call <strong>+1-800-123-4567</strong>.</p>
+
+                            <p style="text-align: center; font-size: 12px; color: #999;">© 2024 Your Company. All rights reserved.</p>
+                        </div>
+                        `
+                    );
+
+                    overdueBookingCount++;
+                }
+            });
+            console.log(
+                "🚀 ~ overdueBookings.forEach ~ overdueBookingCount:",
+                overdueBookingCount
+            );
+
+            resolve(overdueBookingCount);
+        } catch (error) {
+            reject(error);
         }
-    }).catch(error => {
-        console.error("Error while fetching booking:", error);
     });
 }
-getTotalBookingByManager();
+
+checkTimeOutBooking()
+    .then((bookings) => {
+        console.log("Bookings retrieved:", bookings);
+    })
+    .catch((error) => {
+        console.error("Error retrieving bookings:", error);
+    });
