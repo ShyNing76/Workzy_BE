@@ -438,10 +438,10 @@ export const getRevenueIn8DaysService = (tokenUser, building_id) =>
     new Promise(async (resolve, reject) => {
         try {
             const currentDate = new Date(); // Lấy ngày hiện tại
-            const eightDaysAgo = new Date(currentDate); // Tạo một bản sao của ngày hiện tại
-            eightDaysAgo.setDate(currentDate.getDate() - 8); // Lấy ngày 8 ngày trước
-            eightDaysAgo.setHours(0, 0, 0, 0); // Đặt giờ, phút, giây và mili giây về 00:00:00.000
-            const formattedEightDaysAgo = moment(eightDaysAgo).toISOString(); // Định dạng theo yêu cầu
+            const sixDaysAgo = new Date(currentDate); // Tạo một bản sao của ngày hiện tại
+            sixDaysAgo.setDate(currentDate.getDate() - 6); // Lấy ngày 6 ngày trước
+            sixDaysAgo.setHours(0, 0, 0, 0); // Đặt giờ, phút, giây và mili giây về 00:00:00.000
+            const formattedEightDaysAgo = moment(sixDaysAgo).toISOString(); // Định dạng theo yêu cầu
             const formattedCurrentDate = moment(currentDate).toISOString(); // Định dạng theo yêu cầu
             let totalRevenue = {};
             let result = [];
@@ -471,7 +471,7 @@ export const getRevenueIn8DaysService = (tokenUser, building_id) =>
                 return acc;
             }, {});
             const days = [];
-            for (let d = moment(eightDaysAgo); d.isBefore(moment(currentDate)); d.add(1, 'days')) {
+            for (let d = moment(sixDaysAgo); d.isBefore(moment(currentDate)); d.add(1, 'days')) {
                 days.push(d.format('YYYY-MM-DD'));
             }
             days.forEach(day => {
@@ -536,7 +536,7 @@ export const getRevenueIn8DaysService = (tokenUser, building_id) =>
                 return acc;
             }, {});
             const days = [];
-            for (let d = moment(eightDaysAgo); d.isBefore(moment(currentDate)); d.add(1, 'days')) {
+            for (let d = moment(sixDaysAgo); d.isBefore(moment(currentDate)); d.add(1, 'days')) {
                 days.push(d.format('YYYY-MM-DD'));
             }
             days.forEach(day => {
