@@ -37,6 +37,8 @@ function checkTimeOutBooking() {
             });
 
             let overdueBookingCount = 0;
+            const currentTimestamp = moment().toISOString();
+            // Duyệt qua danh sách booking quá hạn
             overdueBookings.forEach(async (booking) => {
                 if (
                     booking.statusArray &&
@@ -44,8 +46,22 @@ function checkTimeOutBooking() {
                     !booking.statusArray.includes("cancelled") &&
                     !booking.statusArray.includes("completed")
                 ) {
-                    console.log("Booking change complete", booking.booking_id);
+                    overdueBookingCount++;
 
+                    // Chuyển trạng thái booking sang completed nếu thời gian kết thúc booking đã qua
+                    // Quá giờ thì chuyển sang trạng thái completed
+                    if (
+                        moment(currentTimestamp).isAfter(
+                            booking.Booking.end_time_date
+                        )
+                    ) {
+                        await db.BookingStatus.create({
+                            booking_id: booking.booking_id,
+                            status: "completed",
+                        });
+                    }
+
+                    // Lấy thông tin khách hàng
                     const customer = await db.Booking.findOne({
                         where: { booking_id: booking.booking_id },
                         include: [
@@ -56,8 +72,7 @@ function checkTimeOutBooking() {
                         ],
                     });
 
-                    console.log("Customer retrieved:", customer);
-
+                    // Gửi email thông báo tới khách hàng
                     await sendMail(
                         customer.Customer.User.email,
                         "Booking will expire soon",
@@ -73,7 +88,7 @@ function checkTimeOutBooking() {
                                 customer.Customer.User.name
                             }</strong>,</p>
                             <p style="text-align: center; font-size: 16px; color: #555;">We regret to inform you that your booking has been cancelled due to non-payment within the allowed time. Below are the details of the booking:</p>
-                            
+
                             <!-- Booking Details -->
                             <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 15px rgba(0, 0, 0, 0.05); margin-top: 20px;">
                                 <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
@@ -116,13 +131,101 @@ function checkTimeOutBooking() {
                         `
                     );
 
-                    overdueBookingCount++;
+                    // Lấy thông tin building và nhân viên
+                    const [building, staffUser] = await Promise.all([
+                        db.Building.findOne({
+                            include: [
+                                {
+                                    model: db.Workspace,
+                                    where: {
+                                        workspace_id:
+                                            booking.Booking.workspace_id,
+                                    },
+                                    required: true,
+                                },
+                            ],
+                            raw: true,
+                        }),
+                        db.User.findOne({
+                            include: [
+                                {
+                                    model: db.Staff,
+                                    where: {
+                                        building_id:
+                                            booking.Booking.Workspace
+                                                .building_id,
+                                    },
+                                    required: true,
+                                },
+                            ],
+                            raw: true,
+                        }),
+                    ]);
+
+                    if (!building || !staffUser) {
+                        console.error(
+                            "Building or staff information not found for booking:",
+                            booking.booking_id
+                        );
+                        return;
+                    }
+
+                    // Gửi email thông báo tới nhân viên
+                    await sendMail(
+                        staffUser.email,
+                        "Booking will expire soon",
+                        `
+                            <div style="font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; background-color: #f4f4f4;">
+                            <!-- Header with logo -->
+                            <div style="text-align: center; padding-bottom: 20px;">
+                                <img src="https://workzy.vercel.app/WORKZY_SMALL_LOGO.png" alt="Company Logo" style="width: 150px;">
+                            </div>
+
+                            <h2 style="text-align: center; color: #dc3545; font-size: 24px; font-weight: bold; letter-spacing: 1px;">Booking Will Expire Soon</h2>
+                            <p style="text-align: center; font-size: 16px; color: #555;">Dear <strong>${
+                                staffUser.name
+                            }</strong>,</p>
+                            <p style="text-align: center; font-size: 16px; color: #555;">We regret to inform you that the booking of <strong>${
+                                customer.Customer.User.name
+                            }</strong> has been cancelled due to non-payment within the allowed time. Below are the details of the booking:</p>
+
+                            <!-- Booking Details -->
+                            <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 15px rgba(0, 0, 0, 0.05); margin-top: 20px;">
+                                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                                <tr style="background-color: #f9f9f9;">
+                                    <td style="padding: 12px; font-weight: bold; border-bottom: 1px solid #ddd;">Booking ID:</td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #ddd;">${
+                                        booking.booking_id
+                                    }</td>
+                                </tr>
+                                <tr style="background-color: #f9f9f9;">
+                                    <td style="padding: 12px; font-weight: bold; border-bottom: 1px solid #ddd;">Original Booking Date:</td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #ddd;">${moment(
+                                        booking.start_time_date
+                                    ).format("dddd, MMMM Do YYYY, h:mm A")}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px; font-weight: bold; border-bottom: 1px solid #ddd;">Cancellation Date:</td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #ddd;">${moment(
+                                        booking.end_time_date
+                                    ).format("dddd, MMMM Do YYYY, h:mm A")}</td>
+                                </tr>
+                                </table>
+                            </div>
+                            `
+                    );
+
+                    const booking = await db.Booking.findOne({
+                        where: { booking_id: booking.booking_id },
+                    });
+
+                    // Chuyển trạng thái booking sang cancelled
+                    await db.BookingStatus.create({
+                        booking_id: booking.booking_id,
+                        status: "cancelled",
+                    });
                 }
             });
-            console.log(
-                "🚀 ~ overdueBookings.forEach ~ overdueBookingCount:",
-                overdueBookingCount
-            );
 
             resolve(overdueBookingCount);
         } catch (error) {
