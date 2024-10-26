@@ -6,10 +6,9 @@ export const createWishListController = async (req, res) => {
     try {
         const error = Joi.object({
             workspace_id: Joi.string().uuid().required(),
-            user_id: Joi.string().uuid().required(),
-        }).validate({user_id: req.body.user_id, workspace_id: req.body.workspace_id}).error;
+        }).validate({workspace_id: req.body.workspace_id}).error;
         if(error) return badRequest(res, error);
-        const response = await services.createWishListService(req.body);
+        const response = await services.createWishListService({workspace_id: req.body.workspace_id, user_id: req.user.user_id});
         return created(res, response);
     } catch (error) {
         if(error === "No valid workspaces found"

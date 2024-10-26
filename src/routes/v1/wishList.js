@@ -20,11 +20,6 @@ router.post("/", verify_token, verify_role(["customer"]), controllers.createWish
                                 format: 'uuid',
                                 example: '3e8d0be4-27a1-4496-a306-b66ed86bd8eb'
                             },
-                            user_id: {
-                                type: 'string',
-                                format: 'uuid',
-                                example: 'b85f4347-9fc8-4722-b14c-7d21d32d50be'
-                            },
                         }
                     }
                 }

@@ -82,27 +82,57 @@ import { Op } from "sequelize";
 // totalPricesInMonth();
 
 function getTotalBookingByManager() {
-    const booking = db.Booking.findAll({
-        include: [
-            {
-                model: db.BookingStatus,
-                order: [["createdAt", "DESC"]],
-                // limit: 1,
-                required: false,
+    const currentDate = new Date(); // Lấy ngày hiện tại
+    const currentMonth = currentDate.getMonth(); // Lấy tháng hiện tại (0-11)
+    const lastMonth = new Date(new Date().setMonth(currentMonth - 1)); // Lấy tháng trước
+    const formattedCurrentMonth = moment(currentDate).format("YYYY-MM"); // Định dạng theo yêu cầu
+    const formattedLastMonth = moment(lastMonth).format("YYYY-MM"); // Định dạng theo yêu cầu
+    const totalRevenueCurrentMonth = db.Booking.sum("total_price", {
+        where: {
+            createdAt: {
+                [db.Sequelize.Op.between]: [
+                    formattedCurrentMonth + "-01",
+                    formattedCurrentMonth + "-31",
+                ],
             },
-        ],
-    }).then(result => {
-        console.log("Booking: " + result);
-        for (let i = 0; i < result.length; i++) {
-            console.log("Booking ID: " + result[i].booking_id);
-            console.log("Total Price: " + result[i].total_price);
-            console.log("Status: " + result[i].BookingStatuses);
-            for (let j = 0; j < result[i].BookingStatuses.length; j++) {
-                console.log("Status: " + result[i].BookingStatuses[j].status);
-            }
-        }
-    }).catch(error => {
-        console.error("Error while fetching booking:", error);
-    });
+        },
+            include: [
+                {
+                    model: db.BookingStatus,
+                    attributes: [],
+                    where: {
+                        status: "completed",
+                    },
+                },
+            ],
+        }).then(totalRevenueCurrentMonth => {
+            console.log("Total revenue current month: " + totalRevenueCurrentMonth);
+            const totalRevenueLastMonth = db.Booking.sum("total_price", {
+                where: {
+                    createdAt: {
+                        [db.Sequelize.Op.between]: [
+                            formattedLastMonth + "-01",
+                            formattedLastMonth + "-31",
+                        ],
+                    },
+                },
+                include: [
+                    {
+                        model: db.BookingStatus,
+                        attributes: [],
+                        where: {
+                            status: "completed",
+                        },
+                    },
+                ],
+            }).then(totalRevenueLastMonth => {
+                console.log("Total revenue last month: " + result);
+            }).catch(error => {
+                console.error("Error while fetching total revenue last month:", error);
+            });
+        }).catch(error => {
+            console.error("Error while fetching total revenue current month:", error);
+        });
+    
 }
 getTotalBookingByManager();

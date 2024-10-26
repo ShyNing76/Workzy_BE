@@ -8,6 +8,7 @@ import {
     handleOffset,
     handleSortOrder,
 } from "../../utils/handleFilter";
+import { where } from "sequelize";
 
 export const getBookingService = ({ page, limit, order, status, ...data }) =>
     new Promise(async (resolve, reject) => {
@@ -434,6 +435,115 @@ export const getTimeBookingService = ({ workspace_id, date }) =>
         }
     });
 
+//trend
+export const getTrendRevenueService = (tokenUser, building_id) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const currentDate = new Date(); // Lấy ngày hiện tại
+            const currentMonth = currentDate.getMonth(); // Lấy tháng hiện tại (0-11)
+            const lastMonth = new Date(new Date().setMonth(currentMonth - 1)); // Lấy tháng trước
+            const formattedCurrentMonth = moment(currentDate).format("YYYY-MM"); // Định dạng theo yêu cầu
+            const formattedLastMonth = moment(lastMonth).format("YYYY-MM"); // Định dạng theo yêu cầu
+            if (tokenUser.role_id === 1) {
+            const totalRevenueCurrentMonth = await db.Booking.sum("total_price", {
+                where: {
+                    createdAt: {
+                        [db.Sequelize.Op.between]: [
+                            formattedCurrentMonth + "-01",
+                            formattedCurrentMonth + "-31",
+                        ],
+                    },
+                },
+                    include: [
+                        {
+                            model: db.BookingStatus,
+                            attributes: [],
+                            where: {
+                                status: "completed",
+                            },
+                        },
+                    ],
+                });
+            const totalRevenueLastMonth = await db.Booking.sum("total_price", {
+                where: {
+                    createdAt: {
+                        [db.Sequelize.Op.between]: [
+                            formattedLastMonth + "-01",
+                            formattedLastMonth + "-31",
+                        ],
+                    },
+                },
+                include: [
+                    {
+                        model: db.BookingStatus,
+                        attributes: [],
+                        where: {
+                            status: "completed",
+                        },
+                    },
+                ],
+            });
+            } else if (tokenUser.role_id === 2) {
+                if (!building_id) return reject("Building_id is missing");
+                const manager = await db.User.findOne({
+                    where: {
+                        user_id: tokenUser.user_id,
+                    },
+                    attributes: ["user_id"],
+                    include: [
+                        {
+                            model: db.Manager,
+                            attributes: ["manager_id"],
+                        },
+                    ],
+                });
+                if (!manager) return reject("Manager is not exist");
+                const isManagerBelongToBuilding = await db.Building.findOne({
+                    where: {
+                        building_id: building_id,
+                        manager_id: manager.Manager.manager_id,
+                    },
+                });
+                if (!isManagerBelongToBuilding)
+                    return reject("Manager does not belong to this building");
+                const totalRevenue = await db.Booking.sum("total_price", {
+                    where: {
+                        createdAt: {
+                            [db.Sequelize.Op.between]: [
+                                formattedCurrentMonth + "-01",
+                                formattedCurrentMonth + "-31",
+                            ],
+                        },
+                    },
+                    include: [
+                        {
+                            model: db.BookingStatus,
+                            attributes: [],
+                            where: {
+                                status: "completed",
+                            },
+                        },
+                        {
+                            model: db.Workspace,
+                            required: false,
+                            attributes: [],
+                            where: {
+                                building_id: building_id,
+                            },
+                        },
+                    ],
+                });
+            }
+            return resolve({
+                err: 0,
+                message: "Total revenue found",
+                data: totalRevenue,
+            });
+        } catch (error) {
+            console.error(error);
+            return reject(error);
+        }
+    });
 //chart
 export const getRevenueIn6DaysService = (tokenUser, building_id) =>
     new Promise(async (resolve, reject) => {

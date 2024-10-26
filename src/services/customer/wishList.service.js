@@ -1,5 +1,4 @@
 import db from "../../models";
-import { Op } from "sequelize";
 import { v4 } from "uuid";
 import {
     handleLimit,
@@ -7,12 +6,15 @@ import {
     handleSortOrder,
 } from "../../utils/handleFilter";
 
-export const createWishListService = ({ workspace_id, user_id }) =>
+export const createWishListService = ( {workspace_id, user_id} ) =>
     new Promise(async (resolve, reject) => {
         try {
-            const customer = await db.Customer.findOne({
+            console.log(workspace_id);
+            console.log(user_id);
+            const customer = await db.User.findOne({
                 where: { user_id: user_id, status: "active" },
-            });
+                include: [{ model: db.Customer, attributes: ["customer_id"] },],
+            })
 
             if (!customer) return reject("No valid customer found");
 
@@ -25,12 +27,12 @@ export const createWishListService = ({ workspace_id, user_id }) =>
             const wishList = await db.Wishlist.findOrCreate({
                 where: {
                     workspace_id: workspace.workspace_id,
-                    customer_id: customer.customer_id,
+                    customer_id: customer.Customer.customer_id,
                 },
                 defaults: {
                     wishlist_id: v4(),
                     workspace_id: workspace.workspace_id,
-                    customer_id: customer.customer_id,
+                    customer_id: customer.Customer.customer_id,
                 },
             });
 
@@ -40,6 +42,7 @@ export const createWishListService = ({ workspace_id, user_id }) =>
                 message: "WishList created successfully!",
             });
         } catch (error) {
+            console.log(error);
             reject(error);
         }
     });
