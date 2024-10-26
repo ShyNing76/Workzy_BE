@@ -502,7 +502,7 @@ export const changeBookingStatusService = (booking_id, status) =>
                 include: [
                     {
                         model: db.Customer,
-                        attributes: [],
+                        attributes: ["point"],
                         required: true,
                         include: [
                             {
@@ -546,7 +546,7 @@ export const changeBookingStatusService = (booking_id, status) =>
                         },
                         {
                             where: {
-                                customer_id: booking.Customer.customer_id,
+                                customer_id: booking.customer_id,
                             },
                             transaction: t,
                         }
