@@ -914,7 +914,7 @@ router.post(
 router.get(
     "/revenue-in-8-days-ago",
     verify_role(["admin", "manager"]),
-    controllers.getRevenueIn8DaysController
+    controllers.getRevenueIn6DaysController
     /*
         #swagger.description = 'Get total prices of all bookings.'
         #swagger.summary = 'Get total prices of all bookings'
@@ -927,6 +927,37 @@ router.get(
             schema: {
                 err: 0,
                 message: 'Total prices retrieved successfully',
+                data: {
+                    total: 1000000
+                }
+            }
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error',
+            schema: {
+                err: 1,
+                message: 'An error occurred while processing your request'
+            }
+        }
+    */
+);
+
+router.get(
+    "/total-booking-in-8-days-ago",
+    verify_role(["admin", "manager"]),
+    controllers.getTotalBookingIn6DaysController
+    /*
+        #swagger.description = 'Get total bookings in 6 days.'
+        #swagger.summary = 'Get total bookings in 6 days'
+        #swagger.parameters['building_id'] = { description: 'Building ID' }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]
+        #swagger.responses[200] = {
+            description: 'Total bookings retrieved successfully',
+            schema: {
+                err: 0,
+                message: 'Total bookings retrieved successfully',
                 data: {
                     total: 1000000
                 }
