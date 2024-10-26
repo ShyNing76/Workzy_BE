@@ -912,7 +912,7 @@ router.post(
 );
 
 router.get(
-    "/revenue-in-8-days-ago",
+    "/revenue-in-6-days-ago",
     verify_role(["admin", "manager"]),
     controllers.getRevenueIn6DaysController
     /*
@@ -943,7 +943,7 @@ router.get(
 );
 
 router.get(
-    "/total-booking-in-8-days-ago",
+    "/total-booking-in-6-days-ago",
     verify_role(["admin", "manager"]),
     controllers.getTotalBookingIn6DaysController
     /*
