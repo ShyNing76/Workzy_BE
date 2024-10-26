@@ -82,33 +82,27 @@ import { Op } from "sequelize";
 // totalPricesInMonth();
 
 function getTotalBookingByManager() {
-    const currentDate = new Date(); // Lấy ngày hiện tại
-    const eightDaysAgo = new Date(currentDate); // Tạo một bản sao của ngày hiện tại
-    eightDaysAgo.setDate(currentDate.getDate() - 8); // Lấy ngày 8 ngày trước
-    eightDaysAgo.setHours(0, 0, 0, 0); // Đặt giờ, phút, giây và mili giây về 00:00:00.000
-    const formattedEightDaysAgo = moment(eightDaysAgo).toISOString(); // Định dạng theo yêu cầu
-    const formattedCurrentDate = moment(currentDate).toISOString(); // Định dạng theo yêu cầu
-            const revenue = db.Booking.findAll({
-                where: {
-                    createdAt: { 
-                        [db.Sequelize.Op.between]: [formattedEightDaysAgo, formattedCurrentDate],
-                    },
-                },
-                include: [
-                    {
-                        model: db.BookingStatus,
-                        attributes: [],
-                        where: {
-                            status: "completed",
-                        },
-                    },
-                ],
-            }).then(result => {
-                for (let i = 0; i < result.length; i++) {
-                    console.log("Booking: " + result[i].total_price);
-            }}
-            ).catch(error => {
-                console.error("Error while fetching booking:", error);
-            });
+    const booking = db.Booking.findAll({
+        include: [
+            {
+                model: db.BookingStatus,
+                order: [["createdAt", "DESC"]],
+                // limit: 1,
+                required: false,
+            },
+        ],
+    }).then(result => {
+        console.log("Booking: " + result);
+        for (let i = 0; i < result.length; i++) {
+            console.log("Booking ID: " + result[i].booking_id);
+            console.log("Total Price: " + result[i].total_price);
+            console.log("Status: " + result[i].BookingStatuses);
+            for (let j = 0; j < result[i].BookingStatuses.length; j++) {
+                console.log("Status: " + result[i].BookingStatuses[j].status);
+            }
+        }
+    }).catch(error => {
+        console.error("Error while fetching booking:", error);
+    });
 }
 getTotalBookingByManager();

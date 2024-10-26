@@ -507,7 +507,7 @@ export const getRevenueIn6DaysService = (tokenUser, building_id) =>
             const bookings = await db.Booking.findAll({
                 where: {
                     createdAt: { 
-                        [db.Sequelize.Op.between]: [formattedEightDaysAgo, formattedCurrentDate],
+                        [db.Sequelize.Op.between]: [formattedSixDaysAgo, formattedCurrentDate],
                     },
                 },
                 include: [
