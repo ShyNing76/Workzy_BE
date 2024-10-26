@@ -1,6 +1,6 @@
 import cors from "cors";
 import express from "express";
-import job from "./config/checkBookingStatus";
+import { job, timeOutJob } from "./config/checkBookingStatus";
 import initWebRoutes from "./routes/v1";
 require("dotenv").config();
 require("./config/passport");
@@ -28,6 +28,7 @@ app.listen(port, () => {
     console.log(`Server is running on ${port}`);
     console.log(`=================================`);
     job.start();
+    timeOutJob.start();
 });
 
 export default app;
