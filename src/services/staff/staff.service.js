@@ -701,13 +701,13 @@ export const createBrokenAmenitiesBookingService = (amenities_quantities, bookin
                     status: "active",
                 },
                 attributes: ["amenity_id", "depreciation_price", "amenity_name"],
-                raw: true,
-                nest: true,
             });
+            // Check if all amenities are exists in db or not
+            const availableAmenities = amenities.map((amenity) => amenity.amenity_name);
+            const notAvailableAmenities = amenitiesName.filter((amenity) => !availableAmenities.includes(amenity));
+            if (notAvailableAmenities.length > 0) return reject(`Amenities ${notAvailableAmenities.join(', ')} not found`);
             if (amenities.length === 0) return reject("Amenities not found");
-            const total_broken_price = amenities.reduce((total, amenity) => {
-                return parseInt(total) + parseInt(amenity.depreciation_price);
-            }, 0);
+
             const booking = await db.Booking.findOne({
                 where: {
                     booking_id: booking_id,
@@ -728,14 +728,18 @@ export const createBrokenAmenitiesBookingService = (amenities_quantities, bookin
             if (booking.BookingStatuses[0].status === "cancelled")
                 return reject("Booking status is cancelled");
 
+            const quantitiesMap = {};
             const quantities = amenities_quantities.map((amenity) => {
-                return amenity.quantity;
+                quantitiesMap[amenity.amenity_name] = amenity.quantity;
             });
 
-            const amenitiesData = amenities.map((amenity, index) => (
-                `${amenity.amenity_name}: ${quantities[index]}: ${amenity.depreciation_price}`
+            const total_broken_price = amenities.reduce((total, amenity) => {
+                return parseInt(total) + parseInt(amenity.depreciation_price) * parseInt(quantitiesMap[amenity.amenity_name]);
+            }, 0);
+            const amenitiesData = amenities.map((amenity) => (
+                `${amenity.amenity_name}: ${quantitiesMap[amenity.amenity_name]}: ${amenity.depreciation_price}`
             )).join('|'); 
-            console.log(amenitiesData);
+
             booking.total_price = parseInt(total_broken_price) + parseInt(booking.total_price);
             booking.total_broken_price = total_broken_price;
             booking.report_damage_ameninites = amenitiesData;
