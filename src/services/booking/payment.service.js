@@ -655,31 +655,32 @@ export const paypalCheckoutAmenitiesService = ({
             if (total_amenities_price !== totalAmenitiesPrice)
                 return reject("Total amenities price mismatch");
 
-            // Create payment
-            const payment = await db.Payment.create(
-                {
+            const [payment, created] = await db.Payment.findOrCreate({
+                where: {
+                    booking_id: booking.booking_id,
+                    payment_type: "Amenities-Price",
+                },
+                defaults: {
                     booking_id: booking.booking_id,
                     amount: total_amenities_price,
                     payment_method: "paypal",
                     payment_date: new Date(),
                     payment_type: "Amenities-Price",
                 },
-                {
-                    transaction: t,
-                }
-            );
+                transaction: t,
+            });
             if (!payment) return reject("Payment created failed");
 
             // Create transaction
-            const transaction = await db.Transaction.create(
-                {
-                    payment_id: payment.payment_id,
-                    status: "In-processing",
-                },
-                {
+            const [transaction, createdTransaction] =
+                await db.Transaction.findOrCreate({
+                    where: { payment_id: payment.payment_id },
+                    defaults: {
+                        payment_id: payment.payment_id,
+                        status: "In-processing",
+                    },
                     transaction: t,
-                }
-            );
+                });
             if (!transaction) return reject("Transaction created failed");
 
             const request = new paypal.orders.OrdersCreateRequest();
@@ -1085,7 +1086,7 @@ export const paypalCheckoutDamageService = ({ booking_id, user_id }) =>
                 },
                 transaction: t,
             });
-            if (!created) return reject("Payment created failed");
+            if (!payment) return reject("Payment created failed");
 
             const [transaction, createdTransaction] =
                 await db.Transaction.findOrCreate({
@@ -1097,8 +1098,7 @@ export const paypalCheckoutDamageService = ({ booking_id, user_id }) =>
                     transaction: t,
                 });
 
-            if (!createdTransaction)
-                return reject("Transaction created failed");
+            if (!transaction) return reject("Transaction created failed");
             const amount = await convertVNDToUSD(booking.total_broken_price);
             const request = new paypal.orders.OrdersCreateRequest();
 
