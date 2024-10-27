@@ -24,7 +24,6 @@ export const createBookingController = async (req, res) => {
             start_time: req.body.start_time,
             end_time: req.body.end_time,
             total_price: req.body.total_price,
-            voucher_id: req.body.voucher_id,
         }).error;
         if (error) return badRequest(res, error.details[0].message);
 

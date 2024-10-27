@@ -1,4 +1,5 @@
 import { v4 } from "uuid";
+import { Op } from "sequelize";
 import db from "../../models";
 import { checkRoomAvailability } from "../../utils/checkRoomAvailability";
 
@@ -40,12 +41,13 @@ export const createBookingService = (data) =>
                     "Workspace is already booked for the selected time period"
                 );
             }
-            const voucher = await db.Voucher.findOne({
-                where: {
-                    voucher_id: data.voucher_id,
-                },
-            });
-            if(voucher){
+            let voucher;
+            if(data.voucher_id && data.voucher_id !== "") {
+                voucher = await db.Voucher.findOne({
+                    where: {
+                        voucher_id: data.voucher_id,
+                    },
+                });
                 voucher.quantity = parseInt(voucher.quantity) - 1;
                 await voucher.save({ transaction: t });
             }
