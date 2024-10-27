@@ -10,10 +10,12 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             Wishlist.hasMany(models.Customer, {
-                foreignKey: "customer_id"
+                foreignKey: "customer_id",
+                sourceKey: "customer_id",
             });
             Wishlist.hasMany(models.Workspace, {
-                foreignKey: "workspace_id"
+                foreignKey: "workspace_id",
+                sourceKey: "workspace_id",
             });
         }
     }
