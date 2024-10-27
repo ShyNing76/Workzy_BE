@@ -655,32 +655,20 @@ export const paypalCheckoutAmenitiesService = ({
             if (total_amenities_price !== totalAmenitiesPrice)
                 return reject("Total amenities price mismatch");
 
-            const [payment, created] = await db.Payment.findOrCreate({
-                where: {
-                    booking_id: booking.booking_id,
-                    payment_type: "Amenities-Price",
-                },
-                defaults: {
-                    booking_id: booking.booking_id,
-                    amount: total_amenities_price,
-                    payment_method: "paypal",
-                    payment_date: new Date(),
-                    payment_type: "Amenities-Price",
-                },
-                transaction: t,
-            });
+            const payment = await db.Payment.create({
+                booking_id: booking.booking_id,
+                amount: total_amenities_price,
+                payment_method: "paypal",
+                payment_date: new Date(),
+                payment_type: "Amenities-Price",
+            }, { transaction: t });
             if (!payment) return reject("Payment created failed");
 
             // Create transaction
-            const [transaction, createdTransaction] =
-                await db.Transaction.findOrCreate({
-                    where: { payment_id: payment.payment_id },
-                    defaults: {
-                        payment_id: payment.payment_id,
-                        status: "In-processing",
-                    },
-                    transaction: t,
-                });
+            const transaction = await db.Transaction.create({
+                payment_id: payment.payment_id,
+                status: "In-processing",
+            }, { transaction: t });
             if (!transaction) return reject("Transaction created failed");
 
             const request = new paypal.orders.OrdersCreateRequest();
@@ -794,7 +782,7 @@ export const paypalCheckoutAmenitiesService = ({
             await Promise.all(bookingAmenities);
 
             // Update booking with total amenities price
-            booking.total_amenities_price = parseInt(total_amenities_price);
+            booking.total_amenities_price = parseInt(total_amenities_price) + parseInt(booking.total_amenities_price);
             await booking.save({ transaction: t });
 
             await db.Notification.create({
@@ -881,7 +869,13 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
                 ],
             });
 
-            const amount = await convertVNDToUSD(booking.total_amenities_price);
+            const payment = await db.Payment.findOne({
+                where: { paypal_order_id: order_id },
+            });
+
+            if (!payment) return reject("Payment not found");
+
+            const amount = await convertVNDToUSD(payment.amount);
             const request = new paypal.orders.OrdersCaptureRequest(order_id);
             request.requestBody({
                 amount: {
@@ -895,12 +889,6 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
             if (response.statusCode !== 201) {
                 return reject("Failed to capture PayPal order");
             }
-
-            const payment = await db.Payment.findOne({
-                where: { paypal_order_id: order_id },
-            });
-
-            if (!payment) return reject("Payment not found");
 
             const captureId =
                 response.result.purchase_units[0].payments.captures[0].id;
@@ -922,7 +910,7 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
 
             booking.total_price =
                 parseInt(booking.total_price) +
-                parseInt(booking.total_amenities_price);
+                parseInt(payment.amount);
             await booking.save({ transaction: t });
             await sendMail(
                 booking.Customer.User.email,
