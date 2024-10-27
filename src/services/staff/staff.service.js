@@ -151,7 +151,7 @@ export const getAllStaffService = ({
                     );
                 }
             });
-            if(!staffs) return reject("No Staff Exist");
+            if (!staffs) return reject("No Staff Exist");
             resolve({
                 err: 0,
                 message: "Got",
@@ -530,11 +530,14 @@ export const changeBookingStatusService = (booking_id, status) =>
                         ? ["check-in", "usage"]
                         : [statusTransitions[bookingStatus.status]];
                 for (const statusToCreate of statusesToCreate) {
-                    changeStatus = await db.BookingStatus.create({
-                        booking_status_id: v4(),
-                        booking_id: booking_id,
-                        status: statusToCreate,
-                    }, { transaction: t });
+                    changeStatus = await db.BookingStatus.create(
+                        {
+                            booking_status_id: v4(),
+                            booking_id: booking_id,
+                            status: statusToCreate,
+                        },
+                        { transaction: t }
+                    );
                 }
 
                 if (statusTransitions[bookingStatus.status] === "completed") {
@@ -661,19 +664,25 @@ export const getAmenitiesByBookingIdService = (booking_id) =>
             const amenitiesWorkspaceList = amenitiesWorkspace.map((amenity) => {
                 return {
                     amenity_name: amenity.Amenities.amenity_name,
-                    quantity: amenity.quantity
+                    quantity: amenity.quantity,
                 };
             });
             const countMap = {};
-            [...amenitiesOfBookingList, ...amenitiesWorkspaceList].forEach((amenity) => {
-                countMap[amenity.amenity_name] = (countMap[amenity.amenity_name] || 0) + amenity.quantity;
-            });
-            const uniqueAmenitiesWithQuantity = Object.keys(countMap).map((amenityName) => {
-                return {
-                    amenity_name: amenityName,
-                    quantity: countMap[amenityName],
-                };
-            });
+            [...amenitiesOfBookingList, ...amenitiesWorkspaceList].forEach(
+                (amenity) => {
+                    countMap[amenity.amenity_name] =
+                        (countMap[amenity.amenity_name] || 0) +
+                        amenity.quantity;
+                }
+            );
+            const uniqueAmenitiesWithQuantity = Object.keys(countMap).map(
+                (amenityName) => {
+                    return {
+                        amenity_name: amenityName,
+                        quantity: countMap[amenityName],
+                    };
+                }
+            );
             console.log(uniqueAmenitiesWithQuantity);
             if (uniqueAmenitiesWithQuantity.length === 0)
                 return reject("No amenities found for the specified booking");
@@ -688,7 +697,10 @@ export const getAmenitiesByBookingIdService = (booking_id) =>
         }
     });
 
-export const createBrokenAmenitiesBookingService = (amenities_quantities, booking_id) =>
+export const createBrokenAmenitiesBookingService = (
+    amenities_quantities,
+    booking_id
+) =>
     new Promise(async (resolve, reject) => {
         const t = await db.sequelize.transaction();
         try {
@@ -700,7 +712,11 @@ export const createBrokenAmenitiesBookingService = (amenities_quantities, bookin
                     amenity_name: { [Op.in]: amenitiesName },
                     status: "active",
                 },
-                attributes: ["amenity_id", "depreciation_price", "amenity_name"],
+                attributes: [
+                    "amenity_id",
+                    "depreciation_price",
+                    "amenity_name",
+                ],
                 raw: true,
                 nest: true,
             });
@@ -732,11 +748,19 @@ export const createBrokenAmenitiesBookingService = (amenities_quantities, bookin
                 return amenity.quantity;
             });
 
-            const amenitiesData = amenities.map((amenity, index) => (
-                `${amenity.amenity_name}: ${quantities[index]}: ${amenity.depreciation_price}`
-            )).join('|'); 
+            const amenitiesData = amenities
+                .map(
+                    (amenity, index) =>
+                        `${amenity.amenity_name}: ${quantities[index]}: ${amenity.depreciation_price}`
+                )
+                .join("|");
             console.log(amenitiesData);
-            booking.total_price = parseInt(total_broken_price) + parseInt(booking.total_price);
+            booking.total_price =
+                parseInt(total_broken_price) +
+                parseInt(
+                    booking.total_workspace_price +
+                        booking.total_amenities_price
+                );
             booking.total_broken_price = total_broken_price;
             booking.report_damage_ameninites = amenitiesData;
             await booking.save({ transaction: t });
@@ -760,4 +784,3 @@ export const createBrokenAmenitiesBookingService = (amenities_quantities, bookin
             reject(error);
         }
     });
-
