@@ -802,7 +802,7 @@ export const paypalCheckoutAmenitiesService = ({
                 customer_id: customer.customer_id,
                 type: "booking",
                 description: `Order created for amenities booking ${booking.booking_id}`,
-            });
+            }, { transaction: t });
 
             await t.commit();
             return resolve({
@@ -1015,7 +1015,7 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
                 customer_id: booking.Customer.customer_id,
                 type: "booking",
                 description: `Order successfully paid for amenities booking ${booking_id}`,
-            });
+            }, { transaction: t });
 
             await t.commit();
             return resolve({
@@ -1158,7 +1158,7 @@ export const paypalCheckoutDamageService = ({ booking_id, user_id }) =>
                 customer_id: customer.customer_id,
                 type: "booking",
                 description: `Order created for damage payment ${booking_id}`,
-            });
+            }, { transaction: t });
 
             await t.commit();
             resolve({
@@ -1387,7 +1387,7 @@ export const paypalDamageSuccessService = ({ booking_id, order_id }) =>
                 customer_id: booking.customer_id,
                 type: "booking",
                 description: `Order successfully paid for damage payment ${booking_id}`,
-            });
+            }, { transaction: t });
 
             await t.commit();
             resolve({

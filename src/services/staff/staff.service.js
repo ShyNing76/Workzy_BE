@@ -502,7 +502,7 @@ export const changeBookingStatusService = (booking_id, status) =>
                 include: [
                     {
                         model: db.Customer,
-                        attributes: ["point"],
+                        attributes: ["point", "customer_id"],
                         required: true,
                         include: [
                             {
@@ -556,6 +556,36 @@ export const changeBookingStatusService = (booking_id, status) =>
                     );
                     if (updatedPoints[0] === 0)
                         return reject("Failed to update customer points");
+
+                    await db.Notification.create(
+                        {
+                            notification_id: v4(),
+                            customer_id: booking.customer_id,
+                            type: "booking",
+                            description: `Your booking with ID ${booking_id} has been completed successfully.`,
+                        },
+                        { transaction: t }
+                    );
+                }
+
+                const notificationMessages = {
+                    "check-in": `Your booking with ID ${booking_id} has been checked in.`,
+                    usage: `Your booking with ID ${booking_id} is now in use.`,
+                    "check-out": `Your booking with ID ${booking_id} has been checked out.`,
+                    "check-amenities": `Your booking with ID ${booking_id} is now in the amenities check stage.`,
+                    completed: `Your booking with ID ${booking_id} has been completed successfully.`,
+                };
+
+                if (notificationMessages[status]) {
+                    await db.Notification.create(
+                        {
+                            notification_id: v4(),
+                            customer_id: booking.customer_id,
+                            type: "booking",
+                            description: notificationMessages[status],
+                        },
+                        { transaction: t }
+                    );
                 }
 
                 await sendMail(
@@ -721,9 +751,16 @@ export const createBrokenAmenitiesBookingService = (
                 nest: true,
             });
             // Check if all amenities are exists in db or not
-            const availableAmenities = amenities.map((amenity) => amenity.amenity_name);
-            const notAvailableAmenities = amenitiesName.filter((amenity) => !availableAmenities.includes(amenity));
-            if (notAvailableAmenities.length > 0) return reject(`Amenities ${notAvailableAmenities.join(', ')} not found`);
+            const availableAmenities = amenities.map(
+                (amenity) => amenity.amenity_name
+            );
+            const notAvailableAmenities = amenitiesName.filter(
+                (amenity) => !availableAmenities.includes(amenity)
+            );
+            if (notAvailableAmenities.length > 0)
+                return reject(
+                    `Amenities ${notAvailableAmenities.join(", ")} not found`
+                );
             if (amenities.length === 0) return reject("Amenities not found");
 
             const booking = await db.Booking.findOne({
@@ -752,12 +789,18 @@ export const createBrokenAmenitiesBookingService = (
             });
 
             const total_broken_price = amenities.reduce((total, amenity) => {
-                return parseInt(total) + parseInt(amenity.depreciation_price) * parseInt(quantitiesMap[amenity.amenity_name]);
+                return (
+                    parseInt(total) +
+                    parseInt(amenity.depreciation_price) *
+                        parseInt(quantitiesMap[amenity.amenity_name])
+                );
             }, 0);
             const amenitiesData = amenities
                 .map(
                     (amenity) =>
-                        `${amenity.amenity_name}: ${quantitiesMap[amenity.amenity_name]}: ${amenity.depreciation_price}`
+                        `${amenity.amenity_name}: ${
+                            quantitiesMap[amenity.amenity_name]
+                        }: ${amenity.depreciation_price}`
                 )
                 .join("|");
 
@@ -770,6 +813,16 @@ export const createBrokenAmenitiesBookingService = (
             booking.total_broken_price = total_broken_price;
             booking.report_damage_ameninites = amenitiesData;
             await booking.save({ transaction: t });
+
+            await db.Notification.create(
+                {
+                    notification_id: v4(),
+                    customer_id: booking.customer_id,
+                    type: "booking",
+                    description: `Your booking with ID ${booking_id} has reported damaged amenities. Total damage cost: ${total_broken_price}.`,
+                },
+                { transaction: t }
+            );
 
             await db.BookingStatus.create(
                 {
