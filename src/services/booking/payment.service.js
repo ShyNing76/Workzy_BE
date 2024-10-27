@@ -1164,10 +1164,10 @@ export const paypalCheckoutDamageService = ({ booking_id, user_id }) =>
                 err: 0,
                 message: "PayPal checkout initiated successfully",
                 data: {
-                    approval_url: response.result.links.find(
+                    approval_url: order.result.links.find(
                         (link) => link.rel === "approve"
                     ).href,
-                    order_id: response.result.id,
+                    order_id: order.id,
                 },
             });
         } catch (err) {
