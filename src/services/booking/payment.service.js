@@ -648,7 +648,10 @@ export const paypalCheckoutAmenitiesService = ({
                     amenity.rent_price * amenitiesMap[amenity.amenity_id]
                 );
             }, 0);
-            console.log("🚀 ~ newPromise ~ totalAmenitiesPrice:", totalAmenitiesPrice);
+            console.log(
+                "🚀 ~ newPromise ~ totalAmenitiesPrice:",
+                totalAmenitiesPrice
+            );
             if (total_amenities_price !== totalAmenitiesPrice)
                 return reject("Total amenities price mismatch");
 
@@ -847,7 +850,7 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
                         model: db.Workspace,
                         attributes: ["workspace_name"],
                         required: true,
-                    }
+                    },
                 ],
             });
             if (!booking) {
@@ -966,12 +969,8 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
                                     .map(
                                         (amenity) => `
                                         <tr>
-                                            <td style="padding: 10px; text-align: left; background-color: #fafafa;">${
-                                            amenity.Amenity.amenity_name
-                                            }</td>
-                                            <td style="padding: 10px; text-align: center; background-color: #fafafa;">${
-                                            amenity.quantity
-                                            }</td>
+                                            <td style="padding: 10px; text-align: left; background-color: #fafafa;">${amenity.Amenity.amenity_name}</td>
+                                            <td style="padding: 10px; text-align: center; background-color: #fafafa;">${amenity.quantity}</td>
                                             <td style="padding: 10px; text-align: center; background-color: #fafafa;">${amenity.price} VNĐ</td>
                                             <td style="padding: 10px; text-align: right; background-color: #fafafa;">${amenity.total_price} VNĐ</td>
                                         </tr>
@@ -986,7 +985,9 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
 
                         <tr style="background-color: #f0f0f0;">
                             <td style="padding: 12px; font-weight: bold; color: #28a745; border-bottom: 1px solid #eaeaea;">Total Price:</td>
-                            <td style="padding: 12px; color: #28a745; border-bottom: 1px solid #eaeaea; text-align: right;">$${booking.total_price} VNĐ</td>
+                            <td style="padding: 12px; color: #28a745; border-bottom: 1px solid #eaeaea; text-align: right;">$${
+                                booking.total_price
+                            } VNĐ</td>
                         </tr>
                         </table>
                     </div>
@@ -1007,7 +1008,7 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
                     </div>
                 `
             );
-              
+
             await db.Notification.create({
                 notification_id: v4(),
                 customer_id: booking.Customer.customer_id,
@@ -1209,7 +1210,7 @@ export const paypalDamageSuccessService = ({ booking_id, order_id }) =>
                         as: "Workspace",
                         attributes: ["workspace_name"],
                         required: true,
-                    }
+                    },
                 ],
             });
             if (!booking) {
@@ -1284,16 +1285,16 @@ export const paypalDamageSuccessService = ({ booking_id, order_id }) =>
                 parseInt(booking.total_broken_price);
             await booking.save({ transaction: t });
 
+            const bookingPoint =
+                parseInt(booking.total_amenities_price) +
+                parseInt(booking.total_workspace_price);
+
+            const newPoint =
+                booking.Customer.point + Math.ceil(bookingPoint / 1000);
+
             const updatedPoints = await db.Customer.update(
                 {
-                    point:
-                        parseInt(booking.Customer.point) +
-                        Math.ceil(
-                            parseInt(
-                                booking.total_amenities_price +
-                                    booking.total_workspace_price
-                            ) / 1000
-                        ),
+                    point: newPoint,
                 },
                 {
                     where: {
@@ -1306,7 +1307,7 @@ export const paypalDamageSuccessService = ({ booking_id, order_id }) =>
                 return reject("Failed to update customer points");
 
             const report_damage_ameninites =
-            booking.report_damage_ameninites.split("|");
+                booking.report_damage_ameninites.split("|");
             let amenitiesMap = report_damage_ameninites
                 .map((amenity) => {
                     const [name, quantity, price] = amenity.split(":");
@@ -1315,8 +1316,9 @@ export const paypalDamageSuccessService = ({ booking_id, order_id }) =>
                         <td style="padding: 12px; text-align: center;">${quantity}</td>
                         <td style="padding: 12px; text-align: right;">${price} VNĐ</td>
                     </tr>`;
-                }).join(""); // Join the array into a single string
-    
+                })
+                .join(""); // Join the array into a single string
+
             await sendMail(
                 "tranngvietquang04@gmail.com",
                 "Payment Successful",
