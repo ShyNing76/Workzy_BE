@@ -78,7 +78,7 @@ export const changeStatusController = async (req, res) => {
 export const getNotificationsController = async (req, res) => {
     try {
         const response = await services.getNotificationsService({
-            ...req.body,
+            ...req.query,
             ...req.user,
         });
         return ok(res, response);

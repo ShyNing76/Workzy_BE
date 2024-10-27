@@ -265,7 +265,6 @@ export const changeStatusService = ({ booking_id, user_id, status }) =>
 export const getNotificationsService = ({ page, limit, order, ...query }) =>
     new Promise(async (resolve, reject) => {
         try {
-            console.log(query);
             const customer = await db.Customer.findOne({
                 where: {
                     user_id: query.user_id,
@@ -276,20 +275,18 @@ export const getNotificationsService = ({ page, limit, order, ...query }) =>
                 return reject("Customer not found");
             }
 
-            const notifications = await db.Notification.findAndCountAll(
-                {
-                    where: {
-                        customer_id: customer.customer_id,
-                    },
-                    attributes: {
-                        exclude: ["created_at", "updated_at"],
-                    },
-                    order: [handleSortOrder(order, "created_at")],
-                    limit: handleLimit(limit),
-                    offset: handleOffset(page, limit),
-                }
-            );
-            
+            const notifications = await db.Notification.findAndCountAll({
+                where: {
+                    customer_id: customer.customer_id,
+                },
+                attributes: {
+                    exclude: ["created_at", "updated_at"],
+                },
+                order: [handleSortOrder(order, "created_at")],
+                limit: handleLimit(limit),
+                offset: handleOffset(page, limit),
+            });
+
             if (!notifications) {
                 return reject("Error while fetching notifications");
             }
@@ -328,26 +325,26 @@ export const getPointService = (tokenUser) =>
         }
     });
 
-
 //lấy top 5 customer có điểm cao nhất
-export const getTopFiveCustomerService = () => new Promise(async (resolve, reject) => {
-    try {
-        const customers = await db.Customer.findAll({
-            order: [["point", "DESC"]],
-            limit: 5,
-            include: [
-                {
-                    model: db.User,
-                    attributes: ["name"],
-                },
-            ],
-        });
-        resolve({
-            err: 0,
-            message: "Got",
-            data: customers
-        });
-    } catch (error) {
-        reject(error)
-    }
-})
+export const getTopFiveCustomerService = () =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const customers = await db.Customer.findAll({
+                order: [["point", "DESC"]],
+                limit: 5,
+                include: [
+                    {
+                        model: db.User,
+                        attributes: ["name"],
+                    },
+                ],
+            });
+            resolve({
+                err: 0,
+                message: "Got",
+                data: customers,
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
