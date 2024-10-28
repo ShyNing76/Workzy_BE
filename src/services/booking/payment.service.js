@@ -655,20 +655,26 @@ export const paypalCheckoutAmenitiesService = ({
             if (total_amenities_price !== totalAmenitiesPrice)
                 return reject("Total amenities price mismatch");
 
-            const payment = await db.Payment.create({
-                booking_id: booking.booking_id,
-                amount: total_amenities_price,
-                payment_method: "paypal",
-                payment_date: new Date(),
-                payment_type: "Amenities-Price",
-            }, { transaction: t });
+            const payment = await db.Payment.create(
+                {
+                    booking_id: booking.booking_id,
+                    amount: total_amenities_price,
+                    payment_method: "paypal",
+                    payment_date: new Date(),
+                    payment_type: "Amenities-Price",
+                },
+                { transaction: t }
+            );
             if (!payment) return reject("Payment created failed");
 
             // Create transaction
-            const transaction = await db.Transaction.create({
-                payment_id: payment.payment_id,
-                status: "In-processing",
-            }, { transaction: t });
+            const transaction = await db.Transaction.create(
+                {
+                    payment_id: payment.payment_id,
+                    status: "In-processing",
+                },
+                { transaction: t }
+            );
             if (!transaction) return reject("Transaction created failed");
 
             const request = new paypal.orders.OrdersCreateRequest();
@@ -782,15 +788,20 @@ export const paypalCheckoutAmenitiesService = ({
             await Promise.all(bookingAmenities);
 
             // Update booking with total amenities price
-            booking.total_amenities_price = parseInt(total_amenities_price) + parseInt(booking.total_amenities_price);
+            booking.total_amenities_price =
+                parseInt(total_amenities_price) +
+                parseInt(booking.total_amenities_price);
             await booking.save({ transaction: t });
 
-            await db.Notification.create({
-                notification_id: v4(),
-                customer_id: customer.customer_id,
-                type: "booking",
-                description: `Order created for amenities booking ${booking.booking_id}`,
-            }, { transaction: t });
+            await db.Notification.create(
+                {
+                    notification_id: v4(),
+                    customer_id: customer.customer_id,
+                    type: "booking",
+                    description: `Order created for amenities booking ${booking.booking_id}`,
+                },
+                { transaction: t }
+            );
 
             await t.commit();
             return resolve({
@@ -909,8 +920,7 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
             if (!transaction) return reject("Transaction created failed");
 
             booking.total_price =
-                parseInt(booking.total_price) +
-                parseInt(payment.amount);
+                parseInt(booking.total_price) + parseInt(payment.amount);
             await booking.save({ transaction: t });
             await sendMail(
                 booking.Customer.User.email,
@@ -998,12 +1008,15 @@ export const paypalAmenitiesSuccessService = ({ booking_id, order_id }) =>
                 `
             );
 
-            await db.Notification.create({
-                notification_id: v4(),
-                customer_id: booking.Customer.customer_id,
-                type: "booking",
-                description: `Order successfully paid for amenities booking ${booking_id}`,
-            }, { transaction: t });
+            await db.Notification.create(
+                {
+                    notification_id: v4(),
+                    customer_id: booking.Customer.customer_id,
+                    type: "booking",
+                    description: `Order successfully paid for amenities booking ${booking_id}`,
+                },
+                { transaction: t }
+            );
 
             await t.commit();
             return resolve({
@@ -1141,27 +1154,30 @@ export const paypalCheckoutDamageService = ({ booking_id, user_id }) =>
                 { where: { payment_id: payment.payment_id }, transaction: t }
             );
 
-            await db.Notification.create({
-                notification_id: v4(),
-                customer_id: customer.customer_id,
-                type: "booking",
-                description: `Order created for damage payment ${booking_id}`,
-            }, { transaction: t });
+            await db.Notification.create(
+                {
+                    notification_id: v4(),
+                    customer_id: customer.customer_id,
+                    type: "booking",
+                    description: `Order created for damage payment ${booking_id}`,
+                },
+                { transaction: t }
+            );
 
             await t.commit();
             resolve({
                 err: 0,
                 message: "PayPal checkout initiated successfully",
                 data: {
-                    approval_url: order.result.links.find(
+                    approval_url: order.links.find(
                         (link) => link.rel === "approve"
                     ).href,
                     order_id: order.id,
                 },
             });
         } catch (err) {
-            await t.rollback();
             console.error(err);
+            await t.rollback();
             return reject(err);
         }
     });
@@ -1370,12 +1386,15 @@ export const paypalDamageSuccessService = ({ booking_id, order_id }) =>
                 </div>
                 `
             );
-            await db.Notification.create({
-                notification_id: v4(),
-                customer_id: booking.customer_id,
-                type: "booking",
-                description: `Order successfully paid for damage payment ${booking_id}`,
-            }, { transaction: t });
+            await db.Notification.create(
+                {
+                    notification_id: v4(),
+                    customer_id: booking.customer_id,
+                    type: "booking",
+                    description: `Order successfully paid for damage payment ${booking_id}`,
+                },
+                { transaction: t }
+            );
 
             await t.commit();
             resolve({
