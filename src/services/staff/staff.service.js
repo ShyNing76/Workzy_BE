@@ -806,10 +806,8 @@ export const createBrokenAmenitiesBookingService = (
 
             booking.total_price =
                 parseInt(total_broken_price) +
-                parseInt(
-                    booking.total_workspace_price +
-                        booking.total_amenities_price
-                );
+                parseInt(booking.total_workspace_price) +
+                parseInt(booking.total_amenities_price);
             booking.total_broken_price = total_broken_price;
             booking.report_damage_ameninites = amenitiesData;
             await booking.save({ transaction: t });
