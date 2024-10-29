@@ -331,11 +331,17 @@ export const addToCalendarService = (booking_id, user_id) =>
                 summary: `Booking at ${booking.data.Workspace.workspace_name}`,
                 description: `Booking details:\n\nWorkspace: ${booking.data.Workspace.workspace_name}\nBooking Type: ${booking.data.BookingType.type}\nStart Time: ${startDateTime}\nEnd Time: ${endDateTime}\nTotal Price: ${booking.data.total_price} VNĐ`,
                 start: {
-                    dateTime: startDateTime,
+                    dateTime: moment(
+                        booking.data.start_time_date,
+                        "DD/MM/YYYY HH:mm:ss"
+                    ).toString(),
                     timeZone: "Asia/Kolkata",
                 },
                 end: {
-                    dateTime: endDateTime,
+                    dateTime: moment(
+                        booking.data.end_time_date,
+                        "DD/MM/YYYY HH:mm:ss"
+                    ).toString(),
                     timeZone: "Asia/Kolkata",
                 },
                 attendees: [
