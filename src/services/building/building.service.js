@@ -174,7 +174,7 @@ export const createBuildingService = (data) =>
         }
     });
 
-export const updateBuildingService = (id, firebaseUrl, data) =>
+export const updateBuildingService = (id, firebaseUrl, remove_images, data) =>
     new Promise(async (resolve, reject) => {
         const t = await db.sequelize.transaction();
         try {
@@ -187,6 +187,8 @@ export const updateBuildingService = (id, firebaseUrl, data) =>
                 return reject("Building not found");
             }
 
+            console.log(data);
+
             const isBuildingNameExist = await db.Building.findOne({
                 where: {
                     building_name: data.building_name,
@@ -197,10 +199,28 @@ export const updateBuildingService = (id, firebaseUrl, data) =>
                 return reject("Building name already exists");
             }
 
+            delete data.remove_images;
+
             building.set({ ...building.dataValues, ...data });
             await building.save({ transaction: t });
 
             try {
+                console.log(remove_images);
+                const remove_images_array = remove_images.split(",");
+                if (remove_images_array && remove_images_array.length > 0) {
+                    // xóa ảnh cũ trong db
+                    await db.BuildingImage.destroy({
+                        where: {
+                            building_id: id,
+                            image: {
+                                [Op.in]: remove_images_array,
+                            },
+                        },
+                        transaction: t,
+                    });
+                    // xóa ảnh cũ trong firebase
+                    await deleteImages(remove_images_array);
+                }
                 // tạo mới những ảnh thêm mới
                 await createBuildingImages(
                     firebaseUrl,
@@ -222,7 +242,7 @@ export const updateBuildingService = (id, firebaseUrl, data) =>
                 },
             });
         } catch (error) {
-            console.error(error);
+            console.log(error);
             await t.rollback();
             reject(error);
         }
@@ -363,10 +383,9 @@ export const deleteBuildingService = (id) =>
     });
 
 //lấy tổng số building
-export const getTotalBuildingService = () => 
+export const getTotalBuildingService = () =>
     new Promise(async (resolve, reject) => {
         try {
-
             const totalBuilding = await db.Building.count({
                 where: {
                     status: "active",

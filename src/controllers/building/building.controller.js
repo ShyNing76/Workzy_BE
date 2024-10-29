@@ -81,10 +81,10 @@ export const updateBuildingController = async (req, res) => {
             images: req.images,
         }).error;
         if (error) return badRequest(res, error);
-        console.log;
         const response = await services.updateBuildingService(
             req.params.id,
             req.images,
+            req.body.remove_images,
             req.body
         );
         return ok(res, response);
@@ -185,7 +185,6 @@ export const deleteBuildingController = async (req, res) => {
     }
 };
 
-
 export const getTotalBuildingController = async (req, res) => {
     try {
         const response = await services.getTotalBuildingService();
@@ -193,4 +192,4 @@ export const getTotalBuildingController = async (req, res) => {
     } catch (error) {
         internalServerError(res, error);
     }
-}
+};

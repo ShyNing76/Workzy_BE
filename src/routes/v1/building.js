@@ -5,9 +5,12 @@ import { uploadImages } from "../../middlewares/imageGoogleUpload";
 
 const router = express.Router();
 
-
-router.get("/total", verify_token, verify_role(["admin"]), controllers.getTotalBuildingController
-/*
+router.get(
+    "/total",
+    verify_token,
+    verify_role(["admin"]),
+    controllers.getTotalBuildingController
+    /*
         #swagger.description = 'Endpoint to get total buildings.'
         #swagger.summary = 'Get total buildings.'
         #swagger.responses[200] = {
@@ -23,7 +26,7 @@ router.get("/total", verify_token, verify_role(["admin"]), controllers.getTotalB
             "apiKeyAuth": []
         }]
      */
-    );
+);
 
 router.get(
     "/",
@@ -87,7 +90,6 @@ router.get(
 );
 
 router.use(verify_token);
-
 
 router.post(
     "/",
@@ -212,6 +214,14 @@ router.put(
                                     format: 'binary',
                                     description: 'Image files'
                                 }
+                            },
+                            remove_images: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    example: 'Image URL.'
+                                },
+                                description: 'Array of image URLs to remove'
                             },
                         },
                         required: ['building_name', 'location', 'address', 'google_address', 'images']
