@@ -206,20 +206,22 @@ export const updateBuildingService = (id, firebaseUrl, remove_images, data) =>
 
             try {
                 console.log(remove_images);
-                const remove_images_array = remove_images.split(",");
-                if (remove_images_array && remove_images_array.length > 0) {
-                    // xóa ảnh cũ trong db
-                    await db.BuildingImage.destroy({
-                        where: {
-                            building_id: id,
-                            image: {
-                                [Op.in]: remove_images_array,
+                if (remove_images) {
+                    const remove_images_array = remove_images.split(",");
+                    if (remove_images_array && remove_images_array.length > 0) {
+                        // xóa ảnh cũ trong db
+                        await db.BuildingImage.destroy({
+                            where: {
+                                building_id: id,
+                                image: {
+                                    [Op.in]: remove_images_array,
+                                },
                             },
-                        },
-                        transaction: t,
-                    });
-                    // xóa ảnh cũ trong firebase
-                    await deleteImages(remove_images_array);
+                            transaction: t,
+                        });
+                        // xóa ảnh cũ trong firebase
+                        await deleteImages(remove_images_array);
+                    }
                 }
                 // tạo mới những ảnh thêm mới
                 await createBuildingImages(
