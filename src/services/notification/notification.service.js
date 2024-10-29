@@ -1,18 +1,71 @@
 import db from '../../models';
+import { sendMail } from '../../utils/sendMail';
 
 export const createNotificationService = (data) => new Promise(async (resolve, reject) => {
     try {
-        const notification = await db.Notification.create(data);
-
-        if (!notification) {
-            return reject("Error while creating");
-        }
-
+            const wishlist = await db.Wishlist.findOne({
+                where: {
+                    wishlist_id: data.wishlist_id,
+                }
+            });
+            if(!wishlist) return reject("Wishlist not found");
+            const customer = await db.Customer.findOne({
+                where: { customer_id: wishlist.customer_id },
+                include: [{
+                    model: db.User,
+                    attributes: ["email"],
+                    where: {
+                        status: "active"
+                    }
+                }]
+            });
+            if(!customer) return reject("Customer not found");
+            const workspace = await db.Workspace.findOne({
+                where: {
+                    workspace_id: wishlist.workspace_id,
+                    status: "active"
+                }
+            });
+            if(!workspace) return reject("Workspace not found");
+            await db.Notification.create({
+                type: data.type,
+                description: data.description,
+                customer_id: wishlist.customer_id
+            });
+            await sendMail(
+                customer.User.email,
+                "Your Workspace Is Available",
+                `Workspace Name: ${workspace.workspace_name} is available now. Come to our website to book it right now! <a href="https://workzy.vercel.app/">Click here</a>`
+            );
         resolve({
             err: 0,
             message: "Notification created successfully"
         });
     } catch (error) {
+        console.log(error);
+        reject(error);
+    }
+});
+
+export const createNotificationBySendMailService = (tokenUser) => new Promise(async (resolve, reject) => {
+    try {
+        const customer = await db.User.findOne({
+            where: {
+                user_id: tokenUser.user_id,
+                status: "active"
+            },
+        });
+            await sendMail(
+                customer.email,
+                "Thank you for your Contact",
+                "We will contact you as soon as possible. Thank you for your interest in our services"
+            );
+        resolve({
+            err: 0,
+            message: "Notification created successfully"
+        });
+    } catch (error) {
+        console.log(error);
         reject(error);
     }
 });

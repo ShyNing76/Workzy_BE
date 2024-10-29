@@ -6,15 +6,30 @@ import * as services from "../../services";
 export const createNotificationController = async (req, res) => {
     try {
         const error = Joi.object({
+            wishlist_id: Joi.string().uuid().required(),
             type,
             description
-        }).validate({type: req.body?.type, description: req.body?.description}).error;
+        }).validate({wishlist_id: req.body?.wishlist_id, type: req.body?.type, description: req.body?.description}).error;
         if (error) badRequest(res, error.message);
 
         const response = await services.createNotificationService(req.body);
 
         return created(res, response);
     } catch (error) {
+        if(error.message === "Wishlist not found" ||
+            error.message === "Workspace not found" ||
+            error.message === "Customer not found") return notFound(res, error.message);
+        internalServerError(res, error.message);
+    }
+};
+
+export const createNotificationBySendEmailController = async (req, res) => {
+    try {
+        const response = await services.createNotificationBySendMailService(req.user);
+
+        return created(res, response);
+    } catch (error) {
+        if(error.message === "Customer not found") return notFound(res, error.message);
         internalServerError(res, error.message);
     }
 };
