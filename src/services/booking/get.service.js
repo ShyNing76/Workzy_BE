@@ -318,30 +318,21 @@ export const addToCalendarService = (booking_id, user_id) =>
                 auth: oauth2Client,
             });
 
-            const startDateTime = moment(booking.data.start_time_date)
-                .utcOffset("+07:00")
-                .format("DD/MM/YYYY HH:mm:ss")
-                .toString();
-            const endDateTime = moment(booking.data.end_time_date)
-                .utcOffset("+07:00")
-                .format("DD/MM/YYYY HH:mm:ss")
-                .toString();
-
             let event = {
                 summary: `Booking at ${booking.data.Workspace.workspace_name}`,
-                description: `Booking details:\n\nWorkspace: ${booking.data.Workspace.workspace_name}\nBooking Type: ${booking.data.BookingType.type}\nStart Time: ${startDateTime}\nEnd Time: ${endDateTime}\nTotal Price: ${booking.data.total_price} VNĐ`,
+                description: `Booking details:\n\nWorkspace: ${booking.data.Workspace.workspace_name}\nBooking Type: ${booking.data.BookingType.type}\nStart Time: ${booking.data.start_time_date}\nEnd Time: ${booking.data.end_time_date}\nTotal Price: ${booking.data.total_price} VNĐ`,
                 start: {
                     dateTime: moment(
                         booking.data.start_time_date,
                         "DD/MM/YYYY HH:mm:ss"
-                    ).toString(),
+                    ).toISOString(),
                     timeZone: "Asia/Kolkata",
                 },
                 end: {
                     dateTime: moment(
                         booking.data.end_time_date,
                         "DD/MM/YYYY HH:mm:ss"
-                    ).toString(),
+                    ).toISOString(),
                     timeZone: "Asia/Kolkata",
                 },
                 attendees: [
@@ -379,7 +370,7 @@ export const addToCalendarService = (booking_id, user_id) =>
                 return reject(calendarError);
             }
         } catch (error) {
-            console.error(error);
+            console.log(error);
             return reject(error);
         }
     });
