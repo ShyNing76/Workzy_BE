@@ -318,14 +318,14 @@ export const addToCalendarService = (booking_id, user_id) =>
                 auth: oauth2Client,
             });
 
-            const startDateTime = moment(
-                booking.data.start_time_date,
-                "DD/MM/YYYY HH:mm:ss"
-            ).toString();
-            const endDateTime = moment(
-                booking.data.end_time_date,
-                "DD/MM/YYYY HH:mm:ss"
-            ).toString();
+            const startDateTime = moment(booking.data.start_time_date)
+                .utcOffset("+07:00")
+                .format("DD/MM/YYYY HH:mm:ss")
+                .toString();
+            const endDateTime = moment(booking.data.end_time_date)
+                .utcOffset("+07:00")
+                .format("DD/MM/YYYY HH:mm:ss")
+                .toString();
 
             let event = {
                 summary: `Booking at ${booking.data.Workspace.workspace_name}`,
