@@ -664,9 +664,9 @@ export const getAmenitiesByBookingIdService = (booking_id) =>
                 return reject("Booking status is not check-amenities");
             if (booking.BookingStatuses[0].status === "cancelled")
                 return reject("Booking status is cancelled");
-            if (amenitiesOfBooking.length === 0)
-                return reject("No amenities found for the specified booking");
-            console.log(amenitiesOfBooking);
+            // if (amenitiesOfBooking.length === 0)
+            //     return reject("No amenities found for the specified booking");
+            // console.log(amenitiesOfBooking);
             const amenitiesWorkspace = await db.AmenitiesWorkspace.findAll({
                 where: {
                     workspace_id: booking.Workspace.workspace_id,
@@ -685,18 +685,22 @@ export const getAmenitiesByBookingIdService = (booking_id) =>
             if (!amenitiesWorkspace)
                 return reject("No amenities found for the specified workspace");
 
-            const amenitiesOfBookingList = amenitiesOfBooking.map((amenity) => {
-                return {
-                    amenity_name: amenity.Amenity.amenity_name,
-                    quantity: amenity.quantity,
-                };
-            });
-            const amenitiesWorkspaceList = amenitiesWorkspace.map((amenity) => {
-                return {
-                    amenity_name: amenity.Amenities.amenity_name,
-                    quantity: amenity.quantity,
-                };
-            });
+            const amenitiesOfBookingList = amenitiesOfBooking
+                ? amenitiesOfBooking.map((amenity) => {
+                      return {
+                          amenity_name: amenity.Amenity.amenity_name,
+                          quantity: amenity.quantity,
+                      };
+                  })
+                : [];
+            const amenitiesWorkspaceList = amenitiesWorkspace
+                ? amenitiesWorkspace.map((amenity) => {
+                      return {
+                          amenity_name: amenity.Amenities.amenity_name,
+                          quantity: amenity.quantity,
+                      };
+                  })
+                : [];
             const countMap = {};
             [...amenitiesOfBookingList, ...amenitiesWorkspaceList].forEach(
                 (amenity) => {

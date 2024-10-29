@@ -54,13 +54,14 @@ export const createBuildingController = async (req, res) => {
         });
         return created(res, response);
     } catch (error) {
-        if (error === "Building name already exists") {
-            return badRequest(res, error);
-        } else if (error.includes("image(s) already exist for this building")) {
-            return badRequest(res, error);
-        } else {
-            return internalServerError(res, error);
-        }
+        const knownError = [
+            "Building name already exists",
+            "Building location already exists",
+            "Building address already exists",
+            "Building image(s) already exist for this building",
+        ];
+        if (knownError.includes(error)) return badRequest(res, error);
+        internalServerError(res, error);
     }
 };
 
