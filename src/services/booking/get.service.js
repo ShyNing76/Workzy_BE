@@ -145,7 +145,11 @@ export const getAllBookingsService = ({
                         model: db.Workspace,
                         as: "Workspace",
                         where: building_id ? { building_id } : {},
-                        attributes: ["workspace_name", "workspace_type_id", "building_id"],
+                        attributes: [
+                            "workspace_name",
+                            "workspace_type_id",
+                            "building_id",
+                        ],
                         include: {
                             model: db.Building,
                             as: "Building",
@@ -314,21 +318,24 @@ export const addToCalendarService = (booking_id, user_id) =>
                 auth: oauth2Client,
             });
 
+            const startDateTime = moment(
+                booking.data.start_time_date,
+                "DD/MM/YYYY HH:mm:ss"
+            ).toString();
+            const endDateTime = moment(
+                booking.data.end_time_date,
+                "DD/MM/YYYY HH:mm:ss"
+            ).toString();
+
             let event = {
                 summary: `Booking at ${booking.data.Workspace.workspace_name}`,
-                description: `Booking details:\n\nWorkspace: ${booking.data.Workspace.workspace_name}\nBooking Type: ${booking.data.BookingType.type}\nStart Time: ${booking.data.start_time_date}\nEnd Time: ${booking.data.end_time_date}`,
+                description: `Booking details:\n\nWorkspace: ${booking.data.Workspace.workspace_name}\nBooking Type: ${booking.data.BookingType.type}\nStart Time: ${startDateTime}\nEnd Time: ${endDateTime}\nTotal Price: ${booking.data.total_price} VNĐ`,
                 start: {
-                    dateTime: moment(
-                        booking.data.start_time_date,
-                        "DD/MM/YYYY HH:mm:ss"
-                    ).toISOString(),
+                    dateTime: startDateTime,
                     timeZone: "Asia/Kolkata",
                 },
                 end: {
-                    dateTime: moment(
-                        booking.data.end_time_date,
-                        "DD/MM/YYYY HH:mm:ss"
-                    ).toISOString(),
+                    dateTime: endDateTime,
                     timeZone: "Asia/Kolkata",
                 },
                 attendees: [
@@ -445,44 +452,50 @@ export const getTrendRevenueService = (tokenUser, building_id) =>
             const formattedCurrentMonth = moment(currentDate).format("YYYY-MM"); // Định dạng theo yêu cầu
             const formattedLastMonth = moment(lastMonth).format("YYYY-MM"); // Định dạng theo yêu cầu
             if (tokenUser.role_id === 1) {
-            const totalRevenueCurrentMonth = await db.Booking.sum("total_price", {
-                where: {
-                    createdAt: {
-                        [db.Sequelize.Op.between]: [
-                            formattedCurrentMonth + "-01",
-                            formattedCurrentMonth + "-31",
-                        ],
-                    },
-                },
-                    include: [
-                        {
-                            model: db.BookingStatus,
-                            attributes: [],
-                            where: {
-                                status: "completed",
+                const totalRevenueCurrentMonth = await db.Booking.sum(
+                    "total_price",
+                    {
+                        where: {
+                            createdAt: {
+                                [db.Sequelize.Op.between]: [
+                                    formattedCurrentMonth + "-01",
+                                    formattedCurrentMonth + "-31",
+                                ],
                             },
                         },
-                    ],
-                });
-            const totalRevenueLastMonth = await db.Booking.sum("total_price", {
-                where: {
-                    createdAt: {
-                        [db.Sequelize.Op.between]: [
-                            formattedLastMonth + "-01",
-                            formattedLastMonth + "-31",
+                        include: [
+                            {
+                                model: db.BookingStatus,
+                                attributes: [],
+                                where: {
+                                    status: "completed",
+                                },
+                            },
                         ],
-                    },
-                },
-                include: [
+                    }
+                );
+                const totalRevenueLastMonth = await db.Booking.sum(
+                    "total_price",
                     {
-                        model: db.BookingStatus,
-                        attributes: [],
                         where: {
-                            status: "completed",
+                            createdAt: {
+                                [db.Sequelize.Op.between]: [
+                                    formattedLastMonth + "-01",
+                                    formattedLastMonth + "-31",
+                                ],
+                            },
                         },
-                    },
-                ],
-            });
+                        include: [
+                            {
+                                model: db.BookingStatus,
+                                attributes: [],
+                                where: {
+                                    status: "completed",
+                                },
+                            },
+                        ],
+                    }
+                );
             } else if (tokenUser.role_id === 2) {
                 if (!building_id) return reject("Building_id is missing");
                 const manager = await db.User.findOne({
@@ -556,112 +569,126 @@ export const getRevenueIn6DaysService = (tokenUser, building_id) =>
             const formattedCurrentDate = moment(currentDate).toISOString(); // Định dạng theo yêu cầu
             let totalRevenue = {};
             let result = [];
-            if(tokenUser.role_id === 1) {
-            const bookings = await db.Booking.findAll({
-                where: {
-                    createdAt: { 
-                        [db.Sequelize.Op.between]: [formattedSixDaysAgo, formattedCurrentDate],
-                    },
-                },
-                include: [
-                    {
-                        model: db.BookingStatus,
-                        attributes: [],
-                        where: {
-                            status: "completed",
+            if (tokenUser.role_id === 1) {
+                const bookings = await db.Booking.findAll({
+                    where: {
+                        createdAt: {
+                            [db.Sequelize.Op.between]: [
+                                formattedSixDaysAgo,
+                                formattedCurrentDate,
+                            ],
                         },
                     },
-                ],
-            });
-            totalRevenue = bookings.reduce((acc, booking) => {
-                const date = moment(booking.createdAt).format('YYYY-MM-DD'); // Định dạng ngày
-                if (!acc[date]) {
-                    acc[date] = 0;
-                }
-                acc[date] += parseInt(booking.total_price); // Cộng dồn total_price
-                return acc;
-            }, {});
-            const days = [];
-            for (let d = moment(sixDaysAgo); d.isBefore(moment(currentDate)); d.add(1, 'days')) {
-                days.push(d.format('YYYY-MM-DD'));
-            }
-            days.forEach(day => {
-                result.push({
-                    date: day,
-                    total_price: totalRevenue[day] || 0,
+                    include: [
+                        {
+                            model: db.BookingStatus,
+                            attributes: [],
+                            where: {
+                                status: "completed",
+                            },
+                        },
+                    ],
                 });
-            })
-        } else if(tokenUser.role_id === 2) {
-            if (!building_id) return reject("Building_id is missing");
-            const manager = await db.User.findOne({
-                where: {
-                    user_id: tokenUser.user_id,
-                },
-                attributes: ["user_id"],
-                include: [
-                    {
-                        model: db.Manager,
-                        attributes: ["manager_id"],
-                    },
-                ],
-            });
-            if (!manager) return reject("Manager is not exist");
-            const isManagerBelongToBuilding = await db.Building.findOne({
-                where: {
-                    building_id: building_id,
-                    manager_id: manager.Manager.manager_id,
-                },
-            });
-            if (!isManagerBelongToBuilding)
-                return reject("Manager does not belong to this building");
-            const bookings = await db.Booking.findAll({
-                where: {
-                    createdAt: { 
-                        [db.Sequelize.Op.between]: [formattedSixDaysAgo, formattedCurrentDate],
-                    },
-                },
-                include: [
-                    {
-                        model: db.BookingStatus,
-                        attributes: [],
-                        where: {
-                            status: "completed",
-                        },
-                    },
-                    {
-                        model: db.Workspace,
-                        required: false,
-                        attributes: [],
-                        where: {
-                            building_id: building_id,
-                        },
-                    },
-                ],
-            });
-            totalRevenue = bookings.reduce((acc, booking) => {
-                const date = moment(booking.createdAt).format('YYYY-MM-DD'); // Định dạng ngày
-                if (!acc[date]) {
-                    acc[date] = 0;
+                totalRevenue = bookings.reduce((acc, booking) => {
+                    const date = moment(booking.createdAt).format("YYYY-MM-DD"); // Định dạng ngày
+                    if (!acc[date]) {
+                        acc[date] = 0;
+                    }
+                    acc[date] += parseInt(booking.total_price); // Cộng dồn total_price
+                    return acc;
+                }, {});
+                const days = [];
+                for (
+                    let d = moment(sixDaysAgo);
+                    d.isBefore(moment(currentDate));
+                    d.add(1, "days")
+                ) {
+                    days.push(d.format("YYYY-MM-DD"));
                 }
-                acc[date] += parseInt(booking.total_price); // Cộng dồn total_price
-                return acc;
-            }, {});
-            const days = [];
-            for (let d = moment(sixDaysAgo); d.isBefore(moment(currentDate)); d.add(1, 'days')) {
-                days.push(d.format('YYYY-MM-DD'));
-            }
-            days.forEach(day => {
-                result.push({
-                    date: day,
-                    total_price: totalRevenue[day] || 0,
+                days.forEach((day) => {
+                    result.push({
+                        date: day,
+                        total_price: totalRevenue[day] || 0,
+                    });
                 });
-            })
-        }
-        resolve({
-            err: 0,
-            message: "Revenue found",
-            data: result,
-        });
+            } else if (tokenUser.role_id === 2) {
+                if (!building_id) return reject("Building_id is missing");
+                const manager = await db.User.findOne({
+                    where: {
+                        user_id: tokenUser.user_id,
+                    },
+                    attributes: ["user_id"],
+                    include: [
+                        {
+                            model: db.Manager,
+                            attributes: ["manager_id"],
+                        },
+                    ],
+                });
+                if (!manager) return reject("Manager is not exist");
+                const isManagerBelongToBuilding = await db.Building.findOne({
+                    where: {
+                        building_id: building_id,
+                        manager_id: manager.Manager.manager_id,
+                    },
+                });
+                if (!isManagerBelongToBuilding)
+                    return reject("Manager does not belong to this building");
+                const bookings = await db.Booking.findAll({
+                    where: {
+                        createdAt: {
+                            [db.Sequelize.Op.between]: [
+                                formattedSixDaysAgo,
+                                formattedCurrentDate,
+                            ],
+                        },
+                    },
+                    include: [
+                        {
+                            model: db.BookingStatus,
+                            attributes: [],
+                            where: {
+                                status: "completed",
+                            },
+                        },
+                        {
+                            model: db.Workspace,
+                            required: false,
+                            attributes: [],
+                            where: {
+                                building_id: building_id,
+                            },
+                        },
+                    ],
+                });
+                totalRevenue = bookings.reduce((acc, booking) => {
+                    const date = moment(booking.createdAt).format("YYYY-MM-DD"); // Định dạng ngày
+                    if (!acc[date]) {
+                        acc[date] = 0;
+                    }
+                    acc[date] += parseInt(booking.total_price); // Cộng dồn total_price
+                    return acc;
+                }, {});
+                const days = [];
+                for (
+                    let d = moment(sixDaysAgo);
+                    d.isBefore(moment(currentDate));
+                    d.add(1, "days")
+                ) {
+                    days.push(d.format("YYYY-MM-DD"));
+                }
+                days.forEach((day) => {
+                    result.push({
+                        date: day,
+                        total_price: totalRevenue[day] || 0,
+                    });
+                });
+            }
+            resolve({
+                err: 0,
+                message: "Revenue found",
+                data: result,
+            });
         } catch (error) {
             console.error(error);
             return reject(error);
@@ -672,119 +699,133 @@ export const getTotalBookingIn6DaysService = (tokenUser, building_id) =>
     new Promise(async (resolve, reject) => {
         try {
             const currentDate = new Date(); // Lấy ngày hiện tại
-            const sixDaysAgo = new Date(currentDate); // Tạo một bản sao của ngày hiện tại  
+            const sixDaysAgo = new Date(currentDate); // Tạo một bản sao của ngày hiện tại
             sixDaysAgo.setDate(currentDate.getDate() - 6); // Lấy ngày 6 ngày trước
             sixDaysAgo.setHours(0, 0, 0, 0); // Đặt giờ, phút, giây và mili giây về 00:00:00.000
             const formattedSixDaysAgo = moment(sixDaysAgo).toISOString(); // Định dạng theo yêu cầu
             const formattedCurrentDate = moment(currentDate).toISOString(); // Định dạng theo yêu cầu
             let totalBooking = {};
             let result = [];
-            if(tokenUser.role_id === 1) {
-            const bookings = await db.Booking.findAll({
-                where: {
-                    createdAt: {
-                        [db.Sequelize.Op.between]: [formattedSixDaysAgo, formattedCurrentDate],
-                    },
-                },
-                include: [
-                    {
-                        model: db.BookingStatus,
-                        attributes: [],
-                        where: {
-                            status: "completed",
+            if (tokenUser.role_id === 1) {
+                const bookings = await db.Booking.findAll({
+                    where: {
+                        createdAt: {
+                            [db.Sequelize.Op.between]: [
+                                formattedSixDaysAgo,
+                                formattedCurrentDate,
+                            ],
                         },
                     },
-                ],
-            });
-            totalBooking = bookings.reduce((acc, booking) => {
-                const date = moment(booking.createdAt).format('YYYY-MM-DD'); // Định dạng ngày
-                if (!acc[date]) {
-                    acc[date] = 0;
-                }
-                acc[date] += 1; // Cộng dồn số lượng booking
-                return acc;
-            }, {});
-            const days = [];
-            for (let d = moment(sixDaysAgo); d.isBefore(moment(currentDate)); d.add(1, 'days')) {
-                days.push(d.format('YYYY-MM-DD'));
-            }
-            days.forEach(day => {
-                result.push({
-                    date: day,
-                    total_booking: totalBooking[day] || 0,
+                    include: [
+                        {
+                            model: db.BookingStatus,
+                            attributes: [],
+                            where: {
+                                status: "completed",
+                            },
+                        },
+                    ],
                 });
-            })
-        } else if(tokenUser.role_id === 2) {
-            if (!building_id) return reject("Building_id is missing");
-            const manager = await db.User.findOne({
-                where: {
-                    user_id: tokenUser.user_id,
-                },
-                attributes: ["user_id"],
-                include: [
-                    {
-                        model: db.Manager,
-                        attributes: ["manager_id"],
-                    },
-                ],
-            });
-            if (!manager) return reject("Manager is not exist");
-            const isManagerBelongToBuilding = await db.Building.findOne({
-                where: {
-                    building_id: building_id,
-                    manager_id: manager.Manager.manager_id,
-                },
-            });
-            if (!isManagerBelongToBuilding)
-                return reject("Manager does not belong to this building");
-            const bookings = await db.Booking.findAll({
-                where: {
-                    createdAt: {
-                        [db.Sequelize.Op.between]: [formattedSixDaysAgo, formattedCurrentDate],
-                    },
-                },
-                include: [
-                    {
-                        model: db.BookingStatus,
-                        attributes: [],
-                        where: {
-                            status: "completed",
-                        },
-                    },
-                    {
-                        model: db.Workspace,
-                        required: false,
-                        attributes: [],
-                        where: {
-                            building_id: building_id,
-                        },
-                    },
-                ],
-            });
-            totalBooking = bookings.reduce((acc, booking) => {
-                const date = moment(booking.createdAt).format('YYYY-MM-DD'); // Định dạng ngày
-                if (!acc[date]) {
-                    acc[date] = 0;
+                totalBooking = bookings.reduce((acc, booking) => {
+                    const date = moment(booking.createdAt).format("YYYY-MM-DD"); // Định dạng ngày
+                    if (!acc[date]) {
+                        acc[date] = 0;
+                    }
+                    acc[date] += 1; // Cộng dồn số lượng booking
+                    return acc;
+                }, {});
+                const days = [];
+                for (
+                    let d = moment(sixDaysAgo);
+                    d.isBefore(moment(currentDate));
+                    d.add(1, "days")
+                ) {
+                    days.push(d.format("YYYY-MM-DD"));
                 }
-                acc[date] += 1; // Cộng dồn số lượng booking
-                return acc;
-            }, {});
-            const days = [];
-            for (let d = moment(sixDaysAgo); d.isBefore(moment(currentDate)); d.add(1, 'days')) {
-                days.push(d.format('YYYY-MM-DD'));
-            }
-            days.forEach(day => {
-                result.push({
-                    date: day,
-                    total_booking: totalBooking[day] || 0,
+                days.forEach((day) => {
+                    result.push({
+                        date: day,
+                        total_booking: totalBooking[day] || 0,
+                    });
                 });
-            })
-        }
-        resolve({
-            err: 0,
-            message: "Total booking found",
-            data: result,
-        });
+            } else if (tokenUser.role_id === 2) {
+                if (!building_id) return reject("Building_id is missing");
+                const manager = await db.User.findOne({
+                    where: {
+                        user_id: tokenUser.user_id,
+                    },
+                    attributes: ["user_id"],
+                    include: [
+                        {
+                            model: db.Manager,
+                            attributes: ["manager_id"],
+                        },
+                    ],
+                });
+                if (!manager) return reject("Manager is not exist");
+                const isManagerBelongToBuilding = await db.Building.findOne({
+                    where: {
+                        building_id: building_id,
+                        manager_id: manager.Manager.manager_id,
+                    },
+                });
+                if (!isManagerBelongToBuilding)
+                    return reject("Manager does not belong to this building");
+                const bookings = await db.Booking.findAll({
+                    where: {
+                        createdAt: {
+                            [db.Sequelize.Op.between]: [
+                                formattedSixDaysAgo,
+                                formattedCurrentDate,
+                            ],
+                        },
+                    },
+                    include: [
+                        {
+                            model: db.BookingStatus,
+                            attributes: [],
+                            where: {
+                                status: "completed",
+                            },
+                        },
+                        {
+                            model: db.Workspace,
+                            required: false,
+                            attributes: [],
+                            where: {
+                                building_id: building_id,
+                            },
+                        },
+                    ],
+                });
+                totalBooking = bookings.reduce((acc, booking) => {
+                    const date = moment(booking.createdAt).format("YYYY-MM-DD"); // Định dạng ngày
+                    if (!acc[date]) {
+                        acc[date] = 0;
+                    }
+                    acc[date] += 1; // Cộng dồn số lượng booking
+                    return acc;
+                }, {});
+                const days = [];
+                for (
+                    let d = moment(sixDaysAgo);
+                    d.isBefore(moment(currentDate));
+                    d.add(1, "days")
+                ) {
+                    days.push(d.format("YYYY-MM-DD"));
+                }
+                days.forEach((day) => {
+                    result.push({
+                        date: day,
+                        total_booking: totalBooking[day] || 0,
+                    });
+                });
+            }
+            resolve({
+                err: 0,
+                message: "Total booking found",
+                data: result,
+            });
         } catch (error) {
             console.error(error);
             return reject(error);
@@ -1027,4 +1068,3 @@ export const get5RecentBookingService = (tokenUser, building_id) =>
             reject(error);
         }
     });
-
