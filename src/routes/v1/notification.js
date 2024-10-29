@@ -1,9 +1,11 @@
 import express from "express";
 import * as controllers from "../../controllers";
+import { verify_role, verify_token } from "../../middlewares/verifyToken";
+
 
 const router = express.Router();
 
-router.get("/", controllers.getAllNotificationsController
+router.get("/", verify_token,  controllers.getAllNotificationsController
     /*
         #swagger.description = 'Endpoint to get all notifications.'
         #swagger.summary = 'Get all notifications.'
@@ -44,10 +46,10 @@ router.get("/:id", controllers.getNotificationByIdController
      */
 );
 
-router.post("/", controllers.createNotificationController
+router.post("/", verify_token, verify_role(["staff"]), controllers.createNotificationController
     /*
-        #swagger.description = 'Endpoint to create a new notification.'
-        #swagger.summary = 'Create a new notification.'
+        #swagger.description = 'Endpoint
+        #swagger.summary = 'Create a notification.'
         #swagger.requestBody = {
             required: true,
             content: {
@@ -62,13 +64,18 @@ router.post("/", controllers.createNotificationController
                             description: {
                                 type: 'string',
                                 example: 'Booking has been made'
-                            }
+                            },
+                            wishlist_id: {
+                                type: 'string',
+                                format: 'uuid',
+                                example: '123e4567-e89b-12d3-a456-426614174000'
+                            },
                         }
                     }
                 }
             }
         }
-        #swagger.responses[200] = {
+        #swagger.responses[201] = {
             description: 'Notification created.'
         }
         #swagger.responses[400] = {
@@ -79,8 +86,27 @@ router.post("/", controllers.createNotificationController
         }
         #swagger.security = [{
             "apiKeyAuth": []
-        }]
-     */
+        }]    
+    */
+);
+
+router.post("/sendMail", verify_token, verify_role(["customer"]), controllers.createNotificationBySendEmailController
+    /*
+        #swagger.description = 'Endpoint to create a notification by sending an email.'
+        #swagger.summary = ' Create a notification by sending an email.'
+        #swagger.responses[201] = {
+            description: 'Notification created.'
+        }
+        #swagger.responses[400] = {
+            description: 'Invalid input.'
+        }
+        #swagger.responses[500] = {
+            description: 'Internal server error.'
+        }
+        #swagger.security = [{
+            "apiKeyAuth": []
+        }]    
+    */
 );
 
 router.put("/:id", controllers.updateNotificationController

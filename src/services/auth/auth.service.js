@@ -10,6 +10,7 @@ export const loginService = ({ email, password }) =>
             const user = await db.User.findOne({
                 where: {
                     email,
+                    status: "active"
                 },
                 raw: true,
             });
