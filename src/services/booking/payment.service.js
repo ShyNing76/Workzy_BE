@@ -1324,7 +1324,7 @@ export const paypalDamageSuccessService = ({ booking_id, order_id }) =>
                 .join(""); // Join the array into a single string
 
             await sendMail(
-                "tranngvietquang04@gmail.com",
+                booking.Customer.User.email,
                 "Payment Successful",
                 `
                 <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border: 1px solid #eaeaea; border-radius: 10px;">
