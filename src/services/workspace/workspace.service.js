@@ -300,7 +300,6 @@ export const getAllWorkspaceService = ({
                                 ? workspace_type_name
                                 : { [Op.ne]: null },
                         },
-                        required: true,
                     },
                     {
                         model: db.WorkspaceImage,
