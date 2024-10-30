@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { workspace_name, workspace_price } from "../../helper/joi_schema";
+import { workspace_name } from "../../helper/joi_schema";
 import {
     badRequest,
     created,
@@ -12,11 +12,19 @@ export const createWorkspaceController = async (req, res) => {
     try {
         const error = Joi.object({
             workspace_name,
-            workspace_price,
+            price_per_hour: Joi.number().integer().min(1).required(),
+            price_per_day: Joi.number().integer().min(1).required(),
+            price_per_month: Joi.number().integer().min(1).required(),
+            building_id: Joi.string().uuid().required(),
+            workspace_type_id: Joi.string().uuid().required(),
             images: Joi.required(),
         }).validate({
             workspace_name: req.body.workspace_name,
-            workspace_price: req.body.workspace_price,
+            price_per_hour: req.body.price_per_hour,
+            price_per_day: req.body.price_per_day,
+            price_per_month: req.body.price_per_month,
+            building_id: req.body.building_id,
+            workspace_type_id: req.body.workspace_type_id,
             images: req.images,
         }).error;
         if (error) return badRequest(res, error);
@@ -36,21 +44,26 @@ export const updateWorkspaceController = async (req, res) => {
     try {
         const error = Joi.object({
             workspace_name,
-            workspace_price,
-            building_id: Joi.required(),
-            workspace_type_id: Joi.required(),
+            price_per_hour: Joi.number().integer().min(1),
+            price_per_day: Joi.number().integer().min(1),
+            price_per_month: Joi.number().integer().min(1),
+            building_id: Joi.string().uuid().required(),
+            workspace_type_id: Joi.string().uuid().required(),
             images: Joi.required(),
         }).validate({
             workspace_name: req.body.workspace_name,
-            workspace_price: req.body.workspace_price,
+            price_per_hour: req.body.price_per_hour,
+            price_per_day: req.body.price_per_day,
+            price_per_month: req.body.price_per_month,
             building_id: req.body.building_id,
             workspace_type_id: req.body.workspace_type_id,
             images: req.images,
         }).error;
         if (error) return badRequest(res, error);
         const response = await services.updateWorkspaceService(req.params.id, {
-            ...req.body,
             images: req.images,
+            remove_images: req.body.remove_images,
+            ...req.body,
         });
         return ok(res, response);
     } catch (error) {

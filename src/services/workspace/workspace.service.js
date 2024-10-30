@@ -11,28 +11,27 @@ import { deleteImages } from "../../middlewares/imageGoogleUpload";
 
 export const createWorkspaceService = async ({
     images,
-    workspace_name,
-    workspace_price,
     ...data
 }) =>
     new Promise(async (resolve, reject) => {
         const t = await db.sequelize.transaction();
         try {
-            const price_per_day = workspace_price * 8 * 0.8;
-            const price_per_month = workspace_price * 22 * 0.8;
-
+            const workspaceType = await db.WorkspaceType.findByPk(data.workspace_type_id);
+            if (!workspaceType) return reject("Workspace Type is not exist");
+            const isBuildingExist = await db.Building.findOne({
+                where: {
+                    building_id: data.building_id,
+                    status: "active",
+                },
+                attributes: ["building_id"],
+            });
+            if (!isBuildingExist) return reject("Building is not exist");
             const workspace = await db.Workspace.findOrCreate({
                 where: {
-                    workspace_name: workspace_name,
+                    workspace_name: data.workspace_name,
                 },
                 defaults: {
                     workspace_id: v4(),
-                    building_id: data.building_id || null,
-                    workspace_type_id: data.workspace_type_id,
-                    workspace_name: workspace_name,
-                    price_per_hour: workspace_price,
-                    price_per_day,
-                    price_per_month,
                     ...data,
                 },
                 transaction: t,
@@ -66,23 +65,21 @@ export const updateWorkspaceService = async (
     {
         workspace_name,
         building_id,
-        workspace_price,
+        price_per_hour,
+        price_per_day,
+        price_per_month,
         workspace_type_id,
         images,
+        remove_images,
         ...data
     }
 ) =>
     new Promise(async (resolve, reject) => {
+        const t = await db.sequelize.transaction();
         try {
-            if (building_id) {
-                const isBuildingExist = await db.Building.findByPk(building_id);
-                if (!isBuildingExist) return reject("Building is not exist");
-            }
-            const [isWorkspaceExist, isTypeExist] = await Promise.all([
-                db.Workspace.findByPk(id),
-                db.WorkspaceType.findByPk(workspace_type_id),
-            ]);
-            if (!isWorkspaceExist) return reject("Workspace is not exist");
+            const isBuildingExist = await db.Building.findByPk(building_id);
+            if (!isBuildingExist) return reject("Building is not exist");
+            const isTypeExist = await db.WorkspaceType.findByPk(workspace_type_id);
             if (!isTypeExist) return reject("Workspace Type is not exist");
 
             const isWorkspaceNameDuplicated = await db.Workspace.findOne({
@@ -92,41 +89,53 @@ export const updateWorkspaceService = async (
                 },
             });
 
-            if (isWorkspaceNameDuplicated)
-                return reject("Workspace name is already used");
+            if (isWorkspaceNameDuplicated) return reject("Workspace name is already used");
 
-            const price_per_day = workspace_price * 8 * 0.8;
-            const price_per_month = workspace_price * 22 * 0.8;
+            const workspace = await db.Workspace.findByPk(id);
+            if (!workspace) return reject("Workspace is not exist");
 
             const updatedRowsCount = await db.Workspace.update(
                 {
                     workspace_name: workspace_name,
                     building_id: building_id,
-                    workspace_type_id: workspace_type_id,
-                    price_per_hour: workspace_price,
+                    price_per_hour: price_per_hour,
                     price_per_day: price_per_day,
                     price_per_month: price_per_month,
+                    workspace_type_id: workspace_type_id,
                     ...data,
-                },
-                {
-                    where: {
-                        workspace_id: id,
-                    },
                 }
             );
+            if (updatedRowsCount[0] === 0) return reject("Cannot find any workspace to update");
 
-            if (images && images.length > 0) {
-                console.log(images);
-                const response = await createWorkspaceImageService({
-                    images: images,
-                    workspaceId: id,
-                });
-                if (response.err === 1) return reject(response.message);
-            }
-            if (updatedRowsCount[0] === 0)
-                return reject(
-                    "Cannot find any workspace to update || Workspace is already updated"
+            try {
+                console.log(remove_images);
+                if (remove_images) {
+                    const remove_images_array = remove_images.split(",");
+                    if (remove_images_array && remove_images_array.length > 0) {
+                        // xóa ảnh cũ trong db
+                        await db.WorkspaceImage.destroy({
+                            where: {
+                                workspace_id: id,
+                                image: {
+                                    [Op.in]: remove_images_array,
+                                },
+                            },
+                            transaction: t,
+                        });
+                        // xóa ảnh cũ trong firebase
+                        await deleteImages(remove_images_array);
+                    }
+                }
+                // tạo mới những ảnh thêm mới
+                await createWorkspaceImages(
+                    images,
+                    workspace.workspace_id,
+                    t
                 );
+            } catch (error) {
+                console.log(error);
+                reject(error.message);
+            }
             resolve({
                 err: 0,
                 message: "Workspace updated successfully!",
@@ -136,6 +145,36 @@ export const updateWorkspaceService = async (
             reject(error);
         }
     });
+
+const createWorkspaceImages = async (images, workspace_id, t) => {
+    const uniqueImages = new Set();
+    const newImages = []; // tạo ra mảng mới chứa những ảnh không trùng lặp
+
+    for (const image of images) {
+        if (!uniqueImages.has(image)) {
+            uniqueImages.add(image);
+            newImages.push(image);
+        }
+    }
+    console.log(newImages);
+
+    try {
+        await Promise.all(
+            newImages.map((image) =>
+                db.WorkspaceImage.create(
+                    {
+                        workspace_id,
+                        image: image.firebaseUrl,
+                    },
+                    { transaction: t }
+                )
+            )
+        );
+    } catch (error) {
+        console.error("Failed to create workspace images:", error);
+        throw error;
+    }
+};
 
 export const deleteImageOfWorkspaceService = async (workspace_id, images) =>
     new Promise(async (resolve, reject) => {
