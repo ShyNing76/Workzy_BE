@@ -53,7 +53,6 @@ export const searchBuildingService = ({ location, workspace_type_name }) =>
                         "workspace_types",
                     ],
                 ],
-                raw: true,
                 group: [
                     "Building.building_id",
                     "Building.building_name",
@@ -62,9 +61,10 @@ export const searchBuildingService = ({ location, workspace_type_name }) =>
                     "Building.location",
                     "Building.description",
                     "Building.rating",
-                    "BuildingImages.image",
+                    "BuildingImages.building_image_id",
                 ],
-                nest: true,
+                // raw: true,
+                // nest: true,
             });
 
             const buildingsWorkspaceWithWorkspaceTypes = workspace_type_name
