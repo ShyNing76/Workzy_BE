@@ -26,7 +26,7 @@ export const booking_type = Joi.string().valid('Hourly', 'Daily', 'Monthly').req
 
 export const description = Joi.string().required()
 
-export const workspace_name = Joi.string().pattern(new RegExp('^[A-Za-z0-9]+_[A-Za-z0-9]+_[0-9]+$')).required()
+export const workspace_name = Joi.string().required()
 
 export const workspace_price = Joi.number().positive().required()
 
