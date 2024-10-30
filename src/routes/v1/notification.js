@@ -90,10 +90,34 @@ router.post("/", verify_token, verify_role(["staff"]), controllers.createNotific
     */
 );
 
-router.post("/sendMail", verify_token, verify_role(["customer"]), controllers.createNotificationBySendEmailController
+router.post("/sendMail", controllers.createNotificationBySendEmailController
     /*
         #swagger.description = 'Endpoint to create a notification by sending an email.'
         #swagger.summary = ' Create a notification by sending an email.'
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            message: {
+                                type: 'string',
+                                example: 'Hello, this is a test email'
+                            },
+                            email: {
+                                type: 'string',
+                                example: "hehe@gmail.com"
+                            },
+                            name: {
+                                type: 'string',
+                                example: 'John Doe'
+                            }
+                        }
+                    }
+                }
+            }
+        }
         #swagger.responses[201] = {
             description: 'Notification created.'
         }
