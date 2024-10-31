@@ -61,6 +61,7 @@ export const createWorkspaceService = async ({ images, ...data }) =>
 
 export const updateWorkspaceService = async (
     id,
+    images,
     {
         workspace_name,
         building_id,
@@ -68,7 +69,6 @@ export const updateWorkspaceService = async (
         price_per_day,
         price_per_month,
         workspace_type_id,
-        images,
         remove_images,
         ...data
     }
@@ -95,29 +95,38 @@ export const updateWorkspaceService = async (
 
             const workspace = await db.Workspace.findByPk(id);
             if (!workspace) return reject("Workspace is not exist");
-
-            const updatedRowsCount = await db.Workspace.update(
-                {
-                    workspace_name: workspace_name,
-                    building_id: building_id,
-                    price_per_hour: price_per_hour,
-                    price_per_day: price_per_day,
-                    price_per_month: price_per_month,
-                    workspace_type_id: workspace_type_id,
-                    ...data,
-                },
-                {
-                    where: {
-                        workspace_id: id,
-                    },
-                    transaction: t,
-                }
-            );
-            if (updatedRowsCount[0] == 0)
-                return reject("Cannot find any workspace to update");
+            delete data.images;
+            // const updatedRowsCount = await db.Workspace.update(
+            //     {
+            //         workspace_name: workspace_name,
+            //         building_id: building_id,
+            //         price_per_hour: price_per_hour,
+            //         price_per_day: price_per_day,
+            //         price_per_month: price_per_month,
+            //         workspace_type_id: workspace_type_id,
+            //     },
+            //     {
+            //         where: {
+            //             workspace_id: id,
+            //         },
+            //         transaction: t,
+            //     },
+            // );
+            // console.log("updatedRowsCount");
+            // if (updatedRowsCount[1] === 0) return reject("Cannot update workspace information");
+            const updateWorkspace = {
+                workspace_name,
+                building_id,
+                price_per_hour,
+                price_per_day,
+                price_per_month,
+                workspace_type_id,
+                ...data,
+            }
+            workspace.set({...workspace.dataValues, ...updateWorkspace});
+            await workspace.save({ transaction: t });
 
             try {
-                console.log(remove_images);
                 if (remove_images) {
                     const remove_images_array = remove_images.split(",");
                     if (remove_images_array && remove_images_array.length > 0) {
@@ -135,18 +144,21 @@ export const updateWorkspaceService = async (
                         await deleteImages(remove_images_array);
                     }
                 }
+
                 // tạo mới những ảnh thêm mới
                 await createWorkspaceImages(images, workspace.workspace_id, t);
             } catch (error) {
                 console.log(error);
                 reject(error.message);
             }
+            await t.commit();
             resolve({
                 err: 0,
                 message: "Workspace updated successfully!",
             });
         } catch (error) {
             console.log(error);
+            await t.rollback();
             reject(error);
         }
     });
@@ -155,13 +167,15 @@ const createWorkspaceImages = async (images, workspace_id, t) => {
     const uniqueImages = new Set();
     const newImages = []; // tạo ra mảng mới chứa những ảnh không trùng lặp
 
+    console.log("images", images);
+
     for (const image of images) {
         if (!uniqueImages.has(image)) {
             uniqueImages.add(image);
             newImages.push(image);
         }
     }
-    console.log(newImages);
+    console.log("newImages", newImages);
 
     try {
         await Promise.all(

@@ -60,8 +60,7 @@ export const updateWorkspaceController = async (req, res) => {
             images: req.images,
         }).error;
         if (error) return badRequest(res, error);
-        const response = await services.updateWorkspaceService(req.params.id, {
-            images: req.images,
+        const response = await services.updateWorkspaceService(req.params.id, req.images,{
             remove_images: req.body.remove_images,
             ...req.body,
         });
