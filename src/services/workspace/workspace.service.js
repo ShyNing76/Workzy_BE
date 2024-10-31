@@ -96,24 +96,6 @@ export const updateWorkspaceService = async (
             const workspace = await db.Workspace.findByPk(id);
             if (!workspace) return reject("Workspace is not exist");
             delete data.images;
-            // const updatedRowsCount = await db.Workspace.update(
-            //     {
-            //         workspace_name: workspace_name,
-            //         building_id: building_id,
-            //         price_per_hour: price_per_hour,
-            //         price_per_day: price_per_day,
-            //         price_per_month: price_per_month,
-            //         workspace_type_id: workspace_type_id,
-            //     },
-            //     {
-            //         where: {
-            //             workspace_id: id,
-            //         },
-            //         transaction: t,
-            //     },
-            // );
-            // console.log("updatedRowsCount");
-            // if (updatedRowsCount[1] === 0) return reject("Cannot update workspace information");
             const updateWorkspace = {
                 workspace_name,
                 building_id,
