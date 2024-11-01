@@ -665,7 +665,7 @@ export const getRevenueIn6DaysService = (tokenUser, building_id) =>
                         },
                         {
                             model: db.Workspace,
-                            required: false,
+                            required: true,
                             attributes: [],
                             where: {
                                 building_id: building_id,
@@ -897,7 +897,7 @@ export const getTotalPricesInMonthService = (tokenUser, building_id) =>
                         ...commonInclude,
                         {
                             model: db.Workspace,
-                            required: false,
+                            required: true,
                             attributes: [],
                             where: {
                                 building_id: building_id,
@@ -945,7 +945,7 @@ export const getTotalBookingService = (tokenUser, building_id) =>
                     include: [
                         {
                             model: db.Workspace,
-                            required: false,
+                            required: true,
                             where: {
                                 building_id: building_id,
                             },
