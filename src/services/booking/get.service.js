@@ -318,9 +318,24 @@ export const addToCalendarService = (booking_id, user_id) =>
                 auth: oauth2Client,
             });
 
+            // convert starttime to vietnam timezone
+            const start_time_date = moment(
+                booking.data.start_time_date,
+                "DD/MM/YYYY HH:mm:ss"
+            )
+                .tz("Asia/Ho_Chi_Minh")
+                .format("YYYY-MM-DD HH:mm:ss");
+
+            const end_time_date = moment(
+                booking.data.end_time_date,
+                "DD/MM/YYYY HH:mm:ss"
+            )
+                .tz("Asia/Ho_Chi_Minh")
+                .format("YYYY-MM-DD HH:mm:ss");
+
             let event = {
                 summary: `Booking at ${booking.data.Workspace.workspace_name}`,
-                description: `Booking details:\n\nWorkspace: ${booking.data.Workspace.workspace_name}\nBooking Type: ${booking.data.BookingType.type}\nStart Time: ${booking.data.start_time_date}\nEnd Time: ${booking.data.end_time_date}\nTotal Price: ${booking.data.total_price} VNĐ`,
+                description: `Booking details:\n\nWorkspace: ${booking.data.Workspace.workspace_name}\nBooking Type: ${booking.data.BookingType.type}\nStart Time: ${start_time_date}\nEnd Time: ${end_time_date}\nTotal Price: ${booking.data.total_price} VNĐ`,
                 start: {
                     dateTime: moment(
                         booking.data.start_time_date,
