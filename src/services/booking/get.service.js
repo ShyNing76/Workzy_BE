@@ -717,9 +717,6 @@ export const getTotalBookingIn6DaysService = (tokenUser, building_id) =>
                         {
                             model: db.BookingStatus,
                             attributes: [],
-                            where: {
-                                status: "completed",
-                            },
                         },
                     ],
                 });
@@ -781,9 +778,6 @@ export const getTotalBookingIn6DaysService = (tokenUser, building_id) =>
                         {
                             model: db.BookingStatus,
                             attributes: [],
-                            where: {
-                                status: "completed",
-                            },
                         },
                         {
                             model: db.Workspace,

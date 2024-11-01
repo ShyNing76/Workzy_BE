@@ -132,7 +132,15 @@ router.post(
                                 format: 'uuid',
                                 example: '3b214914-63e8-47e3-a856-921fdee63719'
                             },
-                            workspace_price: {
+                            price_per_hour: {
+                                type: 'int',
+                                example: '1000000'
+                            },
+                            price_per_day: {
+                                type: 'int',
+                                example: '1000000'
+                            },
+                            price_per_month: {
                                 type: 'int',
                                 example: '1000000'
                             },
@@ -196,27 +204,6 @@ router.put(
                                 format: 'uuid',
                                 example: '621ca0c8-e3ad-4bd8-9df5-eafe998b5b04'
                             },
-                            workspace_type_id: {
-                                type: 'string',
-                                format: 'uuid',
-                                example: '3b214914-63e8-47e3-a856-921fdee63719'
-                            },
-                            workspace_price: {
-                                type: 'int',
-                                example: '1000000'
-                            },
-                            area: {
-                                type: 'int',
-                                example: '20'
-                            },
-                            capacity: {
-                                type: 'int',
-                                example: '20'
-                            },
-                            description: {
-                                type: 'string',
-                                example: 'Workspace description.'
-                            },
                             images: {
                                 type: 'array',
                                 items: {
@@ -224,9 +211,45 @@ router.put(
                                     format: 'binary'
                                 },
                                 description: 'Array of image files'
-                            }
-                        },
-                        required: ['workspace_name','workspace_price','building_id','workspace_type_id']
+                            },
+                            remove_images: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    example: 'Image URL.'
+                                },
+                                description: 'Array of image URLs to remove'
+                            },
+                            workspace_type_id: {
+                                type: 'string',
+                                format: 'uuid',
+                                example: '3b214914-63e8-47e3-a856-921fdee63719'
+                            },
+                            price_per_hour: {
+                                type: 'int',
+                                example: '1000000'
+                            },
+                            price_per_day: {
+                                type: 'int',
+                                example: '1000000'
+                            },
+                            price_per_month: {
+                                type: 'int',
+                                example: '1000000'
+                            },
+                            capacity: {
+                                type: 'int',
+                                example: '20'
+                            },
+                            area: {
+                                type: 'int',
+                                example: '20'
+                            },
+                            description: {
+                                type: 'string',
+                                example: 'Workspace description.'
+                            },
+                        }
                     }
                 }
             }

@@ -1,5 +1,5 @@
 import {badRequest, created, internalServerError, noContent, notFound, ok} from "../../middlewares/handle_error";
-import {type, description} from "../../helper/joi_schema";
+import {type, description, email, name} from "../../helper/joi_schema";
 import Joi from "joi";
 import * as services from "../../services";
 
@@ -25,11 +25,15 @@ export const createNotificationController = async (req, res) => {
 
 export const createNotificationBySendEmailController = async (req, res) => {
     try {
-        const response = await services.createNotificationBySendMailService(req.user);
-
+        const error = Joi.object({
+            message: Joi.string().required(),
+            email,
+            name
+        }).validate({message: req.body?.message, email: req.body?.email, name: req.body?.name}).error;
+        if (error) badRequest(res, error.message);
+        const response = await services.createNotificationBySendMailService(req.body);
         return created(res, response);
     } catch (error) {
-        if(error.message === "Customer not found") return notFound(res, error.message);
         internalServerError(res, error.message);
     }
 };

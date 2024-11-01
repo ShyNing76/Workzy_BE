@@ -47,19 +47,18 @@ export const createNotificationService = (data) => new Promise(async (resolve, r
     }
 });
 
-export const createNotificationBySendMailService = (tokenUser) => new Promise(async (resolve, reject) => {
+export const createNotificationBySendMailService = (data) => new Promise(async (resolve, reject) => {
     try {
-        const customer = await db.User.findOne({
-            where: {
-                user_id: tokenUser.user_id,
-                status: "active"
-            },
-        });
-            await sendMail(
-                customer.email,
-                "Thank you for your Contact",
-                "We will contact you as soon as possible. Thank you for your interest in our services"
-            );
+        await sendMail(
+            "workzy.contact@gmail.com",
+            `Contact From ${data.email}`,
+            `${data.message}`
+        );
+        await sendMail(
+            data.email,
+            "Thank you for your Contact",
+            `Dear, ${data.name} We will contact you as soon as possible. Thank you for your interest in our services`
+        );
         resolve({
             err: 0,
             message: "Notification created successfully"

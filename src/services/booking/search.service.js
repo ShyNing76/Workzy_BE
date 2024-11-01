@@ -28,7 +28,7 @@ export const searchBuildingService = ({ location, workspace_type_name }) =>
                     {
                         model: db.BuildingImage,
                         as: "BuildingImages",
-                        attributes: ["image"],
+                        attributes: [],
                         required: false,
                     },
                 ],
@@ -52,8 +52,19 @@ export const searchBuildingService = ({ location, workspace_type_name }) =>
                         ),
                         "workspace_types",
                     ],
+                    [
+                        fn(
+                            "ARRAY_AGG",
+                            fn(
+                                "DISTINCT",
+                                col(
+                                    "BuildingImages.image"
+                                )
+                            )
+                        ),
+                        "images",
+                    ]
                 ],
-                raw: true,
                 group: [
                     "Building.building_id",
                     "Building.building_name",
@@ -62,8 +73,8 @@ export const searchBuildingService = ({ location, workspace_type_name }) =>
                     "Building.location",
                     "Building.description",
                     "Building.rating",
-                    "BuildingImages.image",
                 ],
+                raw: true,
                 nest: true,
             });
 

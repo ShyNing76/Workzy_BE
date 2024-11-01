@@ -9,30 +9,28 @@ import {
 } from "../../utils/handleFilter";
 import { deleteImages } from "../../middlewares/imageGoogleUpload";
 
-export const createWorkspaceService = async ({
-    images,
-    workspace_name,
-    workspace_price,
-    ...data
-}) =>
+export const createWorkspaceService = async ({ images, ...data }) =>
     new Promise(async (resolve, reject) => {
         const t = await db.sequelize.transaction();
         try {
-            const price_per_day = workspace_price * 8 * 0.8;
-            const price_per_month = workspace_price * 22 * 0.8;
-
+            const workspaceType = await db.WorkspaceType.findByPk(
+                data.workspace_type_id
+            );
+            if (!workspaceType) return reject("Workspace Type is not exist");
+            const isBuildingExist = await db.Building.findOne({
+                where: {
+                    building_id: data.building_id,
+                    status: "active",
+                },
+                attributes: ["building_id"],
+            });
+            if (!isBuildingExist) return reject("Building is not exist");
             const workspace = await db.Workspace.findOrCreate({
                 where: {
-                    workspace_name: workspace_name,
+                    workspace_name: data.workspace_name,
                 },
                 defaults: {
                     workspace_id: v4(),
-                    building_id: data.building_id || null,
-                    workspace_type_id: data.workspace_type_id,
-                    workspace_name: workspace_name,
-                    price_per_hour: workspace_price,
-                    price_per_day,
-                    price_per_month,
                     ...data,
                 },
                 transaction: t,
@@ -63,26 +61,26 @@ export const createWorkspaceService = async ({
 
 export const updateWorkspaceService = async (
     id,
+    images,
     {
         workspace_name,
         building_id,
-        workspace_price,
+        price_per_hour,
+        price_per_day,
+        price_per_month,
         workspace_type_id,
-        images,
+        remove_images,
         ...data
     }
 ) =>
     new Promise(async (resolve, reject) => {
+        const t = await db.sequelize.transaction();
         try {
-            if (building_id) {
-                const isBuildingExist = await db.Building.findByPk(building_id);
-                if (!isBuildingExist) return reject("Building is not exist");
-            }
-            const [isWorkspaceExist, isTypeExist] = await Promise.all([
-                db.Workspace.findByPk(id),
-                db.WorkspaceType.findByPk(workspace_type_id),
-            ]);
-            if (!isWorkspaceExist) return reject("Workspace is not exist");
+            const isBuildingExist = await db.Building.findByPk(building_id);
+            if (!isBuildingExist) return reject("Building is not exist");
+            const isTypeExist = await db.WorkspaceType.findByPk(
+                workspace_type_id
+            );
             if (!isTypeExist) return reject("Workspace Type is not exist");
 
             const isWorkspaceNameDuplicated = await db.Workspace.findOne({
@@ -95,47 +93,89 @@ export const updateWorkspaceService = async (
             if (isWorkspaceNameDuplicated)
                 return reject("Workspace name is already used");
 
-            const price_per_day = workspace_price * 8 * 0.8;
-            const price_per_month = workspace_price * 22 * 0.8;
-
-            const updatedRowsCount = await db.Workspace.update(
-                {
-                    workspace_name: workspace_name,
-                    building_id: building_id,
-                    workspace_type_id: workspace_type_id,
-                    price_per_hour: workspace_price,
-                    price_per_day: price_per_day,
-                    price_per_month: price_per_month,
-                    ...data,
-                },
-                {
-                    where: {
-                        workspace_id: id,
-                    },
-                }
-            );
-
-            if (images && images.length > 0) {
-                console.log(images);
-                const response = await createWorkspaceImageService({
-                    images: images,
-                    workspaceId: id,
-                });
-                if (response.err === 1) return reject(response.message);
+            const workspace = await db.Workspace.findByPk(id);
+            if (!workspace) return reject("Workspace is not exist");
+            delete data.images;
+            const updateWorkspace = {
+                workspace_name,
+                building_id,
+                price_per_hour,
+                price_per_day,
+                price_per_month,
+                workspace_type_id,
+                ...data,
             }
-            if (updatedRowsCount[0] === 0)
-                return reject(
-                    "Cannot find any workspace to update || Workspace is already updated"
-                );
+            workspace.set({...workspace.dataValues, ...updateWorkspace});
+            await workspace.save({ transaction: t });
+
+            try {
+                if (remove_images) {
+                    const remove_images_array = remove_images.split(",");
+                    if (remove_images_array && remove_images_array.length > 0) {
+                        // xóa ảnh cũ trong db
+                        await db.WorkspaceImage.destroy({
+                            where: {
+                                workspace_id: id,
+                                image: {
+                                    [Op.in]: remove_images_array,
+                                },
+                            },
+                            transaction: t,
+                        });
+                        // xóa ảnh cũ trong firebase
+                        await deleteImages(remove_images_array);
+                    }
+                }
+
+                // tạo mới những ảnh thêm mới
+                await createWorkspaceImages(images, workspace.workspace_id, t);
+            } catch (error) {
+                console.log(error);
+                reject(error.message);
+            }
+            await t.commit();
             resolve({
                 err: 0,
                 message: "Workspace updated successfully!",
             });
         } catch (error) {
             console.log(error);
+            await t.rollback();
             reject(error);
         }
     });
+
+const createWorkspaceImages = async (images, workspace_id, t) => {
+    const uniqueImages = new Set();
+    const newImages = []; // tạo ra mảng mới chứa những ảnh không trùng lặp
+
+    console.log("images", images);
+
+    for (const image of images) {
+        if (!uniqueImages.has(image)) {
+            uniqueImages.add(image);
+            newImages.push(image);
+        }
+    }
+    console.log("newImages", newImages);
+
+    try {
+        await Promise.all(
+            newImages.map((image) =>
+                db.WorkspaceImage.create(
+                    {
+                        workspace_id,
+                        image: image.firebaseUrl,
+                    },
+                    { transaction: t }
+                )
+            )
+        );
+    } catch (error) {
+        console.error("Failed to create workspace images:", error);
+        throw error;
+    }
+};
 
 export const deleteImageOfWorkspaceService = async (workspace_id, images) =>
     new Promise(async (resolve, reject) => {
@@ -231,10 +271,11 @@ export const getAllWorkspaceService = ({
                 query.price_per_hour = { [Op.between]: [min_price, max_price] };
             query.status = status || { [Op.ne]: null };
             query.building_id = building_id
-            ? building_id === "null"
-                ? { [Op.is]: null }
-                : building_id
-            : { [Op.or]: [null, { [Op.ne]: null }] };
+                ? building_id === "null"
+                    ? { [Op.is]: null }
+                    : building_id
+                : { [Op.or]: [null, { [Op.ne]: null }] };
+            query.workspace_name = workspace_name ? workspace_name : { [Op.ne]: null };
             const workspaces = await db.Workspace.findAll({
                 where: query,
                 offset: handleOffset(page, limit),
@@ -256,7 +297,6 @@ export const getAllWorkspaceService = ({
                                 ? workspace_type_name
                                 : { [Op.ne]: null },
                         },
-                        required: true,
                     },
                     {
                         model: db.WorkspaceImage,
@@ -317,13 +357,16 @@ export const getWorkspaceByIdService = (workspace_id) =>
         }
     });
 
-export const assignWorkspacetoBuildingService = async ({workspace_ids, building_id}) =>
+export const assignWorkspacetoBuildingService = async ({
+    workspace_ids,
+    building_id,
+}) =>
     new Promise(async (resolve, reject) => {
         try {
             // Await the result to check if the building exists
             const isBuildingExist = await db.Building.findByPk(building_id);
             if (!isBuildingExist) return reject("Building is not exist"); // Reject instead of resolve
-            
+
             const workspace = await db.Workspace.findAll({
                 where: {
                     workspace_id: {
@@ -334,22 +377,25 @@ export const assignWorkspacetoBuildingService = async ({workspace_ids, building_
             if (workspace.length === 0) return reject("Workspace is not exist");
 
             // Await the updates to ensure they are completed
-            const assignWorkspaceToBuilding = await Promise.all(workspace.map(async (w) => {
-                const [updatedWorkspace] = await db.Workspace.update(
-                    {
-                        building_id: building_id,
-                    },
-                    {
-                        where: {
-                            workspace_id: w.workspace_id,
-                            building_id: { [Op.eq]: null },
+            const assignWorkspaceToBuilding = await Promise.all(
+                workspace.map(async (w) => {
+                    const [updatedWorkspace] = await db.Workspace.update(
+                        {
+                            building_id: building_id,
                         },
-                    }
-                );
-                return updatedWorkspace;
-            }));
+                        {
+                            where: {
+                                workspace_id: w.workspace_id,
+                                building_id: { [Op.eq]: null },
+                            },
+                        }
+                    );
+                    return updatedWorkspace;
+                })
+            );
 
-            if(assignWorkspaceToBuilding[1] === 0) return reject("Workspace is already allocated to the building");
+            if (assignWorkspaceToBuilding[1] === 0)
+                return reject("Workspace is already allocated to the building");
             resolve({
                 err: 0,
                 message: "Workspace allocated successfully!",
@@ -360,13 +406,16 @@ export const assignWorkspacetoBuildingService = async ({workspace_ids, building_
         }
     });
 
-export const unassignWorkspacetoBuildingService = async ({workspace_ids, building_id}) =>
+export const unassignWorkspacetoBuildingService = async ({
+    workspace_ids,
+    building_id,
+}) =>
     new Promise(async (resolve, reject) => {
         try {
             // Await the result to check if the building exists
             const isBuildingExist = await db.Building.findByPk(building_id);
             if (!isBuildingExist) return reject("Building is not exist"); // Reject instead of resolve
-            
+
             const workspace = await db.Workspace.findAll({
                 where: {
                     workspace_id: {
@@ -377,21 +426,24 @@ export const unassignWorkspacetoBuildingService = async ({workspace_ids, buildin
             if (workspace.length === 0) return reject("Workspace is not exist");
 
             // Await the updates to ensure they are completed
-            const assignWorkspaceToBuilding = await Promise.all(workspace.map(async (w) => {
-                const [updatedWorkspace] = await db.Workspace.update(
-                    {
-                        building_id: null,
-                    },
-                    {
-                        where: {
-                            workspace_id: w.workspace_id,
+            const assignWorkspaceToBuilding = await Promise.all(
+                workspace.map(async (w) => {
+                    const [updatedWorkspace] = await db.Workspace.update(
+                        {
+                            building_id: null,
                         },
-                    }
-                );
-                return updatedWorkspace;
-            }));
+                        {
+                            where: {
+                                workspace_id: w.workspace_id,
+                            },
+                        }
+                    );
+                    return updatedWorkspace;
+                })
+            );
 
-            if(assignWorkspaceToBuilding[1] === 0) return reject("Workspace unallocated failled"); 
+            if (assignWorkspaceToBuilding[1] === 0)
+                return reject("Workspace unallocated failled");
             resolve({
                 err: 0,
                 message: "Workspace unallocated successfully!",
@@ -402,177 +454,191 @@ export const unassignWorkspacetoBuildingService = async ({workspace_ids, buildin
         }
     });
 
-export const getTotalWorkspaceService = async (tokenUser, building_id) => 
+export const getTotalWorkspaceService = async (tokenUser, building_id) =>
     new Promise(async (resolve, reject) => {
-    try {
-        let totalWorkspaces = 0;
-        if(tokenUser.role_id === 1) {
-            totalWorkspaces = await db.Workspace.count({
-                where: {
-                    status: "active",
-                },
-            });
-        } else if(tokenUser.role_id === 2) {
-            if(!building_id) return reject("Building is required");
-            const manager = await db.Manager.findOne({
-                where: {
-                    user_id: tokenUser.user_id,
-                },
-            });
-            if(!manager) return reject("Manager is not exist");
-            const isManagerBelongToBuilding = await db.Building.findOne({
-                where: {
-                    building_id: building_id,
-                    manager_id: manager.manager_id,
-                },
-            });
-            console.log(isManagerBelongToBuilding);
-            if(!isManagerBelongToBuilding) return reject("Manager does not belong to this building");
-            totalWorkspaces = await db.Workspace.count({
-                where: {
-                    status: "active",
-                },
-                include: [
-                    {
-                        model: db.Building,
-                        attributes: ["building_id"],
-                        where: {
-                            building_id: building_id,
-                        },
+        try {
+            let totalWorkspaces = 0;
+            if (tokenUser.role_id === 1) {
+                totalWorkspaces = await db.Workspace.count({
+                    where: {
+                        status: "active",
                     },
-                ],
+                });
+            } else if (tokenUser.role_id === 2) {
+                if (!building_id) return reject("Building is required");
+                const manager = await db.Manager.findOne({
+                    where: {
+                        user_id: tokenUser.user_id,
+                    },
+                });
+                if (!manager) return reject("Manager is not exist");
+                const isManagerBelongToBuilding = await db.Building.findOne({
+                    where: {
+                        building_id: building_id,
+                        manager_id: manager.manager_id,
+                    },
+                });
+                console.log(isManagerBelongToBuilding);
+                if (!isManagerBelongToBuilding)
+                    return reject("Manager does not belong to this building");
+                totalWorkspaces = await db.Workspace.count({
+                    where: {
+                        status: "active",
+                    },
+                    include: [
+                        {
+                            model: db.Building,
+                            attributes: ["building_id"],
+                            where: {
+                                building_id: building_id,
+                            },
+                        },
+                    ],
+                });
+            }
+            resolve({
+                err: 0,
+                message: "Got Total Workspace successfully",
+                data: totalWorkspaces,
             });
-        }
-        resolve ({
-            err: 0,
-            message: "Got Total Workspace successfully",
-            data: totalWorkspaces,
-        });
         } catch (error) {
             console.log(error);
             reject(error);
         }
     });
 
-export const getTotalUsageWorkspacesService = async (building_id) => 
+export const getTotalUsageWorkspacesService = async (building_id) =>
     new Promise(async (resolve, reject) => {
-    try {
-        const booking = await db.Booking.findAll({
-            attributes: ["workspace_id"],
-            include: [
-                {
-                    model: db.BookingStatus,
-                    attributes: ["status"],
-                    required: true,
-                    where: {
-                        status: "usage",
+        try {
+            const booking = await db.Booking.findAll({
+                attributes: ["workspace_id"],
+                include: [
+                    {
+                        model: db.BookingStatus,
+                        attributes: ["status"],
+                        required: true,
+                        where: {
+                            status: "usage",
+                        },
                     },
-                },{
-                    model: db.Workspace,
-                    atrributes: [],
-                    required: false,
-                    where: {
-                        building_id: building_id,
+                    {
+                        model: db.Workspace,
+                        atrributes: [],
+                        required: false,
+                        where: {
+                            building_id: building_id,
+                        },
                     },
-                }
-            ],
-        });
-        if(booking.length === 0) return reject("No Usage Workspace Exist");
-        const totalUsageWorkspaces = new Set();
-        for (let i = 0; i < booking.length; i++) {
-            totalUsageWorkspaces.add(booking[i].workspace_id);
+                ],
+            });
+            if (booking.length === 0) return reject("No Usage Workspace Exist");
+            const totalUsageWorkspaces = new Set();
+            for (let i = 0; i < booking.length; i++) {
+                totalUsageWorkspaces.add(booking[i].workspace_id);
+            }
+            resolve({
+                err: 0,
+                message: "Got Total Usage Workspace successfully",
+                data: totalUsageWorkspaces.size,
+            });
+        } catch (error) {
+            console.log(error);
+            reject(error);
         }
-        resolve({
-            err: 0,
-            message: "Got Total Usage Workspace successfully",
-            data: totalUsageWorkspaces.size,
-        });
-    } catch (error) {
-        console.log(error);
-        reject(error);
-    }
     });
 
-export const getTotalWorkspaceNotInBookingService = async (building_id) => 
+export const getTotalWorkspaceNotInBookingService = async (building_id) =>
     new Promise(async (resolve, reject) => {
-    try {
-        const booking = await db.Booking.findAll({
-            attributes: ["workspace_id"],
-            include: [
-                {
-                    model: db.BookingStatus,
-                    order: [["createdAt", "DESC"]],
-                    limit: 1,
-                    where: {
-                        status: {[Op.in]: ["confirmed", "paid", "check-in", "completed", "check-out", "check-amenities", "damaged-payment", "usage"]},
+        try {
+            const booking = await db.Booking.findAll({
+                attributes: ["workspace_id"],
+                include: [
+                    {
+                        model: db.BookingStatus,
+                        order: [["createdAt", "DESC"]],
+                        limit: 1,
+                        where: {
+                            status: {
+                                [Op.in]: [
+                                    "confirmed",
+                                    "paid",
+                                    "check-in",
+                                    "completed",
+                                    "check-out",
+                                    "check-amenities",
+                                    "damaged-payment",
+                                    "usage",
+                                ],
+                            },
+                        },
+                        required: true,
                     },
-                    required: true,
-                },{
-                    model: db.Workspace,
-                    required: true,
-                    where: {
-                        building_id: building_id,
+                    {
+                        model: db.Workspace,
+                        required: true,
+                        where: {
+                            building_id: building_id,
+                        },
                     },
-                }
-            ],
-        });
-        const bookedWorkspaceIds = booking.map(b => b.workspace_id);
-        const totalWorkspaces = await db.Workspace.count({
-            where: {
-                workspace_id: {
-                    [Op.notIn]: bookedWorkspaceIds,
+                ],
+            });
+            const bookedWorkspaceIds = booking.map((b) => b.workspace_id);
+            const totalWorkspaces = await db.Workspace.count({
+                where: {
+                    workspace_id: {
+                        [Op.notIn]: bookedWorkspaceIds,
+                    },
+                    building_id: building_id,
                 },
-                building_id: building_id,
-            },
-        });
-        resolve({
-            err: 0,
-            message: "Got Total Workspace Not In Booking successfully",
-            data: totalWorkspaces,
-        });
-    } catch (error) {
-        console.log(error);
-        reject(error);
-    }
+            });
+            resolve({
+                err: 0,
+                message: "Got Total Workspace Not In Booking successfully",
+                data: totalWorkspaces,
+            });
+        } catch (error) {
+            console.log(error);
+            reject(error);
+        }
     });
 
-
-export const getTop5WorkspaceReviewService = async () => 
+export const getTop5WorkspaceReviewService = async () =>
     new Promise(async (resolve, reject) => {
-    try {
-        const rating = await db.Review.findAll({
-            attributes: ["rating"],
-            order: [["rating", "DESC"]],
-            include: [
-                {
-                    model: db.Booking,
-                    attributes: ["booking_id"],
-                    required: true,
+        try {
+            const rating = await db.Review.findAll({
+                attributes: ["rating"],
+                order: [["rating", "DESC"]],
+                include: [
+                    {
+                        model: db.Booking,
+                        attributes: ["booking_id"],
+                        required: true,
+                    },
+                ],
+            });
+            if (rating.length === 0) return reject("No Review Exist");
+            const bookings = await db.Booking.findAll({
+                where: {
+                    booking_id: { [Op.in]: rating.map((r) => r.booking_id) },
                 },
-            ],
-        });
-        if(rating.length === 0) return reject("No Review Exist");
-        const bookings = await db.Booking.findAll({
-            where:{
-                booking_id: {[Op.in]: rating.map(r => r.booking_id)}
-            },
-            attributes: ["workspace_id"],
-        });
-        // const filterWorkspaceId = bookings.set("workspace_id");
-        const top5WorkspaceReview = await db.Workspace.findAll({
-            where: {
-                workspace_id: {[Op.in]: bookings.map(b => b.workspace_id)}
-            },
-            limit: 5,
-        });
-        resolve({
-            err: 0,
-            message: "Got Top 5 Workspace Review successfully",
-            data: top5WorkspaceReview,
-        });
-    } catch (error) {
-        console.log(error);
-        reject(error);
-    }
+                attributes: ["workspace_id"],
+            });
+            // const filterWorkspaceId = bookings.set("workspace_id");
+            const top5WorkspaceReview = await db.Workspace.findAll({
+                where: {
+                    workspace_id: {
+                        [Op.in]: bookings.map((b) => b.workspace_id),
+                    },
+                },
+                limit: 5,
+            });
+            resolve({
+                err: 0,
+                message: "Got Top 5 Workspace Review successfully",
+                data: top5WorkspaceReview,
+            });
+        } catch (error) {
+            console.log(error);
+            reject(error);
+        }
     });
-
