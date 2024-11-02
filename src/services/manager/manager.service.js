@@ -256,10 +256,22 @@ export const getBuildingByManagerIdService = (tokenUser) => new Promise(async (r
             where: {
                 manager_id: manager.manager_id
             },
-            include: {
+            include: [{
                 model: db.BuildingImage,
                 attributes: ["image"],
-            }
+            },
+            {
+                model: db.Staff,
+                attributes: ["staff_id"],
+                include: {
+                    model: db.User,
+                    attributes: ["name", "email", "phone", "date_of_birth"],
+                    where: {
+                        status: "active",
+                        role_id: 3
+                    }
+                }
+            }],
         });
         if(!building) return reject("Building not found");
         resolve({

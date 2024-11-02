@@ -71,14 +71,22 @@ export const getAllUsersService = ({ page, limit, order, name, ...query }) =>
 export const removeUserService = (user_id) =>
     new Promise(async (resolve, reject) => {
         try {
+            const user = await db.User.findOne({
+                where: {
+                    user_id,
+                    role_id: 4,
+                },
+            });
+            if(!user) return reject("User not found");
+            const changeStatus = user.status === "active" ? "inactive" : "active";
             const updateUser = await db.User.update(
                 {
-                    status: "inactive",
+                    status: changeStatus,
                 },
                 {
                     where: {
                         user_id: user_id,
-                        status: "active",
+                        status: user.status,
                     },
                 }
             );
