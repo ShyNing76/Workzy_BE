@@ -31,15 +31,14 @@ export const createBookingController = async (req, res) => {
             ...req.body,
             user_id: req.user.user_id,
         });
-
         return created(res, response);
     } catch (err) {
-        console.error(err);
         const knownErrors = new Set([
             "Workspace is already booked for the selected time period",
             "Customer not found",
             "Workspace not found",
             "Booking type not found",
+            "Voucher not found",
         ]);
 
         if (knownErrors.has(err)) return badRequest(res, err);

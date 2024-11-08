@@ -7,7 +7,6 @@ export const createBookingService = (data) =>
     new Promise(async (resolve, reject) => {
         const t = await db.sequelize.transaction();
         try {
-            console.log(data);
             const [customer, workspace, bookingType] = await Promise.all([
                 db.Customer.findOne({ where: { user_id: data.user_id } }),
                 db.Workspace.findOne({
@@ -48,6 +47,7 @@ export const createBookingService = (data) =>
                         voucher_id: data.voucher_id,
                     },
                 });
+                if (!voucher) return reject("Voucher not found");
                 voucher.quantity = parseInt(voucher.quantity) - 1;
                 await voucher.save({ transaction: t });
             }
