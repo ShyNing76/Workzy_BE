@@ -107,7 +107,7 @@ export const updateWorkspaceService = async (
         price_per_month,
         workspace_type_id,
         remove_images,
-        amenity_ids,
+        addAmenities,
         ...data
     }
 ) =>
@@ -146,6 +146,15 @@ export const updateWorkspaceService = async (
             workspace.set({...workspace.dataValues, ...updateWorkspace});
             await workspace.save({ transaction: t });
 
+            const amenity_ids = addAmenities.map(amenity => amenity.amenity_id);
+            console.log(amenity_ids);
+
+            const amenitiesMap = addAmenities.reduce((map, amenity) => {
+                map[amenity.amenity_id] = amenity.quantity;
+                return map;
+            }, {});
+            console.log(amenitiesMap);
+
             const amenities = await db.Amenity.findAll({
                 where: {
                     amenity_id: {[Op.in]: amenity_ids}
@@ -153,13 +162,6 @@ export const updateWorkspaceService = async (
             })
             if (amenities.length === 0) return reject("No valid amenities found")
 
-            const amenitiesWorkspace = await db.AmenitiesWorkspace.findAll({
-                where: {
-                    workspace_id: workspace.workspace_id
-                }
-            })
-            const amenityWorkspaceIds = amenitiesWorkspace.map(amenityWorkspace => amenityWorkspace.amenities_workspace_id)
-            
             const amenitiesWorkspacePromises = amenities.map(amenity => {
                 return db.AmenitiesWorkspace.findOne(
                     {
@@ -172,13 +174,23 @@ export const updateWorkspaceService = async (
                 ).then(amenityWorkspace => {
                     console.log(amenityWorkspace);
                     if (amenityWorkspace) {
-                        return;
+                        const updateQuantity = amenityWorkspace.quantity + (amenitiesMap[amenity.amenity_id] || 1);
+                        return db.AmenitiesWorkspace.update({
+                            quantity: updateQuantity
+                        }, {
+                            where: {
+                                workspace_id: workspace.workspace_id,
+                                amenity_id: amenity.amenity_id
+                            },
+                            transaction: t
+                        });
                     } else {
                         return db.AmenitiesWorkspace.create(
                             {
                                 amenities_workspace_id: v4(),
                                 workspace_id: workspace.workspace_id,
-                                amenity_id: amenity.amenity_id
+                                amenity_id: amenity.amenity_id,
+                                quantity: amenitiesMap[amenity.amenity_id] || 1
                             },
                             { transaction: t }
                         )

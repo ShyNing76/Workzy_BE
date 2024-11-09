@@ -10,6 +10,9 @@ import * as services from "../../services";
 
 export const createWorkspaceController = async (req, res) => {
     try {
+        const addAmenities = typeof req.body.addAmenities === 'string'
+            ? JSON.parse(req.body.addAmenities)
+            : req.body.addAmenities;
         const error = Joi.object({
             workspace_name,
             price_per_hour: Joi.number().integer().min(1).required(),
@@ -17,13 +20,13 @@ export const createWorkspaceController = async (req, res) => {
             price_per_month: Joi.number().integer().min(1).required(),
             building_id: Joi.string().uuid().required(),
             workspace_type_id: Joi.string().uuid().required(),
+            images: Joi.required(),
             addAmenities: Joi.array().items(
                 Joi.object({
-                    amenity_id: Joi.string().uuid().required(),
+                    amenity_id: Joi.string().required(),
                     quantity: Joi.number().integer().min(1).required()
                 })
             ).required(),
-            images: Joi.required(),
         }).validate({
             workspace_name: req.body.workspace_name,
             price_per_hour: req.body.price_per_hour,
@@ -31,15 +34,15 @@ export const createWorkspaceController = async (req, res) => {
             price_per_month: req.body.price_per_month,
             building_id: req.body.building_id,
             workspace_type_id: req.body.workspace_type_id,
-            addAmenities: JSON.parse(req.body.addAmenities),
             images: req.images,
+            addAmenities: addAmenities,
         }).error;
         if (error) return badRequest(res, error);
         console.log(req.body)
         const response = await services.createWorkspaceService({
             ...req.body,
             images: req.images,
-            addAmenities: JSON.parse(req.body.addAmenities),
+            addAmenities: addAmenities,
         });
         return created(res, response);
     } catch (error) {
@@ -50,7 +53,9 @@ export const createWorkspaceController = async (req, res) => {
 
 export const updateWorkspaceController = async (req, res) => {
     try {
-        console.log(req.body)
+        const addAmenities = typeof req.body.addAmenities === 'string'
+            ? JSON.parse(req.body.addAmenities)
+            : req.body.addAmenities;
         const error = Joi.object({
             workspace_name,
             price_per_hour: Joi.number().integer().min(1),
@@ -58,7 +63,6 @@ export const updateWorkspaceController = async (req, res) => {
             price_per_month: Joi.number().integer().min(1),
             building_id: Joi.string().uuid().required(),
             workspace_type_id: Joi.string().uuid().required(),
-            // amenity_ids: Joi.string().required(),
             addAmenities: Joi.array().items(
                 Joi.object({
                     amenity_id: Joi.string().uuid().required(),
@@ -73,15 +77,14 @@ export const updateWorkspaceController = async (req, res) => {
             price_per_month: req.body.price_per_month,
             building_id: req.body.building_id,
             workspace_type_id: req.body.workspace_type_id,
-            // amenity_ids: req.body.amenity_ids,
-            addAmenities: req.body.addAmenities,
+            addAmenities: addAmenities,
             images: req.images,
         }).error;
         if (error) return badRequest(res, error);
         const response = await services.updateWorkspaceService(req.params.id, req.images,{
             ...req.body,
             remove_images: req.body.remove_images,
-            amenity_ids: req.body.amenity_ids.split(","),
+            addAmenities: addAmenities,
         });
         return ok(res, response);
     } catch (error) {
