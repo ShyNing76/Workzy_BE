@@ -127,6 +127,32 @@ router.post(
                                 },
                                 description: 'Array of image files'
                             },
+                            addAmenities: {
+                                type: 'array',
+                                items: {
+                                    type: 'object',
+                                    properties: {
+                                        amenity_id: {
+                                            type: 'string',
+                                            example: '123e4567-e89b-12d3-a456-426614174000'
+                                        },
+                                        quantity: {
+                                            type: 'integer',
+                                            example: 1
+                                        }
+                                    }
+                                },
+                                example: [
+                                    {
+                                        amenity_id: '5ec1ef7d-c7ea-41cc-85e4-c1763dfe3d5d',
+                                        quantity: 1
+                                    },
+                                    {
+                                        amenity_id: 'ad4f1315-9edb-4181-bc56-32aee886faf8',
+                                        quantity: 2
+                                    }
+                                ]
+                            },
                             workspace_type_id: {
                                 type: 'string',
                                 format: 'uuid',
@@ -219,6 +245,32 @@ router.put(
                                     example: 'Image URL.'
                                 },
                                 description: 'Array of image URLs to remove'
+                            },
+                            addAmenities: {
+                                type: 'array',
+                                items: {
+                                    type: 'object',
+                                    properties: {
+                                        amenity_id: {
+                                            type: 'string',
+                                            example: '123e4567-e89b-12d3-a456-426614174000'
+                                        },
+                                        quantity: {
+                                            type: 'integer',
+                                            example: 1
+                                        }
+                                    }
+                                },
+                                example: [
+                                    {
+                                        amenity_id: '5ec1ef7d-c7ea-41cc-85e4-c1763dfe3d5d',
+                                        quantity: 1
+                                    },
+                                    {
+                                        amenity_id: 'ad4f1315-9edb-4181-bc56-32aee886faf8',
+                                        quantity: 2
+                                    }
+                                ]
                             },
                             workspace_type_id: {
                                 type: 'string',

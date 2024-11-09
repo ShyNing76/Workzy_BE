@@ -236,10 +236,14 @@ router.put(
                                 type: 'integer',
                                 example: 120000
                             },
-                            type: {
-                                type: 'string',
-                                example: 'Device'
+                            original_price: {
+                                type: 'integer',
+                                example: 100000
                             },
+                            rent_price: {
+                                type: 'integer',
+                                example: 20000
+                            }
                         }
                     }
                 }

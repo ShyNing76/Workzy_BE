@@ -9,9 +9,10 @@ import {
 } from "../../utils/handleFilter";
 import { deleteImages } from "../../middlewares/imageGoogleUpload";
 
-export const createWorkspaceService = async ({ images, ...data }) =>
+export const createWorkspaceService = async ({ images, addAmenities, ...data }) =>
     new Promise(async (resolve, reject) => {
         const t = await db.sequelize.transaction();
+        console.log(addAmenities)
         try {
             const workspaceType = await db.WorkspaceType.findByPk(
                 data.workspace_type_id
@@ -37,7 +38,43 @@ export const createWorkspaceService = async ({ images, ...data }) =>
             });
 
             if (!workspace[1]) return reject("Workspace already exists");
-            const workspaceId = workspace[0].workspace_id;
+            const workspaceId = workspace[0].dataValues.workspace_id;
+
+            const amenity_ids = addAmenities.map(amenity => amenity.amenity_id);
+            console.log(amenity_ids);
+
+            const amenitiesMap = addAmenities.reduce((map, amenity) => {
+                map[amenity.amenity_id] = amenity.quantity;
+                return map;
+            }, {});
+            console.log(amenitiesMap);
+
+            const amenities = await db.Amenity.findAll({
+                where: {
+                    amenity_id: {[Op.in]: amenity_ids}
+                }
+            })
+            if (amenities.length === 0) return reject("No valid amenities found")
+            const amenitiesWorkspacePromises = amenities.map(amenity => {
+                return db.AmenitiesWorkspace.findOrCreate({
+                    where: {
+                        workspace_id: workspaceId,
+                        amenity_id: amenity.amenity_id,
+                        
+                    },
+                    defaults: {
+                        amenities_workspace_id: v4(), 
+                        workspace_id: workspaceId,
+                        amenity_id: amenity.amenity_id,
+                        quantity: amenitiesMap[amenity.amenity_id] || 1
+                    },
+                    transaction: t,
+                })
+            });
+            const results = await Promise.all(amenitiesWorkspacePromises);
+            const newRecordsCount = results.filter(result => result[1]).length; // result[1] is true if a new entry was created
+            
+            if (newRecordsCount === 0) return reject('Error associating amenities with workspace');
 
             if (images && images.length > 0) {
                 console.log(images);
@@ -70,6 +107,7 @@ export const updateWorkspaceService = async (
         price_per_month,
         workspace_type_id,
         remove_images,
+        addAmenities,
         ...data
     }
 ) =>
@@ -108,8 +146,60 @@ export const updateWorkspaceService = async (
             workspace.set({ ...workspace.dataValues, ...updateWorkspace });
             await workspace.save({ transaction: t });
 
+            const amenity_ids = addAmenities.map(amenity => amenity.amenity_id);
+            console.log(amenity_ids);
+
+            const amenitiesMap = addAmenities.reduce((map, amenity) => {
+                map[amenity.amenity_id] = amenity.quantity;
+                return map;
+            }, {});
+            console.log(amenitiesMap);
+
+            const amenities = await db.Amenity.findAll({
+                where: {
+                    amenity_id: {[Op.in]: amenity_ids}
+                }
+            })
+            if (amenities.length === 0) return reject("No valid amenities found")
+
+            const amenitiesWorkspacePromises = amenities.map(amenity => {
+                return db.AmenitiesWorkspace.findOne(
+                    {
+                        where: {
+                            workspace_id: workspace.workspace_id,
+                            amenity_id: amenity.amenity_id
+                        },
+                        transaction: t,
+                    }
+                ).then(amenityWorkspace => {
+                    console.log(amenityWorkspace);
+                    if (amenityWorkspace) {
+                        const updateQuantity = amenityWorkspace.quantity + (amenitiesMap[amenity.amenity_id] || 1);
+                        return db.AmenitiesWorkspace.update({
+                            quantity: updateQuantity
+                        }, {
+                            where: {
+                                workspace_id: workspace.workspace_id,
+                                amenity_id: amenity.amenity_id
+                            },
+                            transaction: t
+                        });
+                    } else {
+                        return db.AmenitiesWorkspace.create(
+                            {
+                                amenities_workspace_id: v4(),
+                                workspace_id: workspace.workspace_id,
+                                amenity_id: amenity.amenity_id,
+                                quantity: amenitiesMap[amenity.amenity_id] || 1
+                            },
+                            { transaction: t }
+                        )
+                    }
+                })
+            });
+            Promise.all(amenitiesWorkspacePromises);
             try {
-                if (remove_images) {
+                if (remove_images && remove_images.length > 0) {
                     const remove_images_array = remove_images.split(",");
                     if (remove_images_array && remove_images_array.length > 0) {
                         // xóa ảnh cũ trong db

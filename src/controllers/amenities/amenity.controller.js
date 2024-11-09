@@ -26,6 +26,7 @@ export const updateAmenityController = async (req, res) => {
             amenity_name: Joi.string().required(),
             original_price: Joi.number().positive().required(),
             rent_price: Joi.number().positive().required(),
+            image: Joi.string().required()
         }).validate({amenity_name: req.body.amenity_name, original_price: req.body.original_price,
             rent_price: req.body.rent_price
         }).error;
