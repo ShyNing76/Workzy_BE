@@ -127,6 +127,33 @@ router.post(
                                 },
                                 description: 'Array of image files'
                             },
+                            addAmenities: {
+                                type: 'array',
+                                items: {
+                                    type: 'object',
+                                    properties: {
+                                        amenity_id: {
+                                            type: 'string',
+                                            format: 'uuid',
+                                            example: '123e4567-e89b-12d3-a456-426614174000'
+                                        },
+                                        quantity: {
+                                            type: 'integer',
+                                            example: 1
+                                        }
+                                    }
+                                },
+                                example: [
+                                    {
+                                        amenity_id: '123e4567-e89b-12d3-a456-426614174000',
+                                        quantity: 1
+                                    },
+                                    {
+                                        amenity_id: '223e4567-e89b-12d3-a456-426614174001',
+                                        quantity: 2
+                                    }
+                                ]
+                            },
                             workspace_type_id: {
                                 type: 'string',
                                 format: 'uuid',
@@ -219,6 +246,14 @@ router.put(
                                     example: 'Image URL.'
                                 },
                                 description: 'Array of image URLs to remove'
+                            },
+                            amenity_ids: {
+                                type: 'array',
+                                items: {
+                                    type: 'string',
+                                    format: 'uuid'
+                                },
+                                example: ['0c2cfee2-d9b7-4215-baaf-f40632e7de2c', '621ca0c8-e3ad-4bd8-9df5-eafe998b5b04']
                             },
                             workspace_type_id: {
                                 type: 'string',
