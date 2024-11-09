@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
                 through: "AmenitiesWorkspace",
                 foreignKey: "workspace_id",
             });
+            Workspace.hasMany(models.AmenitiesWorkspace, { foreignKey: 'workspace_id' });
             Workspace.belongsTo(models.WorkspaceType, {
                 foreignKey: "workspace_type_id",
             });

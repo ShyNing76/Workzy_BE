@@ -169,12 +169,11 @@ export const updateWorkspaceService = async (
                             workspace_id: workspace.workspace_id,
                             amenity_id: amenity.amenity_id
                         },
-                        transaction: t,
                     }
                 ).then(amenityWorkspace => {
                     console.log(amenityWorkspace);
                     if (amenityWorkspace) {
-                        const updateQuantity = amenityWorkspace.quantity + (amenitiesMap[amenity.amenity_id] || 1);
+                        const updateQuantity = amenitiesMap[amenity.amenity_id] || 1;
                         return db.AmenitiesWorkspace.update({
                             quantity: updateQuantity
                         }, {
@@ -197,7 +196,7 @@ export const updateWorkspaceService = async (
                     }
                 })
             });
-            Promise.all(amenitiesWorkspacePromises);
+            await Promise.all(amenitiesWorkspacePromises);
             try {
                 if (remove_images && remove_images.length > 0) {
                     const remove_images_array = remove_images.split(",");
@@ -395,6 +394,16 @@ export const getAllWorkspaceService = ({
                         attributes: ["image"],
                         required: false,
                     },
+                    {
+                        model: db.AmenitiesWorkspace,
+                        attributes: ["amenity_id", "quantity"],
+                        include: [
+                            {
+                                model: db.Amenity,
+                                attributes: ["amenity_name"],
+                            },
+                        ],
+                    }
                 ],
             });
             if (workspaces.length === 0) return reject("No Workspace Exist");
