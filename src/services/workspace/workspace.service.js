@@ -393,6 +393,16 @@ export const getAllWorkspaceService = ({
                         attributes: ["image"],
                         required: false,
                     },
+                    {
+                        model: db.AmenitiesWorkspace,
+                        attributes: ["amenity_id", "quantity"],
+                        include: [
+                            {
+                                model: db.Amenity,
+                                attributes: ["amenity_name"],
+                            },
+                        ],
+                    }
                 ],
             });
             if (workspaces.length === 0) return reject("No Workspace Exist");

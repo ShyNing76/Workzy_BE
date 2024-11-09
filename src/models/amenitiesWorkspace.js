@@ -17,6 +17,8 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: "amenity_id",
                 sourceKey: "amenity_id"
             });
+            AmenitiesWorkspace.belongsTo(models.Amenity, { foreignKey: 'amenity_id' });
+            AmenitiesWorkspace.belongsTo(models.Workspace, { foreignKey: 'workspace_id' });
         }
     }
 
