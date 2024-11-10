@@ -1,14 +1,14 @@
 import express from "express";
 import * as controllers from "../../controllers";
 import { verify_role, verify_token } from "../../middlewares/verifyToken";
-import { uploadImage } from "../../middlewares/imageGoogleUpload"
+import { uploadImage } from "../../middlewares/imageGoogleUpload";
 
 const router = express.Router();
 
 router.get(
-    "/total", 
-    verify_token, 
-    verify_role(["admin"]), 
+    "/total",
+    verify_token,
+    verify_role(["admin"]),
     controllers.getTotalAmenityController
     /*
         #swagger.description = 'Endpoint to get total amenities.'
@@ -205,8 +205,8 @@ router.post(
 router.put(
     "/:id",
     verify_token,
-    uploadImage,
     verify_role(["admin"]),
+    uploadImage,
     controllers.updateAmenityController
     /*
         #swagger.description = 'Endpoint to update an amenity.'
