@@ -780,6 +780,7 @@ export const getTotalBookingIn6DaysService = (tokenUser, building_id) =>
                 });
                 if (!isManagerBelongToBuilding)
                     return reject("Manager does not belong to this building");
+
                 const bookings = await db.Booking.findAll({
                     where: {
                         createdAt: {
@@ -791,19 +792,23 @@ export const getTotalBookingIn6DaysService = (tokenUser, building_id) =>
                     },
                     include: [
                         {
-                            model: db.BookingStatus,
-                            attributes: [],
-                        },
-                        {
                             model: db.Workspace,
-                            required: false,
-                            attributes: [],
-                            where: {
-                                building_id: building_id,
-                            },
+                            attributes: ["workspace_name"],
+                            required: true,
+                            include: [
+                                {
+                                    model: db.Building,
+                                    attributes: ["building_name"],
+                                    required: true,
+                                    where: {
+                                        building_id: building_id,
+                                    }
+                                },
+                            ],
                         },
                     ],
                 });
+                console.log(bookings);
                 totalBooking = bookings.reduce((acc, booking) => {
                     const date = moment(booking.createdAt).format("YYYY-MM-DD"); // Định dạng ngày
                     if (!acc[date]) {

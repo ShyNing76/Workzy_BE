@@ -243,22 +243,48 @@ const { sendMail } = require("../utils/sendMail");
 //     });
 
 function getAll(){
-    const data = db.Workspace.findAll({
-        attributes: ["workspace_id"],
+    const currentDate = new Date(); // Lấy ngày hiện tại
+    const sixDaysAgo = new Date(currentDate); // Tạo một bản sao của ngày hiện tại
+    sixDaysAgo.setDate(currentDate.getDate() - 6); // Lấy ngày 6 ngày trước
+    sixDaysAgo.setHours(0, 0, 0, 0); // Đặt giờ, phút, giây và mili giây về 00:00:00.000
+    const formattedSixDaysAgo = moment(sixDaysAgo).toISOString(); // Định dạng theo yêu cầu
+    const formattedCurrentDate = moment(currentDate).toISOString(); // Định dạng theo yêu cầu
+    const bookings = db.Booking.findAll({
+        where: {
+            createdAt: {
+                [db.Sequelize.Op.between]: [
+                    formattedSixDaysAgo,
+                    formattedCurrentDate,
+                ],
+            },
+        },
         include: [
             {
-                model: db.AmenitiesWorkspace,
-                attributes: ["amenity_id", "quantity"],
+                model: db.Workspace,
+                attributes: ["workspace_name"],
+                required: true,
                 include: [
                     {
-                        model: db.Amenity,
-                        attributes: ["amenity_id"],
+                        model: db.Building,
+                        attributes: ["building_name"],
+                        required: true,
+                        where: {
+                            building_id: "4929409f-d119-495c-94b7-04d9e7b4561a",
+                        }
                     },
                 ],
             },
-        ]
-    }).then((data) => {
-        console.log(data);
+        ],
+    }).then((bookings) => {
+        for (let i = 0; i < bookings.length; i++) {
+            console.log("Booking ID:", bookings[i].booking_id);
+            console.log("Workspace Name:", bookings[i].Workspace.workspace_name);
+            console.log("Building Name:", bookings[i].Workspace.Building.building_name);
+            console.log("Created At:", bookings[i].createdAt);
+            console.log("=====================================");
+        }
+    }).catch((error) => {
+        console.error(error);
     });
 }
 
