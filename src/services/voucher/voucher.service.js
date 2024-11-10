@@ -34,9 +34,10 @@ export const createVoucherService = ({voucher_name, voucher_code, description, d
     }
 })
 
-export const getAllVoucherService = ({page, limit, order, status, ...query}) => new Promise(async (resolve, reject) => {
+export const getAllVoucherService = ({page, limit, order, status, voucher_name, ...query}) => new Promise(async (resolve, reject) => {
     try {
         query.status = status ? status : {[Op.ne]: null};
+        query.voucher_name = voucher_name ? {[Op.iLike]: `%${voucher_name}%`} : {[Op.ne]: null};
         const vouchers = await db.Voucher.findAndCountAll({
             where: query,
             offset: handleOffset(page, limit),
