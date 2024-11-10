@@ -33,6 +33,8 @@ export const createAmenityController = async (req, res) => {
 
 export const updateAmenityController = async (req, res) => {
     try {
+        console.log("caihdfkashdkjfhkjashfkjhawuiehfuihafh");
+
         const error = Joi.object({
             amenity_name: Joi.string().required(),
             original_price: Joi.number().positive().required(),
@@ -43,12 +45,14 @@ export const updateAmenityController = async (req, res) => {
             rent_price: req.body.rent_price,
         }).error;
         if (error) return badRequest(res, error);
+
         const response = await services.updateAmenityService(req.params.id, {
             ...req.body,
-            image: req.file.firebaseUrl,
+            image: req.file?.firebaseUrl,
         });
         return ok(res, response);
     } catch (error) {
+        console.log(error);
         if (
             error === "Amenity is already used" ||
             error === "Cannot find any amenity to update"

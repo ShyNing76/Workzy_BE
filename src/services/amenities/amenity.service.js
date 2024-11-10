@@ -37,6 +37,7 @@ export const createAmenityService = (data) => new Promise(async (resolve, reject
 
 export const updateAmenityService = (amenity_id, data) => new Promise(async (resolve, reject) => {
     try {
+        console.log("cccc" + data);
         const isDuplicated = await db.Amenity.findOne({
             where: {
                 amenity_name: data.amenity_name,
@@ -75,7 +76,7 @@ export const updateAmenityService = (amenity_id, data) => new Promise(async (res
         })
 
     } catch (error) {
-        console.log(error.message)
+        console.log(error)
         reject(error)
     }
 })
