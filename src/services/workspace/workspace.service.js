@@ -364,9 +364,7 @@ export const getAllWorkspaceService = ({
                     ? { [Op.is]: null }
                     : building_id
                 : { [Op.or]: [null, { [Op.ne]: null }] };
-            query.workspace_name = workspace_name
-                ? workspace_name
-                : { [Op.ne]: null };
+            query.workspace_name = workspace_name ? {[Op.iLike]: `%${workspace_name}%`} : { [Op.ne]: null };
             const workspaces = await db.Workspace.findAll({
                 where: query,
                 offset: handleOffset(page, limit),
