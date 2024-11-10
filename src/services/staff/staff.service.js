@@ -107,6 +107,7 @@ export const getAllStaffService = ({
         try {
             query.status = status ? status : { [Op.ne]: null };
             query.role_id = 3;
+            query.name = name ? { [Op.iLike]: `%${name}%` } : { [Op.ne]: null };
             const staffs = await db.User.findAndCountAll({
                 where: query,
                 offset: handleOffset(page, limit),
@@ -151,7 +152,7 @@ export const getAllStaffService = ({
                     );
                 }
             });
-            if (!staffs) return reject("No Staff Exist");
+            if (staffs.count === 0) return reject("No Staff Exist");
             resolve({
                 err: 0,
                 message: "Got",
