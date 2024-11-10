@@ -167,6 +167,7 @@ export const updateWorkspaceService = async (
                     where: {
                         workspace_id: workspace.workspace_id,
                     },
+                    transaction: t,
                 });
             if(deletedCount === 0) return reject("No amenities found for this workspace");
 
