@@ -162,39 +162,24 @@ export const updateWorkspaceService = async (
             })
             if (amenities.length === 0) return reject("No valid amenities found")
 
+            const deletedCount = await db.AmenitiesWorkspace.destroy(
+                {
+                    where: {
+                        workspace_id: workspace.workspace_id,
+                    },
+                });
+            if(deletedCount === 0) return reject("No amenities found for this workspace");
+
             const amenitiesWorkspacePromises = amenities.map(amenity => {
-                return db.AmenitiesWorkspace.findOne(
+                return db.AmenitiesWorkspace.create(
                     {
-                        where: {
-                            workspace_id: workspace.workspace_id,
-                            amenity_id: amenity.amenity_id
-                        },
-                    }
-                ).then(amenityWorkspace => {
-                    console.log(amenityWorkspace);
-                    if (amenityWorkspace) {
-                        const updateQuantity = amenitiesMap[amenity.amenity_id] || 1;
-                        return db.AmenitiesWorkspace.update({
-                            quantity: updateQuantity
-                        }, {
-                            where: {
-                                workspace_id: workspace.workspace_id,
-                                amenity_id: amenity.amenity_id
-                            },
-                            transaction: t
-                        });
-                    } else {
-                        return db.AmenitiesWorkspace.create(
-                            {
-                                amenities_workspace_id: v4(),
-                                workspace_id: workspace.workspace_id,
-                                amenity_id: amenity.amenity_id,
-                                quantity: amenitiesMap[amenity.amenity_id] || 1
-                            },
-                            { transaction: t }
-                        )
-                    }
-                })
+                        amenities_workspace_id: v4(),
+                        workspace_id: workspace.workspace_id,
+                        amenity_id: amenity.amenity_id,
+                        quantity: amenitiesMap[amenity.amenity_id] || 1
+                    },
+                    { transaction: t }
+                )
             });
             await Promise.all(amenitiesWorkspacePromises);
             try {
