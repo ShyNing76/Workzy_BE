@@ -146,8 +146,15 @@ export const updateWorkspaceTypeService = async ({ id }, data) =>
             }
 
             console.log(workspaceType);
-            if (workspaceType.image) await deleteImage(workspaceType.image);
-
+            if (data.new_image) {
+                try {
+                    await deleteImage(workspaceType.image);
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+            data.image = data.new_image;
+            delete data.new_image;
             await db.WorkspaceType.update({
                 ...data
             }, {
