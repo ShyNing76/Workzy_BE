@@ -87,12 +87,14 @@ export const getAllWishListService = ({ page, limit, order, building_id, ...quer
                             "price_per_month",
                         ],
                         required: true,
-                        include: [{
-                            model: db.Building,
-                            attributes: ["building_name"],
-                            where: building_id ? { building_id: building_id } : {},
-                            required: true,
-                        }]
+                        include: [
+                            {
+                                model: db.Building,
+                                attributes: ["building_name"],
+                                where: building_id ? { building_id: building_id } : {},
+                                required: true,
+                            },
+                        ],
                     },
                     {
                         model: db.Customer,

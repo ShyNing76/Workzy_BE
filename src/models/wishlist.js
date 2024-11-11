@@ -9,11 +9,11 @@ module.exports = (sequelize, DataTypes) => {
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            Wishlist.hasMany(models.Customer, {
+            Wishlist.belongsTo(models.Customer, {
                 foreignKey: "customer_id",
                 sourceKey: "customer_id",
             });
-            Wishlist.hasMany(models.Workspace, {
+            Wishlist.belongsTo(models.Workspace, {
                 foreignKey: "workspace_id",
                 sourceKey: "workspace_id",
             });
