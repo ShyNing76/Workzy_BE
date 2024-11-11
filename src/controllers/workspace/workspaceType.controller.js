@@ -65,7 +65,6 @@ export const updateWorkspaceTypeController = async (req, res) => {
             workspace_type_name: req.body.workspace_type_name,
         }).error;
         if (error) return badRequest(res, error);
-        console.log(req.file.firebaseUrl);
         const response = await services.updateWorkspaceTypeService(req.params, {
             ...req.body,
             image: req.file?.firebaseUrl,
