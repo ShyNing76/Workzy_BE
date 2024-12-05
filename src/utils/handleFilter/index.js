@@ -37,3 +37,10 @@ export const handleOffset = (page, limit) => {
     }
     return (parseInt(page) - 1) * parseInt(limit) || 0;
 };
+
+export const handlePage = (page) => {
+    if (page === null || page === undefined || page <= 0) {
+        return 1;
+    }
+    return parseInt(page) || 1;
+};

@@ -37,6 +37,7 @@ export const createAmenityService = (data) => new Promise(async (resolve, reject
 
 export const updateAmenityService = (amenity_id, data) => new Promise(async (resolve, reject) => {
     try {
+        console.log("cccc" + data);
         const isDuplicated = await db.Amenity.findOne({
             where: {
                 amenity_name: data.amenity_name,
@@ -75,7 +76,7 @@ export const updateAmenityService = (amenity_id, data) => new Promise(async (res
         })
 
     } catch (error) {
-        console.log(error.message)
+        console.log(error)
         reject(error)
     }
 })
@@ -116,19 +117,21 @@ export const updateStatusAmenityService = (id) => new Promise(async (resolve, re
 
 export const getAllAmenityService = ({page, limit, order, amenity_name, status, ...query}) => new Promise(async (resolve, reject) => {
     try {
-        if(status) query.status = status ? status : {[Op.ne]: null};
+        if (status) query.status = status ? status : { [Op.ne]: null };
+        const fLimit = limit !== undefined ? handleLimit(limit) : null;
+        console.log(fLimit);
         const amenities = await db.Amenity.findAndCountAll({
             where: {
                 amenity_name: {
-                    [Op.iLike]: `%${amenity_name || ""}%`
+                    [Op.iLike]: `%${amenity_name || ""}%`,
                 },
-                ...query, 
+                ...query,
             },
             offset: handleOffset(page, limit),
-            limit: handleLimit(limit),
+            limit: fLimit,
             order: [handleSortOrder(order, "amenity_name")],
             attributes: {
-            exclude: ["createdAt", "updatedAt"]
+                exclude: ["createdAt", "updatedAt"],
             },
         });
         if(amenities.count === 0) return reject("No Amenity Exist")
@@ -138,6 +141,7 @@ export const getAllAmenityService = ({page, limit, order, amenity_name, status, 
             data: amenities
         });
     } catch (error) {
+        console.log(error);
         reject(error)
     }
 })

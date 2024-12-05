@@ -38,6 +38,7 @@ router.get(
         #swagger.parameters['page'] = { description: 'Page number.' }
         #swagger.parameters['limit'] = { description: 'Number of items per page.' }
         #swagger.parameters['status'] = { description: 'Status.' }
+        #swagger.parameters['voucher_name'] = { description: 'Voucher name.' }
         #swagger.responses[200] = {
             description: 'Voucher found.'
         }

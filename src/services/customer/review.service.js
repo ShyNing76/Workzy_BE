@@ -113,7 +113,7 @@ export const getAllReviewService = ({
                                     {
                                         model: db.User,
                                         as: "User",
-                                        attributes: ["name"],
+                                        attributes: ["name", "image"],
                                     },
                                 ],
                             },

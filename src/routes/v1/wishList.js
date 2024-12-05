@@ -73,6 +73,7 @@ router.get("/", verify_token, verify_role(["staff", "admin"]), controllers.getAl
         #swagger.parameters['order'] = { description: 'Order by name, status.' }
         #swagger.parameters['page'] = { description: 'Page number.' }
         #swagger.parameters['limit'] = { description: 'Number of items per page.' }
+        #swagger.parameters['building_id'] = { description: 'Filter by building_id.' }
         #swagger.responses[200] = {
             description: 'Wishlist fetched successfully.'
         }

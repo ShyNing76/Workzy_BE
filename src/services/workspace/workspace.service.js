@@ -5,14 +5,19 @@ import { Op } from "sequelize";
 import {
     handleLimit,
     handleOffset,
+    handlePage,
     handleSortOrder,
 } from "../../utils/handleFilter";
 import { deleteImages } from "../../middlewares/imageGoogleUpload";
 
-export const createWorkspaceService = async ({ images, addAmenities, ...data }) =>
+export const createWorkspaceService = async ({
+    images,
+    addAmenities,
+    ...data
+}) =>
     new Promise(async (resolve, reject) => {
         const t = await db.sequelize.transaction();
-        console.log(addAmenities)
+        console.log(addAmenities);
         try {
             const workspaceType = await db.WorkspaceType.findByPk(
                 data.workspace_type_id
@@ -40,7 +45,9 @@ export const createWorkspaceService = async ({ images, addAmenities, ...data }) 
             if (!workspace[1]) return reject("Workspace already exists");
             const workspaceId = workspace[0].dataValues.workspace_id;
 
-            const amenity_ids = addAmenities.map(amenity => amenity.amenity_id);
+            const amenity_ids = addAmenities.map(
+                (amenity) => amenity.amenity_id
+            );
             console.log(amenity_ids);
 
             const amenitiesMap = addAmenities.reduce((map, amenity) => {
@@ -51,30 +58,33 @@ export const createWorkspaceService = async ({ images, addAmenities, ...data }) 
 
             const amenities = await db.Amenity.findAll({
                 where: {
-                    amenity_id: {[Op.in]: amenity_ids}
-                }
-            })
-            if (amenities.length === 0) return reject("No valid amenities found")
-            const amenitiesWorkspacePromises = amenities.map(amenity => {
+                    amenity_id: { [Op.in]: amenity_ids },
+                },
+            });
+            if (amenities.length === 0)
+                return reject("No valid amenities found");
+            const amenitiesWorkspacePromises = amenities.map((amenity) => {
                 return db.AmenitiesWorkspace.findOrCreate({
                     where: {
                         workspace_id: workspaceId,
                         amenity_id: amenity.amenity_id,
-                        
                     },
                     defaults: {
-                        amenities_workspace_id: v4(), 
+                        amenities_workspace_id: v4(),
                         workspace_id: workspaceId,
                         amenity_id: amenity.amenity_id,
-                        quantity: amenitiesMap[amenity.amenity_id] || 1
+                        quantity: amenitiesMap[amenity.amenity_id] || 1,
                     },
                     transaction: t,
-                })
+                });
             });
             const results = await Promise.all(amenitiesWorkspacePromises);
-            const newRecordsCount = results.filter(result => result[1]).length; // result[1] is true if a new entry was created
-            
-            if (newRecordsCount === 0) return reject('Error associating amenities with workspace');
+            const newRecordsCount = results.filter(
+                (result) => result[1]
+            ).length; // result[1] is true if a new entry was created
+
+            if (newRecordsCount === 0)
+                return reject("Error associating amenities with workspace");
 
             if (images && images.length > 0) {
                 console.log(images);
@@ -146,7 +156,9 @@ export const updateWorkspaceService = async (
             workspace.set({ ...workspace.dataValues, ...updateWorkspace });
             await workspace.save({ transaction: t });
 
-            const amenity_ids = addAmenities.map(amenity => amenity.amenity_id);
+            const amenity_ids = addAmenities.map(
+                (amenity) => amenity.amenity_id
+            );
             console.log(amenity_ids);
 
             const amenitiesMap = addAmenities.reduce((map, amenity) => {
@@ -157,44 +169,31 @@ export const updateWorkspaceService = async (
 
             const amenities = await db.Amenity.findAll({
                 where: {
-                    amenity_id: {[Op.in]: amenity_ids}
-                }
-            })
-            if (amenities.length === 0) return reject("No valid amenities found")
+                    amenity_id: { [Op.in]: amenity_ids },
+                },
+            });
+            if (amenities.length === 0)
+                return reject("No valid amenities found");
 
-            const amenitiesWorkspacePromises = amenities.map(amenity => {
-                return db.AmenitiesWorkspace.findOne(
+            const deletedCount = await db.AmenitiesWorkspace.destroy({
+                where: {
+                    workspace_id: workspace.workspace_id,
+                },
+                transaction: t,
+            });
+            if (deletedCount === 0)
+                return reject("No amenities found for this workspace");
+
+            const amenitiesWorkspacePromises = amenities.map((amenity) => {
+                return db.AmenitiesWorkspace.create(
                     {
-                        where: {
-                            workspace_id: workspace.workspace_id,
-                            amenity_id: amenity.amenity_id
-                        },
-                    }
-                ).then(amenityWorkspace => {
-                    console.log(amenityWorkspace);
-                    if (amenityWorkspace) {
-                        const updateQuantity = amenitiesMap[amenity.amenity_id] || 1;
-                        return db.AmenitiesWorkspace.update({
-                            quantity: updateQuantity
-                        }, {
-                            where: {
-                                workspace_id: workspace.workspace_id,
-                                amenity_id: amenity.amenity_id
-                            },
-                            transaction: t
-                        });
-                    } else {
-                        return db.AmenitiesWorkspace.create(
-                            {
-                                amenities_workspace_id: v4(),
-                                workspace_id: workspace.workspace_id,
-                                amenity_id: amenity.amenity_id,
-                                quantity: amenitiesMap[amenity.amenity_id] || 1
-                            },
-                            { transaction: t }
-                        )
-                    }
-                })
+                        amenities_workspace_id: v4(),
+                        workspace_id: workspace.workspace_id,
+                        amenity_id: amenity.amenity_id,
+                        quantity: amenitiesMap[amenity.amenity_id] || 1,
+                    },
+                    { transaction: t }
+                );
             });
             await Promise.all(amenitiesWorkspacePromises);
             try {
@@ -365,54 +364,60 @@ export const getAllWorkspaceService = ({
                     : building_id
                 : { [Op.or]: [null, { [Op.ne]: null }] };
             query.workspace_name = workspace_name
-                ? workspace_name
+                ? { [Op.iLike]: `%${workspace_name}%` }
                 : { [Op.ne]: null };
-            const workspaces = await db.Workspace.findAll({
-                where: query,
-                offset: handleOffset(page, limit),
-                limit: handleLimit(limit),
-                order: [handleSortOrder(order, "workspace_name")],
-                attributes: {
-                    exclude: ["building_id", "createdAt", "updatedAt"],
-                },
-                include: [
-                    {
-                        model: db.Building,
-                        attributes: ["building_id"],
+            const { count, rows: workspaces } =
+                await db.Workspace.findAndCountAll({
+                    where: query,
+                    distinct: true,
+                    offset: handleOffset(page, limit),
+                    limit: handleLimit(limit),
+                    order: [handleSortOrder(order, "workspace_name")],
+                    attributes: {
+                        exclude: ["building_id", "createdAt", "updatedAt"],
                     },
-                    {
-                        model: db.WorkspaceType,
-                        attributes: ["workspace_type_name"],
-                        where: {
-                            workspace_type_name: workspace_type_name
-                                ? workspace_type_name
-                                : { [Op.ne]: null },
+                    include: [
+                        {
+                            model: db.Building,
+                            attributes: ["building_id"],
                         },
-                    },
-                    {
-                        model: db.WorkspaceImage,
-                        attributes: ["image"],
-                        required: false,
-                    },
-                    {
-                        model: db.AmenitiesWorkspace,
-                        attributes: ["amenity_id", "quantity"],
-                        include: [
-                            {
-                                model: db.Amenity,
-                                attributes: ["amenity_name"],
+                        {
+                            model: db.WorkspaceType,
+                            attributes: ["workspace_type_name"],
+                            where: {
+                                workspace_type_name: workspace_type_name
+                                    ? workspace_type_name
+                                    : { [Op.ne]: null },
                             },
-                        ],
-                    }
-                ],
-            });
+                        },
+                        {
+                            model: db.WorkspaceImage,
+                            attributes: ["image"],
+                            required: false,
+                        },
+                        {
+                            model: db.AmenitiesWorkspace,
+                            attributes: ["amenity_id", "quantity"],
+                            include: [
+                                {
+                                    model: db.Amenity,
+                                    attributes: ["amenity_name"],
+                                },
+                            ],
+                        },
+                    ],
+                });
             if (workspaces.length === 0) return reject("No Workspace Exist");
             resolve({
                 err: 0,
                 message: "Got Workspace successfully",
+                total: count,
+                totalPages: Math.ceil(count / handleLimit(limit)),
+                currentPage: handlePage(page),
                 data: workspaces,
             });
         } catch (error) {
+            console.log(error);
             reject(error);
         }
     });

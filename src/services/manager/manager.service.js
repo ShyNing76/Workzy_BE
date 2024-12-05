@@ -265,9 +265,8 @@ export const getBuildingByManagerIdService = (tokenUser) => new Promise(async (r
                 attributes: ["staff_id"],
                 include: {
                     model: db.User,
-                    attributes: ["name", "email", "phone", "date_of_birth"],
+                    attributes: ["user_id", "name", "email", "phone", "date_of_birth", "status"],
                     where: {
-                        status: "active",
                         role_id: 3
                     }
                 }

@@ -65,7 +65,7 @@ export const deleteWishListService = (wishlist_id) =>
         }
     });
 
-export const getAllWishListService = ({ page, limit, order, ...query }) =>
+export const getAllWishListService = ({ page, limit, order, building_id, ...query }) =>
     new Promise(async (resolve, reject) => {
         try {
             const wishlist = await db.Wishlist.findAll({
@@ -87,6 +87,14 @@ export const getAllWishListService = ({ page, limit, order, ...query }) =>
                             "price_per_month",
                         ],
                         required: true,
+                        include: [
+                            {
+                                model: db.Building,
+                                attributes: ["building_name"],
+                                where: building_id ? { building_id: building_id } : {},
+                                required: true,
+                            },
+                        ],
                     },
                     {
                         model: db.Customer,
