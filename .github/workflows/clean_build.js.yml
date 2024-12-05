@@ -59,6 +59,7 @@ jobs:
                   DATABASE_DIALECT: postgres
               run: npm run test
     build:
+        needs: test
         runs-on: ubuntu-latest
 
         strategy:
