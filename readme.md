@@ -145,17 +145,103 @@ npm run dev
 
 The API will be available at `http://localhost:5000`
 
-## 🧪 Testing
+## 🧪 Testing Strategy
 
-Run the test suite:
-```bash
-npm run test
-```
+### Unit Testing Framework
 
-Run tests with coverage:
+Workzy uses a robust unit testing approach with:
+
+- **Test Runner**: Mocha
+- **Assertion Library**: Chai
+- **Mocking Library**: Sinon
+
+### Running Tests
+
 ```bash
+# Run all unit tests
+npm test
+
+# Run tests with coverage
 npm run test:coverage
 ```
+
+### Key Testing Scenarios
+
+#### 1. Workspace Booking Service
+
+```javascript
+describe("Booking Service", () => {
+  // Test booking creation
+  it("should create a valid booking", () => {
+    // Test logic using Chai assertions
+  });
+
+  // Test booking validation
+  it("should reject invalid booking times", () => {
+    // Validate booking constraints
+  });
+});
+```
+
+#### 2. Authentication Module
+
+```javascript
+describe("Authentication", () => {
+  // Test user login
+  it("should authenticate valid user credentials", () => {
+    // Sinon for mocking authentication service
+  });
+
+  // Test authorization
+  it("should prevent unauthorized access", () => {
+    // Role-based access control tests
+  });
+});
+```
+
+### Testing Best Practices
+
+- 100% unit test coverage for critical services
+- Isolated tests with dependency injection
+- Use of test doubles (stubs, mocks) for complex dependencies
+- Consistent and descriptive test naming
+- Regular test suite execution in CI/CD pipeline
+
+### Mocking with Sinon
+
+```javascript
+describe("Payment Service", () => {
+  // Create a stub for payment gateway
+  const paymentStub = sinon.stub(PaymentGateway, "processPayment");
+
+  it("should handle successful payment", () => {
+    // Stub successful payment scenario
+    paymentStub.returns({ success: true });
+  });
+
+  it("should handle payment failures", () => {
+    // Stub payment failure scenario
+    paymentStub.throws(new Error("Payment failed"));
+  });
+});
+```
+
+### Test Configuration
+
+```javascript
+// test/mocha.opts
+--require chai
+--require sinon
+--reporter spec
+--slow 5000
+```
+
+### Continuous Integration
+
+- Automated testing on every pull request
+- Code coverage reports generated
+- Mandatory test pass for code merging
+
 
 ## 🔒 Security
 
