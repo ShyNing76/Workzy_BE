@@ -35,6 +35,9 @@ jobs:
             - name: Build
               run: npm run build
 
+            - name: Test
+              run: npm run test
+
             - name: Swagger
               run: npm run swagger
 
