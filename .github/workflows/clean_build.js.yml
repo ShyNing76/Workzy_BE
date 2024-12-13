@@ -57,7 +57,7 @@ jobs:
                   DATABASE_PASSWORD: ""
                   DATABASE_NAME: test_db
                   DATABASE_DIALECT: postgres
-              run: npm run test
+              run: npm run coverage
     build:
         needs: test
         runs-on: ubuntu-latest
