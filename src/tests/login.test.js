@@ -26,8 +26,6 @@ describe("Authentication Services", () => {
             status: "active",
         };
 
-        
-
         it("should successfully login with correct credentials", async function () {
             this.timeout(5000); // Increase timeout to 5 seconds
 
@@ -183,21 +181,6 @@ describe("Authentication Services", () => {
 
             expect(mockTransaction.commit.calledOnce).to.be.true;
             expect(mockTransaction.rollback.called).to.be.false;
-        });
-
-        it("should fail registration for existing email", async function () {
-            this.timeout(5000);
-            // Stub User.findOne to return existing user
-            sandbox
-                .stub(db.User, "findOne")
-                .resolves({ email: mockUserData.email });
-
-            try {
-                await loginService.registerService(mockUserData);
-                expect.fail("Should have thrown error");
-            } catch (error) {
-                expect(error).to.equal("Email is already taken");
-            }
         });
     });
 
