@@ -17,3 +17,7 @@ Dockerfile
 Dockerfile
 docker-compose.yml
 .babelrc
+.nyc_output
+coverage.lcov
+/coverage
+

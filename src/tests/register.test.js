@@ -89,5 +89,33 @@ describe("Authentication Services", () => {
                 expect(error).to.equal("Email is already taken");
             }
         });
+        it("should rollback transaction on error during user creation", async () => {
+            // Stub transaction
+            const mockTransaction = {
+                commit: sandbox.stub(),
+                rollback: sandbox.stub()
+            };
+            sandbox.stub(db.sequelize, "transaction").resolves(mockTransaction);
+
+            // Stub findOne to return no existing user
+            sandbox.stub(db.User, "findOne").resolves(null);
+
+            // Stub User.create to throw error
+            const createError = new Error("Database error");
+            sandbox.stub(db.User, "create").rejects(createError);
+
+            try {
+                await loginService.registerService({
+                    email: "newuser@example.com",
+                    password: "password123",
+                    name: "New User"
+                });
+                expect.fail("Expected rejection");
+            } catch (error) {
+                expect(error).to.equal(createError);
+                expect(mockTransaction.rollback.calledOnce).to.be.true;
+                expect(mockTransaction.commit.called).to.be.false;
+            }
+        });
     });
 });

@@ -184,6 +184,7 @@ export const loginGoogleService = (profile) =>
                 accessToken: "Bearer " + accessToken,
             });
         } catch (error) {
+            t.rollback();
             reject(error);
         }
     });
